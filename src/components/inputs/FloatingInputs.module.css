@@ -1,0 +1,454 @@
+/* ==================== Material Design Outline Style ==================== */
+
+/* Floating Label Wrapper */
+.floatingWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.inputContainer {
+    position: relative;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    min-height: 45px;
+
+    /* Border styling */
+    border: 1px solid #ccc;
+}
+
+/* Hover state */
+.inputContainer:hover {
+    border-color: #999;
+}
+
+/* Focus state - thicker border */
+.inputContainer:has(:focus) {
+    border-color: var(--primary);
+    color: var(--primary);
+    border-width: 2px;
+    padding: 0 11px;
+}
+
+/* Error state */
+.inputContainer.hasError {
+    border-color: #ff4d4f;
+}
+
+.inputContainer.hasError:has(:focus),
+.inputContainer.hasError.active {
+    border-color: #ff4d4f;
+}
+
+/* ==================== Input/TextArea Base ==================== */
+.inputContainer :global(.ant-input),
+.inputContainer :global(.ant-input-number),
+.inputContainer :global(.ant-input-number-input),
+.inputContainer :global(.ant-input-textarea .ant-input) {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+    background-color: transparent !important;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none !important;
+    outline: none !important;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.inputContainer :global(.ant-input):focus,
+.inputContainer :global(.ant-input-number):focus-within,
+.inputContainer :global(.ant-input-number-input):focus,
+.inputContainer :global(.ant-input-textarea .ant-input):focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Placeholder */
+.inputContainer :global(.ant-input::placeholder),
+.inputContainer :global(.ant-input-number-input::placeholder),
+.inputContainer :global(.ant-input-textarea .ant-input::placeholder) {
+    color: transparent !important;
+}
+
+/* InputNumber specific */
+.inputContainer :global(.ant-input-number) {
+    width: 100%;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.inputContainer :global(.ant-input-number-handler-wrap) {
+    display: none !important;
+}
+
+.inputContainer :global(.ant-input-number-input) {
+    padding: 8px 0 !important;
+    text-align: inherit;
+}
+
+/* TextArea */
+.inputContainer :global(.ant-input-textarea) {
+    border: none !important;
+    padding: 0 !important;
+}
+
+.inputContainer :global(.ant-input-textarea .ant-input) {
+    min-height: 100px;
+    padding: 16px 0 8px 0 !important;
+    resize: vertical;
+    border: none !important;
+}
+
+/* ==================== Select/Cascader/TreeSelect ==================== */
+.inputContainer :global(.ant-select),
+.inputContainer :global(.ant-cascader),
+.inputContainer :global(.ant-tree-select) {
+    width: 100%;
+}
+
+.inputContainer :global(.ant-select-selector),
+.inputContainer :global(.ant-cascader-input),
+.inputContainer :global(.ant-tree-select-selector) {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.inputContainer :global(.ant-select-selector):focus,
+.inputContainer :global(.ant-cascader-input):focus,
+.inputContainer :global(.ant-tree-select-selector):focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Select specific */
+.inputContainer :global(.ant-select-selection-item) {
+    line-height: 24px !important;
+    padding: 0 !important;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.inputContainer :global(.ant-select-selection-placeholder) {
+    color: transparent !important;
+}
+
+.inputContainer :global(.ant-select-clear) {
+    top: 50% !important;
+    right: 0 !important;
+}
+
+.inputContainer :global(.ant-select-open),
+.inputContainer :global(.ant-select-focused),
+.inputContainer :global(.ant-select-outlined) {
+    border: none !important;
+}
+
+.inputContainer :global(.ant-select-arrow) {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 0 !important;
+    color: #999;
+    font-size: 12px;
+}
+
+.inputContainer.active :global(.ant-select-arrow) {
+    color: #1890ff;
+}
+
+/* Cascader specific */
+.inputContainer :global(.ant-cascader) {
+    width: 100%;
+    padding: 0 !important;
+}
+
+.inputContainer :global(.ant-cascader-input) {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.inputContainer :global(.ant-cascader-input:focus) {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.inputContainer :global(.ant-cascader-clear) {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 0 !important;
+}
+
+.inputContainer :global(.ant-cascader-picker-arrow) {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 0 !important;
+    color: #999;
+}
+
+/* TreeSelect specific */
+.inputContainer :global(.ant-tree-select-selection-item) {
+    padding: 0 !important;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+/* ==================== Floating Label (Outline Style) ==================== */
+.floatingLabel {
+    position: absolute;
+    left: 8px;
+    top: -2px;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+    transform-origin: left center;
+    line-height: 1;
+    padding: 0 4px;
+
+    /* Create gap in border by using background */
+    background: white;
+    max-width: calc(100% - 16px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Active floating label (floating up) */
+.inputContainer:has(:focus) .floatingLabel {
+    top: -2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary);
+    background: white;
+    padding: 0 4px;
+}
+
+.inputContainer.hasError .floatingLabel {
+    color: #ff4d4f;
+}
+
+.inputContainer.hasError.active .floatingLabel,
+.inputContainer.hasError:has(:focus) .floatingLabel {
+    color: #ff4d4f;
+}
+
+/* ==================== Required Indicator ==================== */
+.required {
+    color: #ff4d4f;
+    margin-left: 2px;
+}
+
+/* ==================== Error Message ==================== */
+.errorMessage {
+    color: #ff4d4f;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* ==================== Helper Text ==================== */
+.helperText {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
+    margin-bottom: 0;
+    display: block;
+}
+
+/* ==================== Disabled State ==================== */
+.inputContainer.disabled {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: #ccc;
+}
+
+.inputContainer.disabled:hover {
+    border-color: #ccc;
+}
+
+.inputContainer.disabled :global(.ant-input),
+.inputContainer.disabled :global(.ant-input-number),
+.inputContainer.disabled :global(.ant-input-number-input),
+.inputContainer.disabled :global(.ant-select-selector),
+.inputContainer.disabled :global(.ant-cascader-input),
+.inputContainer.disabled :global(.ant-input-textarea .ant-input),
+.inputContainer.disabled :global(.ant-tree-select-selector) {
+    color: rgba(0, 0, 0, 0.38) !important;
+    cursor: not-allowed;
+}
+
+.inputContainer.disabled .floatingLabel {
+    color: rgba(0, 0, 0, 0.38);
+}
+
+/* ==================== Dropdown Styles ==================== */
+:global(.ant-select-dropdown),
+:global(.ant-cascader-menu-wrapper),
+:global(.ant-tree-select-dropdown) {
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+        0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    border: 1px solid #f0f0f0;
+}
+
+:global(.ant-select-item-option),
+:global(.ant-cascader-menu-item),
+:global(.ant-tree-select-option) {
+    padding: 8px 12px !important;
+    font-size: 14px;
+}
+
+:global(.ant-select-item-option-selected),
+:global(.ant-tree-select-option-selected) {
+    background-color: rgba(24, 144, 255, 0.08);
+    color: #1890ff;
+    font-weight: 500;
+}
+
+:global(.ant-select-item-option-active),
+:global(.ant-tree-select-option-active) {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ==================== Full Width ==================== */
+.fullWidth {
+    width: 100% !important;
+}
+
+/* ==================== Size Variants ==================== */
+.small {
+    min-height: 40px;
+    padding: 0 8px;
+}
+
+.small:has(:focus),
+.small.active {
+    padding: 0 7px;
+}
+
+.small .floatingLabel {
+    font-size: 12px;
+}
+
+.small.active .floatingLabel,
+.small:has(:focus) .floatingLabel {
+    font-size: 11px;
+    top: -10px;
+}
+
+.small :global(.ant-input),
+.small :global(.ant-input-number-input),
+.small :global(.ant-select-selector),
+.small :global(.ant-cascader-input),
+.small :global(.ant-input-textarea .ant-input),
+.small :global(.ant-tree-select-selector) {
+    font-size: 13px;
+    padding: 6px 0 !important;
+}
+
+.large {
+    min-height: 64px;
+    padding: 0 16px;
+}
+
+.large:has(:focus),
+.large.active {
+    padding: 0 15px;
+}
+
+.large .floatingLabel {
+    font-size: 16px;
+    left: 16px;
+}
+
+.large.active .floatingLabel,
+.large:has(:focus) .floatingLabel {
+    font-size: 12px;
+    top: -14px;
+}
+
+.large :global(.ant-input),
+.large :global(.ant-input-number-input),
+.large :global(.ant-select-selector),
+.large :global(.ant-cascader-input),
+.large :global(.ant-input-textarea .ant-input),
+.large :global(.ant-tree-select-selector) {
+    font-size: 16px;
+    padding: 10px 0 !important;
+}
+
+/* ==================== Dark Mode Support ==================== */
+@media (prefers-color-scheme: dark) {
+    .inputContainer {
+        border-color: rgba(255, 255, 255, 0.23);
+        background-color: transparent;
+    }
+
+    .inputContainer:hover {
+        border-color: rgba(255, 255, 255, 0.87);
+    }
+
+    .inputContainer:has(:focus),
+    .inputContainer.active {
+        border-color: #177ddc;
+    }
+
+    .inputContainer :global(.ant-input),
+    .inputContainer :global(.ant-input-number-input),
+    .inputContainer :global(.ant-select-selector),
+    .inputContainer :global(.ant-cascader-input),
+    .inputContainer :global(.ant-input-textarea .ant-input),
+    .inputContainer :global(.ant-tree-select-selector) {
+        color: rgba(255, 255, 255, 0.87);
+        background-color: transparent !important;
+    }
+
+    .floatingLabel {
+        color: rgba(255, 255, 255, 0.6);
+        background: #141414;
+    }
+
+    .inputContainer.active .floatingLabel,
+    .inputContainer:has(:focus) .floatingLabel {
+        color: #177ddc;
+        background: #141414;
+    }
+
+    .inputContainer :global(.ant-select-arrow) {
+        color: rgba(255, 255, 255, 0.54);
+    }
+
+    .inputContainer.active :global(.ant-select-arrow),
+    .inputContainer:has(:focus) :global(.ant-select-arrow) {
+        color: #177ddc;
+    }
+
+    .inputContainer.disabled {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .inputContainer.disabled :global(.ant-input),
+    .inputContainer.disabled :global(.ant-input-number-input),
+    .inputContainer.disabled :global(.ant-select-selector),
+    .inputContainer.disabled :global(.ant-cascader-input),
+    .inputContainer.disabled :global(.ant-input-textarea .ant-input),
+    .inputContainer.disabled :global(.ant-tree-select-selector) {
+        color: rgba(255, 255, 255, 0.38) !important;
+    }
+
+    .inputContainer.disabled .floatingLabel {
+        color: rgba(255, 255, 255, 0.38);
+    }
+}
