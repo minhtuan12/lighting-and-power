@@ -38,7 +38,7 @@ export default async function ProductLayout(
     }: Readonly<{
         sidebar: React.ReactNode;
         content: React.ReactNode;
-        params: Promise<{ slug: string[] }>;
+        params: Promise<{ slug?: string[] }>;
     }>
 ) {
     const { slug: slugs } = await params;
