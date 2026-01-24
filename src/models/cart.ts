@@ -79,7 +79,6 @@ const CartSchema = new Schema(
 );
 
 // Indexes
-CartSchema.index({ userId: 1 });
 CartSchema.index({ 'items.productId': 1 });
 CartSchema.index({ lastModified: -1 });
 

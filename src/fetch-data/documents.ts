@@ -12,7 +12,7 @@ interface IDcoumentResponse {
 
 export async function getDocuments(): Promise<IDcoumentResponse> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/documents`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 3 hour
             }

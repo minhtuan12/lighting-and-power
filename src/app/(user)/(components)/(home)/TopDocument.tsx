@@ -31,7 +31,11 @@ function DocumentItem({ item }: { item: IDocument }) {
 
 export default function TopDocuments({ documents }: { documents: IDocument[] }) {
     return <Flex vertical gap={12}>
-        <h3 className="bg-[#000F8F] text-center text-white font-semibold w-full h-9 flex items-center justify-center">
+        <h3 className="text-center text-white font-semibold w-full h-9 flex items-center justify-center"
+            style={{
+                background: 'linear-gradient(90deg, #FFFFFF 15%, #0028BB 50%, #0052FF 40%, #0028BB 20%, #FFFFFF 85%)',
+            }}
+        >
             SỔ TAY NGÀNH ĐIỆN TỬ
         </h3>
         <Carousel<IDocument>

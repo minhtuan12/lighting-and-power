@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-me';
 import { showMessage } from '@/hooks/use-message';
 import { EUserRole } from '@/types/user';
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 function AdminLogin() {
@@ -16,7 +16,6 @@ function AdminLogin() {
     const [error, setError] = useState('');
 
     const router = useRouter();
-    const searchParams = useSearchParams();
     const { loginAsync, isAuthenticated } = useAuth();
 
     const validateForm = () => {

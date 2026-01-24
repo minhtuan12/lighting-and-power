@@ -39,7 +39,7 @@ interface IParams {
 export async function getProducts(params?: IProductFilterParams): Promise<IProductResponse> {
     try {
         const queryString = params ? `?${new URLSearchParams(params as Record<string, any>).toString()}` : '';
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products${queryString}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/products${queryString}`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 1 hour
             }
@@ -68,7 +68,7 @@ export async function getProducts(params?: IProductFilterParams): Promise<IProdu
 
 export async function getProductFilters(): Promise<IFiltersResponse> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/filters`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/products/filters`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 1 hour
             }
@@ -122,7 +122,7 @@ export async function getProductFilters(): Promise<IFiltersResponse> {
 export async function getProductDetail({ slug, id }: { slug?: string; id?: string }): Promise<IProductDetailResponse> {
     // get product detail by slug or id
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${slug ?? id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/products/${slug ?? id}`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 1 hour
             }

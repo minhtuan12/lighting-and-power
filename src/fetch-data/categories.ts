@@ -13,7 +13,7 @@ interface IOneCategoryResponse {
 export async function getCategories(params?: Record<string, any>): Promise<ICategoryResponse> {
     const queryString = params ? `?${new URLSearchParams(params as Record<string, any>).toString()}` : '';
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories${queryString}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/categories${queryString}`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 3 hour
             }
@@ -37,7 +37,7 @@ export async function getCategories(params?: Record<string, any>): Promise<ICate
 
 export async function getCategoryBySlug(slug: string): Promise<IOneCategoryResponse> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories/${slug}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/categories/${slug}`, {
             next: {
                 revalidate: 3600 * 1 // Cache for 3 hour
             }

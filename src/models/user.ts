@@ -65,8 +65,6 @@ const UserSchema = new Schema<IUser>(
 );
 
 // Indexes
-UserSchema.index({ email: 1 });
-UserSchema.index({ phone: 1 });
 UserSchema.index({ passwordExpiresAt: 1 });
 
 // Virtual: Kiểm tra password có hết hạn không

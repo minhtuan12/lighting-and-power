@@ -194,8 +194,6 @@ const ProductSchema = new Schema(
 );
 
 // Indexes
-ProductSchema.index({ slug: 1 });
-ProductSchema.index({ sku: 1 });
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ status: 1 });
 ProductSchema.index({ isFeatured: 1 });

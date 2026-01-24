@@ -3,8 +3,8 @@ import { getDocuments } from "@/fetch-data/documents";
 import { Flex } from "antd";
 import Image from "next/image";
 import IntroductionCard from "./(components)/(home)/IntroductionCard";
+import TopCategories from "./(components)/(home)/TopCategories";
 import TopDocuments from "./(components)/(home)/TopDocument";
-import TopProducts from "./(components)/(home)/TopProducts";
 
 const introductions = [
     { text: 'Giao hàng nhanh', icon: '/images/ship.png' },
@@ -16,6 +16,7 @@ const introductions = [
 export default async function Home() {
     const { data: categories } = await getCategories();
     const { data: documentsData } = await getDocuments();
+    const categoriesWithChildren = categories.filter(c => !c.parentId && c.children && c.children?.length > 0);
 
     return <Flex vertical gap={30}>
         <Image
@@ -29,8 +30,9 @@ export default async function Home() {
         <Flex className="w-full h-17" gap={16}>
             {introductions.map(({ text, icon }) => <IntroductionCard key={text} text={text} icon={icon} />)}
         </Flex>
-        <TopProducts category={categories?.[0]} />
-        <TopProducts category={categories?.[1]} />
+        <Flex className="!mt-[50px]" gap={80} vertical>
+            {categoriesWithChildren?.slice(0, 2).map((i, index) => <TopCategories key={index} category={i} />)}
+        </Flex>
         <TopDocuments documents={documentsData.documents} />
     </Flex>
 }

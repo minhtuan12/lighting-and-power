@@ -7,7 +7,7 @@ interface IConfigResponse {
 
 export async function getConfig(): Promise<IConfigResponse> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/config`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/config`, {
             next: {
                 revalidate: 3600 * 12 // Cache for 12 hour
             }

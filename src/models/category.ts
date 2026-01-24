@@ -59,7 +59,6 @@ const CategorySchema = new Schema<ICategory>(
 );
 
 // Index for better query performance
-CategorySchema.index({ slug: 1 });
 CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ level: 1 });
 CategorySchema.index({ isActive: 1 });
