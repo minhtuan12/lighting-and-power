@@ -58,7 +58,7 @@ export default async function ({ params, searchParams }: SidebarProps) {
         getProducts({ isFeatured: true })
     ]);
 
-    return <Flex gap={30} className={`w-[290px]`} vertical>
+    return <Flex gap={30} className={`w-[260px]`} vertical>
         {
             isLastChild ? <Filters searchParams={(await searchParams as any)} /> :
                 <CategorySidebar slugs={slugs || []} categories={categoriesData.data as ICategory[]} />

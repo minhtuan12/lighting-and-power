@@ -78,7 +78,7 @@ export default async function ({ params, searchParams }: SlugPageProps) {
 
     // ========= Product List or Category List ==========
     return <Flex vertical gap={24} className="flex-1">
-        <div className="grid grid-cols-[repeat(auto-fill,190px)] gap-5 justify-end h-fit">
+        <div className="grid grid-cols-[repeat(auto-fill,200px)] gap-3 justify-end h-fit">
             {
                 isLastChild ? <ProductsContent slugs={slugs} data={productsData} /> :
                     <CategoriesContent categories={categories} slugs={slugs} />
