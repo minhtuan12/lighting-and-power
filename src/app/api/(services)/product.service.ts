@@ -516,7 +516,6 @@ export class ProductService {
         return stats[0] || {};
     }
 
-    // app/api/products/(services)/product.service.ts
     static async getFilterOptions(): Promise<IProductFilterOptions> {
         try {
             const pipeline = [

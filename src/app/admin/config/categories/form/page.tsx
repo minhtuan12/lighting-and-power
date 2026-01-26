@@ -4,15 +4,15 @@ import { FloatingCascader, FloatingInput, FloatingTextArea } from '@/components/
 import { routes } from '@/constants/routes';
 import { useCategories } from '@/hooks/admin/use-categories';
 import { showMessage } from '@/hooks/use-message';
-import { buildTree, convertNestedCategories } from '@/lib/utils';
+import { fetchAPI } from '@/lib/api-client';
+import { buildTree, convertNestedCategories, getParentCategoriesChain } from '@/lib/utils';
 import { breadcrumbAtom } from '@/stores/ui';
 import { ICategory } from '@/types/category';
-import { Button, Card, Form, Select, Switch } from 'antd';
+import { Button, Card, Form, Switch, Upload } from 'antd';
 import { useSetAtom } from 'jotai';
+import { Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-const { Option } = Select;
+import { useCallback, useEffect, useState } from 'react';
 
 const CategoryForm = () => {
     const router = useRouter();
@@ -23,6 +23,9 @@ const CategoryForm = () => {
 
     const [form] = Form.useForm();
     const [parentCategories, setParentCategories] = useState<ICategory[]>([]);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageFilePreview, setImageFilePreview] = useState<string>('');
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     const {
         categories: allCategories,
@@ -37,16 +40,6 @@ const CategoryForm = () => {
     const { data: categoryData, isLoading: isLoadingCategory } = categoryId
         ? getCategoryById(categoryId)
         : { data: null, isLoading: false };
-
-    // Load parent categories (chỉ lấy level 0 và 1)
-    useEffect(() => {
-        if (allCategories?.data) {
-            const parents = allCategories.data.filter((cat: ICategory) =>
-                cat.level <= 1 && (!isEdit || cat._id !== categoryId)
-            );
-            setParentCategories(parents);
-        }
-    }, [allCategories, categoryId, isEdit]);
 
     // Tìm category theo ID
     const findCategoryById = (id: string): ICategory | undefined => {
@@ -66,12 +59,42 @@ const CategoryForm = () => {
         }
     };
 
+    // ==================== Image Upload to Cloudinary ====================
+    const uploadImagesToCloudinary = useCallback(async (file: File): Promise<string> => {
+        setIsUploadingImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'lightingpower');
+
+            const data = await fetchAPI('/admin/upload/image', {
+                method: 'POST',
+                body: formData,
+            });
+            return data.secure_url;
+        } catch (error: any) {
+            console.error('Image upload error:', error);
+            throw new Error(error.message || 'Failed to upload images');
+        } finally {
+            setIsUploadingImage(false);
+        }
+    }, []);
+
     const handleSubmit = async (values: any) => {
         try {
+            // Upload images first
+            showMessage.loading('Đang tải ảnh lên...');
+            let uploadedImageUrl: string = '';
+
+            if (imageFile && typeof imageFile !== 'string') {
+                uploadedImageUrl = await uploadImagesToCloudinary(imageFile);
+            }
             const formData: Partial<ICategory> = {
                 name: values.name,
+                image: uploadedImageUrl ?? categoryData?.data?.image ?? imageFile,
                 description: values.description,
-                parentId: values.parentId?.[values.parentId?.length - 1] || null,
+                parentId: Array.isArray(values.parentId) ?
+                    (values.parentId?.[values.parentId?.length - 1] || null) : values.parentId,
                 isActive: values.isActive ?? true,
                 metaTitle: values.metaTitle,
                 metaDescription: values.metaDescription,
@@ -95,8 +118,19 @@ const CategoryForm = () => {
         }
     };
 
+    const handleImageSelect = useCallback((file: File) => {
+        setImageFile(file);
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImageFilePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    }, [imageFile, imageFilePreview]);
+
     const isLoading = isLoadingCategory || isLoadingCategories;
-    const isSubmitting = isCreating || isUpdating;
+    const isSubmitting = isCreating || isUpdating || isUploadingImage;
 
     useEffect(() => {
         setBreadcrumb([
@@ -111,7 +145,37 @@ const CategoryForm = () => {
                 title: isEdit ? 'Cập nhật danh mục' : 'Tạo mới danh mục',
             },
         ])
-    }, [setBreadcrumb])
+    }, [setBreadcrumb]);
+
+    // Load parent categories (chỉ lấy level 0 và 1)
+    useEffect(() => {
+        if (allCategories?.data) {
+            const parents = allCategories.data.filter((cat: ICategory) =>
+                cat.level <= 1 && (!isEdit || cat._id !== categoryId)
+            );
+            setParentCategories(parents);
+        }
+    }, [allCategories, categoryId, isEdit]);
+
+    // Load product data for edit
+    useEffect(() => {
+        if (isEdit && categoryData?.data) {
+            const category = categoryData.data;
+            form.setFieldsValue({
+                name: category.name,
+                slug: category.slug,
+                description: category.description,
+                parentId: getParentCategoriesChain(parentCategories, category.parentId),
+                isActive: category.isActive,
+                metaTitle: category.metaTitle,
+                metaDescription: category.metaDescription,
+                metaKeywords: category.metaKeywords,
+            });
+
+            setImageFilePreview(category.image);
+            setImageFile(null);
+        }
+    }, [isEdit, categoryData, form, parentCategories]);
 
     return (
         <Card
@@ -169,6 +233,31 @@ const CategoryForm = () => {
                                 onChange={handleParentChange}
                             />
                         </Form.Item>
+
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Hình ảnh</h3>
+                            <div className="space-y-4">
+
+                                <Upload
+                                    maxCount={1}
+                                    beforeUpload={(file) => {
+                                        handleImageSelect(file);
+                                        return false;
+                                    }}
+                                    accept="image/*"
+                                    className="cursor-pointer"
+                                    rootClassName='!w-fit'
+                                >
+                                    {imageFilePreview ?
+                                        <img src={imageFilePreview} className="object-cover rounded w-20 h-20 border" />
+                                        : <div className="p-3 border-2 border-dashed border-gray-300 rounded text-center hover:border-blue-400 transition-colors cursor-pointer">
+                                            <Plus size={16} className="mx-auto text-gray-400 mb-1" />
+                                            <p className="text-xs text-gray-600">Upload ảnh</p>
+                                        </div>
+                                    }
+                                </Upload>
+                            </div>
+                        </div>
 
                         <Form.Item
                             label={<span className="font-semibold">Trạng thái</span>}

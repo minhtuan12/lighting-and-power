@@ -1,6 +1,9 @@
 import Carousel from "@/components/Carousel";
+import DefaultImage from "@/components/DefaultImage";
+import { routes } from "@/constants/routes";
 import { ICategory } from "@/types/category";
 import { Flex } from "antd";
+import Link from "next/link";
 
 export default async function TopCategories({ category }: { category: ICategory }) {
     return <Flex vertical gap={12}>
@@ -18,7 +21,14 @@ export default async function TopCategories({ category }: { category: ICategory 
             items={category.children as ICategory[]}
             pathToRedirect="san-pham"
         >
-            {(category.children ?? []).map(item => <div key={item.name} className="text-center text-[15px] font-bold">{item.name}</div>)}
+            {
+                (category.children ?? []).map(item => <Link key={item.name} href={`${routes.sanPham.url}/${item.slug}`}>
+                    <Flex gap={15} vertical align="center">
+                        <DefaultImage src={item.image} className="w-40 h-40" />
+                        <div className="text-center text-[15px] font-bold text-black">{item.name}</div>
+                    </Flex>
+                </Link>)
+            }
         </Carousel>
-    </Flex>
+    </Flex >
 }

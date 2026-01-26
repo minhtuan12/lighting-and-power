@@ -8,7 +8,7 @@ export class AuthService {
     // ================= PASSWORD POLICY CONFIG =================
     private static readonly PASSWORD_EXPIRY_MONTHS = 6;
     private static readonly PASSWORD_HISTORY_COUNT = 5; // Lưu 5 mật khẩu gần nhất
-    private static readonly PASSWORD_MIN_LENGTH = 8;
+    private static readonly PASSWORD_MIN_LENGTH = 6;
 
     // ================= AUTH =================
 

@@ -69,6 +69,8 @@ function AdminLogin() {
             router.refresh();
         } catch (err: any) {
             showMessage.error(err.message || 'Đăng nhập thất bại');
+        } finally {
+            setIsLoading(false);
         }
     };
 

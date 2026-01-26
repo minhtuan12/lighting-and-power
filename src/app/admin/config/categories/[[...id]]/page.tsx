@@ -11,7 +11,7 @@ import { filterAtom, selectedCategoryAtom } from '@/stores/category';
 import { breadcrumbAtom } from '@/stores/ui';
 import { ICategory } from '@/types/category';
 import { LoadingOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, Select, Space, Switch, Table } from 'antd';
+import { Badge, Button, Card, Flex, Image, Select, Space, Switch, Table } from 'antd';
 import { useAtom, useSetAtom } from 'jotai';
 import { ChevronLeft, Filter, Plus } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -94,6 +94,26 @@ const Category = () => {
     }
 
     const columns = useMemo(() => [
+        {
+            title: 'Ảnh',
+            dataIndex: 'image',
+            key: 'image',
+            width: 100,
+            align: 'center',
+            render: (image: string) => (
+                <Space size={12} align='center'>
+                    {image && (
+                        <Image
+                            preview={false}
+                            style={{ borderRadius: 8, border: '#cac8c8 1px solid', marginTop: 2 }}
+                            src={image}
+                            width={80}
+                            height={50}
+                        />
+                    )}
+                </Space>
+            ),
+        },
         {
             title: 'Tên danh mục',
             dataIndex: 'name',

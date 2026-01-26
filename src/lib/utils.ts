@@ -198,3 +198,26 @@ export function capitalizeFirstLetterEachWord(str: string) {
     }
     return newWord.join(' ');
 }
+
+export function getParentCategoriesChain(categories: ICategory[], lastId: string) {
+    const result: string[] = [];
+    let currentId: string | null = lastId;
+
+    // Tạo map để tra cứu nhanh category theo id
+    const categoryMap = new Map<string, ICategory>();
+    categories.forEach(cat => {
+        categoryMap.set(cat._id, cat);
+    });
+
+    // Đi từ lastId lên đến root (parentId = null)
+    while (currentId) {
+        const category = categoryMap.get(currentId);
+
+        if (!category) break;
+
+        result.unshift(currentId);
+        currentId = category.parentId ?? null;
+    }
+
+    return result;
+} 

@@ -60,6 +60,7 @@ async function updateCategory(
         const body = await request.json();
         const {
             name,
+            image,
             description,
             parentId,
             isActive,
@@ -71,6 +72,7 @@ async function updateCategory(
         const category = await CategoryService.update(params.id, {
             name,
             slug: await SlugGenerator.generateUniqueSlug(name, Category, { excludeId: params.id }),
+            image,
             description,
             parentId,
             isActive,

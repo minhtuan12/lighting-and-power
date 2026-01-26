@@ -16,6 +16,10 @@ const CategorySchema = new Schema<ICategory>(
             lowercase: true,
             trim: true
         },
+        image: {
+            type: String,
+            default: ''
+        },
         description: {
             type: String,
             trim: true,

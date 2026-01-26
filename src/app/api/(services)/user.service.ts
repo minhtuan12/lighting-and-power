@@ -40,16 +40,11 @@ export class UserService {
         };
     }
 
-
     static async getProfile(userId: string) {
         const user = await User.findById(userId).select('-password');
 
         if (!user) {
             throw new Error('User not found');
-        }
-
-        if (user.isActive === false) {
-            throw new Error('Account inactive');
         }
 
         return user;

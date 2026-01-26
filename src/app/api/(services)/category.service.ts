@@ -222,6 +222,7 @@ export class CategoryService {
     static async update(id: string, data: {
         name?: string;
         slug?: string;
+        image?: string;
         description?: string;
         parentId?: string | null;
         isActive?: boolean;
@@ -281,6 +282,7 @@ export class CategoryService {
         // Update other fields
         if (data.name !== undefined) category.name = data.name;
         if (data.slug !== undefined) category.slug = data.slug;
+        if (data.image !== undefined) category.image = data.image;
         if (data.description !== undefined) category.description = data.description;
         if (data.isActive !== undefined) {
             category.isActive = data.isActive;

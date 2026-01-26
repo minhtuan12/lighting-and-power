@@ -1,3 +1,4 @@
+import PaginationClient from "@/app/(user)/(components)/(product)/filter/PaginationClient";
 import ProductDetail from "@/app/(user)/(components)/(product)/ProductDetail";
 import ProductItem from "@/app/(user)/(components)/ProductItem";
 import DefaultImage from "@/components/DefaultImage";
@@ -9,7 +10,7 @@ import { getCategoryChain } from "@/lib/utils";
 import { ICategory } from "@/types/category";
 import { SlugPageProps } from "@/types/general";
 import { IProduct } from "@/types/product";
-import { Flex, Pagination } from "antd";
+import { Flex } from "antd";
 import Link from "next/link";
 
 interface IProductContent {
@@ -86,11 +87,10 @@ export default async function ({ params, searchParams }: SlugPageProps) {
         </div>
         {
             isLastChild && <Flex className="w-full" justify="center">
-                <Pagination
+                <PaginationClient
                     total={pagination.total}
                     pageSize={PAGE_LIMIT}
                     current={pagination.page}
-                    className="custom-pagination"
                 />
             </Flex>
         }

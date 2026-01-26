@@ -3,6 +3,10 @@ import mongoose, { Schema } from 'mongoose';
 
 const UserSchema = new Schema<IUser>(
     {
+        avatar: {
+            type: String,
+            trim: true
+        },
         fullName: {
             type: String,
             required: [true, 'Full name is required'],
