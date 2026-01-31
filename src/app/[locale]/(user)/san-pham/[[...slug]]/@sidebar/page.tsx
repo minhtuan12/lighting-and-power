@@ -1,4 +1,4 @@
-import Filters from "@/app/(user)/(components)/(product)/filter/Filters";
+import Filters from "@/app/[locale]/(user)/(components)/(product)/filter/Filters";
 import DefaultImage from "@/components/DefaultImage";
 import { routes } from "@/constants/routes";
 import { getCategories } from "@/fetch-data/categories";

@@ -433,7 +433,7 @@ const ProductForm = () => {
                         label={<span className="font-semibold text-base">Mô tả chi tiết</span>}
                         name="description"
                     >
-                        <SimpleEditor placeholder='Nhập mô tả chi tiết sản phẩm' />
+                        <SimpleEditor value={productData?.data?.description} placeholder='Nhập mô tả chi tiết sản phẩm' />
                     </Form.Item>
                 </div>
 

@@ -1,6 +1,8 @@
+import createIntlMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { routes } from './constants/routes';
+import { routing } from './i18n/routing';
 
 const protectedRoutes = [
     // routes.gioHang.url,
@@ -9,45 +11,72 @@ const protectedRoutes = [
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url];
 
-export default async function proxy(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    const accessToken = request.cookies.get('accessToken')?.value;
+const intlMiddleware = createIntlMiddleware(routing);
 
-    // Avoid loop
-    const isAuthRoute = authRoutes.some(route =>
-        pathname.includes(route)
-    );
-    if (isAuthRoute) {
-        if (accessToken) {
-            return NextResponse.redirect(new URL('/', request.url));
+function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
+    return (request: NextRequest): NextResponse | null => {
+        const accessToken = request.cookies.get('accessToken')?.value;
+
+        // Check auth routes
+        const isAuthRoute = authRoutes.some(route =>
+            pathnameWithoutLocale.includes(route)
+        );
+
+        if (isAuthRoute && accessToken) {
+            return NextResponse.redirect(new URL(`/${locale}`, request.url));
         }
-        return NextResponse.next();
-    }
 
-    const isProtected = protectedRoutes.some(route =>
-        pathname.includes(route)
-    );
+        // Check protected routes
+        const isProtected = protectedRoutes.some(route =>
+            pathnameWithoutLocale.includes(route)
+        );
 
-    if (isProtected) {
-        if (!accessToken) {
-            const loginUrl = new URL(routes.dangNhap.url, request.url);
+        if (isProtected && !accessToken) {
+            const loginUrl = new URL(`/${locale}${routes.dangNhap.url}`, request.url);
 
             // optional: redirect back sau login
-            loginUrl.searchParams.set('redirect', pathname);
-
+            loginUrl.searchParams.set('redirect', pathnameWithoutLocale);
             return NextResponse.redirect(loginUrl);
         }
+
+        return null;
+    };
+}
+
+export default async function proxy(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+
+    // Run i18n middleware first
+    const intlResponse = intlMiddleware(request);
+
+    // Extract locale from pathname
+    const pathnameLocale = pathname.split('/')[1];
+    const isValidLocale = routing.locales.includes(pathnameLocale as any);
+
+    if (!isValidLocale) {
+        return intlResponse;
     }
 
-    return NextResponse.next();
+    // Get pathname without locale
+    const pathnameWithoutLocale = pathname.replace(`/${pathnameLocale}`, '') || '/';
+
+    // Run auth middleware
+    const authMiddleware = createAuthMiddleware(pathnameLocale, pathnameWithoutLocale);
+    const authResponse = authMiddleware(request);
+
+    // If auth middleware returns a response (redirect), use it
+    if (authResponse) {
+        return authResponse;
+    }
+
+    // Otherwise, use i18n response
+    return intlResponse;
 }
 
 export const config = {
     matcher: [
-        '/gio-hang/:path*',
-        '/tai-lieu-dien-tu/:path*',
-        '/dang-ky/:path*',
-        '/dang-nhap/:path*',
-        '/((?!api|_next/static|_next/image|favicon.ico|images|.*\\.png$).*)',
+        '/',
+        '/(vi|en|zh)/:path*',
+        '/((?!api|_next|_vercel|.*\\..*).*)'
     ],
 };

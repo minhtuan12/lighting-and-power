@@ -1,0 +1,82 @@
+{
+    "common": {
+        "home": "Home",
+        "product": "Products",
+        "contact": "Contact",
+        "login": "Login",
+        "register": "Register",
+        "cart": "Cart",
+        "search": "Search",
+        "product-detail": "Product Detail",
+        "document": "Documents",
+        "address": "Address",
+        "phone": "Phone Number",
+        "email": "Email",
+        "language": "Language",
+        "currency": "Currency",
+        "apply": "Apply"
+    },
+    "form": {
+        "enter": "Enter {field}"
+    },
+    "auth": {
+        "fullName": "Full Name",
+        "email": "Email",
+        "phone": "Phone Number",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "loginSuccess": "Login successful",
+        "registerSuccess": "Registration successful",
+        "invalidCredentials": "Invalid email/phone or password"
+    },
+    "product": {
+        "authentic": "Authentic",
+        "addToCart": "Add to Cart",
+        "buyNow": "Buy Now",
+        "price": "Price",
+        "inStock": "In Stock",
+        "outOfStock": "Out of Stock",
+        "remaining": "Remaining",
+        "quantity": "Quantity",
+        "min": "Minimum",
+        "multiple": "Multiple",
+        "priceEach": "Price",
+        "description": "Description",
+        "sameDayDelivery": "Same-day Delivery",
+        "shortDescription": "Short Description",
+        "weight": "Weight",
+        "dimensions": {
+            "length": "Length",
+            "width": "Width",
+            "height": "Height"
+        },
+        "value": "Value",
+        "filter": {
+            "filters": "Filters",
+            "clearAll": "Clear All",
+            "priceRange": "Price Range",
+            "brand": "Brand",
+            "apply": "Apply",
+            "fields": {
+                "manufacturers": "Manufacturers",
+                "origins": "Origins",
+                "units": "Units",
+                "tags": "New & Bestsellers",
+                "priceRange": "Price Range",
+                "weightRange": "Weight (grams)",
+                "dimensionRanges": "Dimensions (mm)",
+                "specifications": "Specifications"
+            }
+        }
+    },
+    "validation": {
+        "required": "Please enter {field}",
+        "invalid": "Invalid {field}",
+        "min": "{field} must be at least {min} characters",
+        "uppercasePassword": "Password phải có ít nhất 1 chữ hoa",
+        "lowercasePassword": "Password must contain at least 1 lowercase letter",
+        "oneDigitPassword": "Password must contain at least 1 digit",
+        "specialCharacterPassword": "Password must contain at least 1 special character",
+        "passwordNotMatch": "Passwords do not match"
+    }
+}

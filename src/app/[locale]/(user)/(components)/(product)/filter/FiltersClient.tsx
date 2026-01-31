@@ -5,24 +5,11 @@ import { PRODUCT_TAG_OPTIONS } from "@/constants/common";
 import { hasValidData } from "@/lib/utils";
 import { FilterState, IProductFilterOptions, IProductFilterParams } from "@/types/product";
 import { Button, Card, Checkbox, Collapse, Flex, InputNumber, Slider, Space } from "antd";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 const FilterHeader = <Flex gap={10}><Icon src="/images/filter.png" size={15} />Lọc sản phẩm</Flex>;
-
-function getLabel(key: string): string | null {
-    const labels: Record<string, string> = {
-        manufacturers: 'Hãng sản xuất',
-        origins: 'Xuất xứ',
-        units: 'Đơn vị',
-        tags: 'Mới & Bán chạy',
-        priceRange: 'Khoảng giá',
-        weightRange: 'Trọng lượng (gram)',
-        dimensionRanges: 'Kích thước (mm)',
-        specifications: 'Thông số kỹ thuật',
-    };
-    return labels[key] || null;
-}
 
 export default function FiltersClient({
     filterOptions,
@@ -31,6 +18,7 @@ export default function FiltersClient({
     filterOptions: IProductFilterOptions;
     currentFilters: IProductFilterParams;
 }) {
+    const t = useTranslations('product.filter');
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -425,6 +413,20 @@ export default function FiltersClient({
         }));
     };
 
+    const getLabel = useCallback((key: string): string | null => {
+        const labels: Record<string, string> = {
+            manufacturers: t('fields.manufacturers'),
+            origins: t('fields.origins'),
+            units: t('fields.units'),
+            tags: t('fields.tags'),
+            priceRange: t('fields.priceRange'),
+            weightRange: t('fields.weightRange'),
+            dimensionRanges: t('fields.dimensionRanges'),
+            specifications: t('fields.specifications'),
+        };
+        return labels[key] || null;
+    }, [t]);
+
     // Build URL từ filterState
     const buildURL = (filters: any) => {
         const params = new URLSearchParams();
@@ -578,13 +580,13 @@ export default function FiltersClient({
             <Button
                 onClick={handleResetFilters}
             >
-                Xóa bộ lọc
+                {t('clearAll')}
             </Button>
             <Button
                 type="primary"
                 onClick={handleApplyFilters}
             >
-                Áp dụng
+                {t('apply')}
             </Button>
         </Flex>
     </Flex>

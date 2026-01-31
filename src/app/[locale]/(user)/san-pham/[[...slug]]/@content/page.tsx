@@ -1,6 +1,6 @@
-import PaginationClient from "@/app/(user)/(components)/(product)/filter/PaginationClient";
-import ProductDetail from "@/app/(user)/(components)/(product)/ProductDetail";
-import ProductItem from "@/app/(user)/(components)/ProductItem";
+import PaginationClient from "@/app/[locale]/(user)/(components)/(product)/filter/PaginationClient";
+import ProductDetail from "@/app/[locale]/(user)/(components)/(product)/ProductDetail";
+import ProductItem from "@/app/[locale]/(user)/(components)/ProductItem";
 import DefaultImage from "@/components/DefaultImage";
 import { PAGE_LIMIT } from "@/constants/common";
 import { routes } from "@/constants/routes";

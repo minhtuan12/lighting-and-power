@@ -1,0 +1,83 @@
+{
+    "common": {
+        "home": "Trang chủ",
+        "product": "Sản phẩm",
+        "contact": "Liên hệ",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "cart": "Giỏ hàng",
+        "search": "Tìm kiếm",
+        "product-detail": "Chi tiết sản phẩm",
+        "document": "Tài liệu điện tử",
+        "address": "Địa chỉ",
+        "phone": "Số điện thoại",
+        "email": "Email",
+        "language": "Ngôn ngữ",
+        "currency": "Tiền tệ",
+        "apply": "Áp dụng"
+    },
+    "form": {
+        "enter": "Nhập {field}"
+    },
+    "auth": {
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận mật khẩu",
+        "loginSuccess": "Đăng nhập thành công",
+        "registerSuccess": "Đăng ký thành công",
+        "invalidCredentials": "Email/số điện thoại hoặc mật khẩu không đúng"
+    },
+    "product": {
+        "authentic": "Chính hãng",
+        "addToCart": "Thêm vào giỏ hàng",
+        "buyNow": "Mua ngay",
+        "price": "Giá",
+        "inStock": "Còn hàng",
+        "outOfStock": "Hết hàng",
+        "remaining": "Hàng còn",
+        "quantity": "Số lượng mua",
+        "min": "Tối thiểu",
+        "multiple": "Bội số",
+        "priceEach": "Đơn giá",
+        "description": "Mô tả",
+        "sameDayDelivery": "Giao hàng trong ngày",
+        "shortDescription": "Mô tả ngắn",
+        "weight": "Trọng lượng",
+        "dimensions": {
+            "length": "Chiều dài",
+            "width": "Chiều rộng",
+            "height": "Chiều cao"
+        },
+        "value": "Giá trị",
+        "filter": {
+            "filters": "Bộ lọc",
+            "clearAll": "Xóa bộ lọc",
+            "priceRange": "Khoảng giá",
+            "brand": "Thương hiệu",
+            "apply": "Áp dụng",
+            "fields": {
+                "manufacturers": "Hãng sản xuất",
+                "origins": "Xuất xứ",
+                "units": "Đơn vị",
+                "tags": "Mới & Bán chạy",
+                "priceRange": "Khoảng giá",
+                "weightRange": "Trọng lượng (gram)",
+                "dimensionRanges": "Kích thước (mm)",
+                "specifications": "Thông số kỹ thuật"
+            }
+        }
+    },
+    "validation": {
+        "requiredOne": "Vui lòng nhập {field} hoặc {field2}",
+        "required": "Vui lòng nhập {field}",
+        "invalid": "{field} không hợp lệ",
+        "min": "{field} phải có ít nhất {min} ký tự",
+        "uppercasePassword": "Mật khẩu phải có ít nhất 1 chữ hoa",
+        "lowercasePassword": "Mật khẩu phải có ít nhất 1 chữ thường",
+        "oneDigitPassword": "Mật khẩu phải có ít nhất 1 số",
+        "specialCharacterPassword": "Mật khẩu phải có ít nhất 1 ký tự đặc biệt",
+        "passwordNotMatch": "Mật khẩu không khớp"
+    }
+}

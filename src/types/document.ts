@@ -15,5 +15,11 @@ export interface IDocument {
     isPublished?: boolean;
 }
 
-export type DocumentType = 'introduction' | 'knowledge' | 'guide' | 'manual' | 'other';
+export interface IDocumentType {
+    label: string;
+    value: string;
+    color: string;
+    icon: any;
+}
+
 export type ContentType = 'file' | 'text';

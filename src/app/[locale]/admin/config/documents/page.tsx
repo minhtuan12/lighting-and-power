@@ -3,12 +3,13 @@
 import { FloatingInput, FloatingSelect, FloatingTextArea } from '@/components/inputs/FloatingInputs';
 import SearchBar from '@/components/SearchBar';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor';
-import { ALLOWED_FILE_TYPES, CONTENT_TYPES, DOCUMENT_TYPES, MAX_FILE_SIZE, PAGE_LIMIT } from '@/constants/common';
+import { ALLOWED_FILE_TYPES, CONTENT_TYPES, MAX_FILE_SIZE, PAGE_LIMIT } from '@/constants/common';
 import { useDocuments } from '@/hooks/admin/use-documents';
 import useDebounce from '@/hooks/use-debounce';
 import { showMessage } from '@/hooks/use-message';
+import { getDocumentTypes } from '@/lib/utils';
 import { breadcrumbAtom, filterDocumentAtom } from '@/stores';
-import { IDocument } from '@/types/document';
+import { IDocument, IDocumentType } from '@/types/document';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Modal, Popconfirm, Select, Space, Switch, Table, Tag, Upload } from 'antd';
 import { useAtom, useSetAtom } from 'jotai';
@@ -22,6 +23,7 @@ export const Documents = () => {
     const [editingDocument, setEditingDocument] = useState<IDocument | null>(null);
     const [contentType, setContentType] = useState<'text' | 'file'>('text');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([]);
 
     const [filter, setFilter] = useAtom(filterDocumentAtom);
     const setBreadcrumb = useSetAtom(breadcrumbAtom);
@@ -172,7 +174,7 @@ export const Documents = () => {
             width: 150,
             align: 'center',
             render: (type: string) => {
-                const typeConfig = DOCUMENT_TYPES.find(t => t.value === type);
+                const typeConfig = documentTypes.find(t => t.value === type);
                 return <Tag color={typeConfig?.color} variant='outlined'>{typeConfig?.label}</Tag>;
             },
         },
@@ -259,8 +261,14 @@ export const Documents = () => {
         debounceSearch(value);
     }
     useEffect(() => {
-        setBreadcrumb([{ title: 'Quản lý tài liệu' }])
-    }, [setBreadcrumb]);
+        async function fetchDocumentTypes() {
+            const data = await getDocumentTypes();
+            setDocumentTypes(data);
+        }
+
+        fetchDocumentTypes();
+        setBreadcrumb([{ title: 'Quản lý tài liệu' }]);
+    }, [setBreadcrumb, setDocumentTypes]);
 
     return (
         <Card
@@ -292,7 +300,7 @@ export const Documents = () => {
                                     ...prev,
                                     type: e
                                 }))}
-                                options={DOCUMENT_TYPES}
+                                options={documentTypes}
                                 suffixIcon={<Filter size={16} />}
                             />
 
@@ -359,7 +367,7 @@ export const Documents = () => {
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={{
-                        type: DOCUMENT_TYPES[0].value,
+                        type: documentTypes?.[0]?.value ?? '',
                         contentType: CONTENT_TYPES[0].value,
                     }}
                 >
@@ -383,7 +391,7 @@ export const Documents = () => {
                         >
                             <FloatingSelect
                                 label="Chọn loại"
-                                options={DOCUMENT_TYPES}
+                                options={documentTypes}
                             />
                         </Form.Item>
 
@@ -406,7 +414,7 @@ export const Documents = () => {
                             name="content"
                             rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}
                         >
-                            <SimpleEditor placeholder="Nhập nội dung tài liệu" />
+                            <SimpleEditor value={editingDocument?.content} placeholder="Nhập nội dung tài liệu" />
                         </Form.Item>
                     ) : (
                         <Form.Item label="Tải file">

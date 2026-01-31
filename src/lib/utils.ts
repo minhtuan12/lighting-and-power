@@ -220,4 +220,14 @@ export function getParentCategoriesChain(categories: ICategory[], lastId: string
     }
 
     return result;
-} 
+}
+
+export async function getDocumentTypes() {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_CLOUDINARY_RAW_URL!}/document-types_xssill.json`, { cache: 'force-cache' });
+        return await res.json();
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}

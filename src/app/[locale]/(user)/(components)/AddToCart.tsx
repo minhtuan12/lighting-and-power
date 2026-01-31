@@ -5,6 +5,7 @@ import { addToCartAtom } from "@/stores";
 import { IProduct } from "@/types/product";
 import { Button, Col, Flex, InputNumber, Row } from "antd";
 import { useSetAtom } from "jotai";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 interface IProps {
@@ -17,6 +18,7 @@ interface IProps {
 export default function AddToCart(
     { product, minQuantity, maxQuantity, size = 'small' }: IProps
 ) {
+    const t = useTranslations('product');
     const [quantity, setQuantity] = useState(minQuantity ?? 1);
     const isSmallSize = size === 'small';
     const outOfStock = useMemo(() => !product.stock, [product?.stock]);
@@ -60,7 +62,7 @@ export default function AddToCart(
         <Button disabled={outOfStock} onClick={handleAddToCart} className={`w-full rounded-[5px] flex items-center gap-3 !bg-[var(--primary)] hover:!bg-blue-800 ${isSmallSize ? '!h-[30px]' : '!h-[34px]'}`} type="primary">
             <Icon src="/images/cart.png" size={15} />
             <span className={`${isSmallSize ? 'text-[12px]' : 'text-[14px]'}`}>
-                Thêm vào giỏ hàng
+                {t('addToCart')}
             </span>
         </Button>
     </Flex>

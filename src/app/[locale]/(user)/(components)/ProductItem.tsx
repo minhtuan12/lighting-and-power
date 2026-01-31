@@ -4,6 +4,7 @@ import { Icon } from "@/components/Icon";
 import { routes } from "@/constants/routes";
 import { IProduct } from "@/types/product";
 import { Card, Flex } from "antd";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
@@ -16,6 +17,8 @@ interface IProps {
 }
 
 function ItemContent({ item, className, enableAddToCart }: IProps) {
+    const t = useTranslations('product');
+
     return <Card
         style={{
             border: '1px solid #b0b0b0'
@@ -57,7 +60,7 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                 {
                     item.stock && <Flex align='center' gap={5} className='text-[12px]'>
                         <Icon src='/images/green-tick.png' size={17} />
-                        <p>Hàng còn: {item.stock?.toLocaleString('vi-VN')}</p>
+                        <p>{t('remaining')}: {item.stock?.toLocaleString('vi-VN')}</p>
                     </Flex>
                 }
                 {enableAddToCart && <AddToCart product={item} minQuantity={item.minOrderQuantity} maxQuantity={item.stock} />}

@@ -5,9 +5,12 @@ import { showMessage } from '@/hooks/use-message';
 import { useRegister } from '@/hooks/user/use-register';
 import { Button, Form, Input } from 'antd';
 import { Lock, Mail, Phone, RefreshCcwDot, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterForm() {
+    const t = useTranslations();
+    const v = useTranslations('validation');
     const router = useRouter();
     const { registerAsync, isRegistering } = useRegister();
     const [form] = Form.useForm();
@@ -21,10 +24,10 @@ export default function RegisterForm() {
                 phone: values.phone,
             });
 
-            showMessage.success('Đăng ký thành công!');
+            showMessage.success(t('auth.registerSuccess'));
             router.push(routes.dangNhap.url);
         } catch (error: any) {
-            showMessage.error(error?.message || 'Đăng ký thất bại!');
+            showMessage.error(error?.message || t('auth.registerFailed'));
         }
     };
 
@@ -32,97 +35,97 @@ export default function RegisterForm() {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
             <Form.Item
                 name="fullName"
-                label="Họ và tên"
-                rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+                label={t('auth.fullName')}
+                rules={[{ required: true, message: v('required', { field: t('auth.fullName') }) }]}
             >
-                <Input placeholder="Nhập họ và tên" size="large" prefix={<User />} />
+                <Input placeholder={t('form.enter', { field: t('auth.fullName') })} size="large" prefix={<User />} />
             </Form.Item>
 
             <Form.Item
                 name="email"
-                label="Email"
+                label={t('auth.email')}
                 rules={[
-                    { type: 'email', message: 'Email không hợp lệ!' },
+                    { type: 'email', message: v('invalid', { field: t('auth.email') }) },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
                             const phone = getFieldValue('phone');
                             if (!value && !phone) {
-                                return Promise.reject(new Error('Vui lòng nhập email hoặc số điện thoại!'));
+                                return Promise.reject(new Error(v('requiredOne', { field: t('auth.email'), field2: t('auth.phone') })));
                             }
                             return Promise.resolve();
                         },
                     }),
                 ]}
             >
-                <Input placeholder="Nhập email" size="large" prefix={<Mail />} />
+                <Input placeholder={t('form.enter', { field: t('auth.email') })} size="large" prefix={<Mail />} />
             </Form.Item>
 
             <Form.Item
                 name="phone"
-                label="Số điện thoại"
+                label={t('auth.phone')}
                 rules={[
                     {
                         pattern: /^[0-9]{10,11}$/,
-                        message: 'Số điện thoại phải có 10-11 số!'
+                        message: v('invalid', { field: t('auth.phone') })
                     },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
                             const email = getFieldValue('email');
                             if (!value && !email) {
-                                return Promise.reject(new Error('Vui lòng nhập email hoặc số điện thoại!'));
+                                return Promise.reject(new Error(v('requiredOne', { field: t('auth.email'), field2: t('auth.phone') })));
                             }
                             return Promise.resolve();
                         },
                     }),
                 ]}
             >
-                <Input placeholder="Nhập số điện thoại" size="large" prefix={<Phone />} />
+                <Input placeholder={t('form.enter', { field: t('auth.phone') })} size="large" prefix={<Phone />} />
             </Form.Item>
 
             <Form.Item
                 name="password"
-                label="Mật khẩu"
+                label={t('auth.password')}
                 rules={[
-                    { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                    { required: true, message: v('required', { field: t('auth.password') }) },
+                    { min: 6, message: v('min', { field: t('auth.password'), min: 6 }) },
                     {
                         pattern: /[A-Z]/,
-                        message: 'Mật khẩu phải có ít nhất 1 chữ hoa!'
+                        message: v('uppercasePassword')
                     },
                     {
                         pattern: /[a-z]/,
-                        message: 'Mật khẩu phải có ít nhất 1 chữ thường!'
+                        message: v('lowercasePassword')
                     },
                     {
                         pattern: /[0-9]/,
-                        message: 'Mật khẩu phải có ít nhất 1 số!'
+                        message: v('oneDigitPassword')
                     },
                     {
                         pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
-                        message: 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt!'
+                        message: v('specialCharacterPassword')
                     }
                 ]}
             >
-                <Input.Password placeholder="Nhập mật khẩu" size="large" prefix={<Lock />} />
+                <Input.Password placeholder={t('form.enter', { field: t('auth.password') })} size="large" prefix={<Lock />} />
             </Form.Item>
 
             <Form.Item
                 name="confirmPassword"
-                label="Xác nhận mật khẩu"
+                label={t('auth.confirmPassword')}
                 dependencies={['password']}
                 rules={[
-                    { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                    { required: true, message: v('passwordNotMatch') },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
                             if (!value || getFieldValue('password') === value) {
                                 return Promise.resolve();
                             }
-                            return Promise.reject(new Error('Mật khẩu không khớp!'));
+                            return Promise.reject(new Error(v('passwordNotMatch')));
                         },
                     }),
                 ]}
             >
-                <Input.Password placeholder="Nhập lại mật khẩu" size="large" prefix={<RefreshCcwDot />} />
+                <Input.Password placeholder={t('auth.confirmPassword')} size="large" prefix={<RefreshCcwDot />} />
             </Form.Item>
 
             <Button
@@ -131,8 +134,8 @@ export default function RegisterForm() {
                 loading={isRegistering}
                 block
             >
-                Đăng ký
+                {t('auth.register')}
             </Button>
-        </Form>
+        </Form >
     );
 }

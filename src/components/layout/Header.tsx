@@ -3,9 +3,11 @@ import { ICategory } from '@/types/category';
 import { IConfig } from '@/types/config';
 import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd';
 import { ChevronDown } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { Cart } from '../Cart';
+import Cart from '../Cart';
 import { Icon } from '../Icon';
+import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -18,43 +20,47 @@ function convertCategories(categories: ICategory[]): MenuItem[] {
 }
 
 export default async function Header({ config, categories }: { config: IConfig; categories: ICategory[] }) {
+    const t = await getTranslations('common');
     const items: MenuItem[] = [
         {
-            label: <Link href={routes.trangChu.url}>{routes.trangChu.title.toUpperCase()}</Link>,
+            label: <Link href={routes.trangChu.url}>{t(routes.trangChu.key).toUpperCase()}</Link>,
             key: routes.trangChu.url,
         },
         {
             label: <Flex align='center' gap={6} className='!text-white !text-[17px]'>
-                <Link href={routes.sanPham.url}>{routes.sanPham.title.toUpperCase()}</Link>
+                <Link href={routes.sanPham.url}>{t(routes.sanPham.key).toUpperCase()}</Link>
                 <ChevronDown size={20} />
             </Flex>,
             key: routes.sanPham.url,
             children: convertCategories(categories),
         },
         {
-            label: <Link href={routes.taiLieuDienTu.url}>{routes.taiLieuDienTu.title.toUpperCase()}</Link>,
+            label: <Link href={routes.taiLieuDienTu.url}>{t(routes.taiLieuDienTu.key).toUpperCase()}</Link>,
             key: routes.taiLieuDienTu.url,
         },
         {
-            label: <Link href={routes.lienHe.url}>{routes.lienHe.title.toUpperCase()}</Link>,
+            label: <Link href={routes.lienHe.url}>{t(routes.lienHe.key).toUpperCase()}</Link>,
             key: routes.lienHe.url,
         },
     ];
 
     return (
-        <header className='fixed top-0 z-[9999] w-full bg-white'>
+        <header className='fixed top-0 z-[999] w-full bg-white'>
             <Flex justify='space-between' align='end' className="!bg-white !text-gray-100 !h-[120px] !gap-34 !py-4 !mx-auto max-w-[1140px]">
                 <Row className='w-full' align={'bottom'}>
                     <Col span={8} style={{ display: 'flex', justifyContent: 'left' }}>
-                        <Input placeholder='Search' className='!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[25px] !border-[#B4B4B4]' />
+                        <Input placeholder={t('search')} className='!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[25px] !border-[#B4B4B4]' />
                     </Col>
                     <Col span={8} style={{ display: 'flex', justifyContent: 'center' }}>
                         <Icon src="/images/logo-vertical.png" alt="Vertical Logo" size={200} />
                     </Col>
                     <Col span={8} style={{ display: 'flex', justifyContent: 'right' }}>
-                        <Flex gap={7} align='center' className='text-[#C40000] font-bold w-['>
-                            <Icon src='/images/header-phone.png' />
-                            {config.hotline}
+                        <Flex gap={30} className='items-end'>
+                            <Flex gap={7} align='center' className='text-[#C40000] font-bold'>
+                                <Icon src='/images/header-phone.png' />
+                                {config.hotline}
+                            </Flex>
+                            <LanguageCurrencySwitcher />
                         </Flex>
                     </Col>
                 </Row>
@@ -69,10 +75,10 @@ export default async function Header({ config, categories }: { config: IConfig; 
                     <Flex gap={35}>
                         <Flex gap={35}>
                             <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
-                                <Link href={routes.dangKy.url}>{routes.dangKy.title.toUpperCase()}</Link>
+                                <Link href={routes.dangKy.url}>{t(routes.dangKy.key).toUpperCase()}</Link>
                             </Button>
                             <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
-                                <Link href={routes.dangNhap.url}>{routes.dangNhap.title.toUpperCase()}</Link>
+                                <Link href={routes.dangNhap.url}>{t(routes.dangNhap.key).toUpperCase()}</Link>
                             </Button>
                         </Flex>
                         <Link href={routes.gioHang.url} className='flex items-center gap-2'>

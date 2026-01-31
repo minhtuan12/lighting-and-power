@@ -13,15 +13,6 @@ export const PRODUCT_STATUS_OPTIONS = [
     { value: 'discontinued', label: 'Ngừng sản xuất' },
 ];
 
-// Document
-export const DOCUMENT_TYPES = [
-    { value: 'introduction', label: 'Giới thiệu sản phẩm', icon: '📄', color: 'magenta' },
-    { value: 'knowledge', label: 'Kiến thức sản phẩm', icon: '📚', color: 'volcano' },
-    { value: 'guide', label: 'Hướng dẫn sử dụng', icon: '📖', color: 'cyan' },
-    { value: 'manual', label: 'Hướng dẫn lắp ráp', icon: '🔧', color: 'geekblue' },
-    { value: 'other', label: 'Khác', icon: '📋', color: 'purple' },
-];
-
 export const CONTENT_TYPES = [
     { value: 'text', label: 'Viết tay' },
     { value: 'file', label: 'Upload file' },

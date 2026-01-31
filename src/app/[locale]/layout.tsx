@@ -1,7 +1,11 @@
+import { routing } from '@/i18n/routing';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import { Inter } from "next/font/google";
-import "./globals.css";
+import { notFound } from 'next/navigation';
+import "../globals.css";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -15,13 +19,26 @@ export const metadata: Metadata = {
     description: "Lighting & Power",
 };
 
-export default function RootLayout({
+export function generateStaticParams() {
+    return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function RootLayout({
     children,
+    params,
 }: Readonly<{
     children: React.ReactNode;
+    params: Promise<{ locale: string }>;
 }>) {
+    const { locale } = await params;
+
+    if (!routing.locales.includes(locale as any)) {
+        notFound();
+    }
+
+    const messages = await getMessages();
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang={locale} suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
                 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
@@ -35,7 +52,9 @@ export default function RootLayout({
                 suppressHydrationWarning
                 className={`${inter.className} ${inter.variable} antialiased`}
             >
-                <AntdRegistry>{children}</AntdRegistry>
+                <NextIntlClientProvider messages={messages}>
+                    <AntdRegistry>{children}</AntdRegistry>
+                </NextIntlClientProvider>
             </body>
         </html>
     );

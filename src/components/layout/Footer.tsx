@@ -1,6 +1,7 @@
 import { ICategory } from '@/types/category';
 import { IConfig } from '@/types/config';
 import { Col, Flex, Row } from 'antd';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Icon } from '../Icon';
 
@@ -11,6 +12,7 @@ const social = [
 ];
 
 export default async function Footer({ config, categories }: { config: IConfig, categories: ICategory[] }) {
+    const t = await getTranslations('common');
     return (
         <footer className="bg-[#363636] text-gray-100 w-full">
             <div className="max-w-[1140px] mx-auto px-4 py-12">
@@ -27,9 +29,9 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                     {config.companyName.toUpperCase()}
                                 </h3>
                                 <div className="space-y-2 text-sm text-white font-normal text-[13px]">
-                                    <p>Địa chỉ: {config.address}</p>
+                                    <p>{t('address')}: {config.address}</p>
                                     <div className="flex items-center text-white">
-                                        Email:&nbsp;<a
+                                        {t('email')}:&nbsp;<a
                                             href={`mailto:${config.email}`}
                                             className="hover:text-orange-500 transition-colors"
                                         >
@@ -50,7 +52,7 @@ export default async function Footer({ config, categories }: { config: IConfig, 
 
                         {/* Social Links */}
                         <Flex gap={12} align='center'>
-                            <p className="text-sm font-semibold text-gray-300">Liên hệ:</p>
+                            <p className="text-sm font-semibold text-gray-300">{t('contact')}:</p>
                             <div className="flex gap-3">
                                 {social.map(({ key, icon }) => {
                                     const url = config?.social && config.social?.[key as keyof typeof config.social] !== undefined ?
