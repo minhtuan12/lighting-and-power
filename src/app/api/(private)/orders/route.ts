@@ -3,13 +3,14 @@ import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { OrderService } from "../../(services)/order.service";
+import { authContext } from "@/lib/context";
 
 // POST /api/orders - Tạo đơn hàng mới
 async function createOrder(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -42,7 +43,7 @@ async function createOrder(request: NextRequest) {
             );
         }
 
-        const order = await OrderService.createOrder(userId, {
+        const order = await OrderService.createOrder(user.userId, {
             customerInfo,
             shippingAddress,
             paymentMethod,
@@ -76,9 +77,9 @@ async function createOrder(request: NextRequest) {
 // GET /api/orders - Lấy danh sách đơn hàng của user
 async function getOrders(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -90,7 +91,7 @@ async function getOrders(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const status = searchParams.get('status') as any;
 
-        const result = await OrderService.getUserOrders(userId, {
+        const result = await OrderService.getUserOrders(user.userId, {
             page,
             limit,
             status

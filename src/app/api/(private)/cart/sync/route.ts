@@ -1,21 +1,22 @@
 import { CartService } from "@/app/api/(services)/cart.service";
 import { withMiddleware } from "@/lib/api-handler";
+import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 
 async function syncCart(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
             );
         }
 
-        const cart = await CartService.syncCart(userId);
+        const cart = await CartService.syncCart(user.userId);
 
         return NextResponse.json({
             success: true,

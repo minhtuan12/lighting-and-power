@@ -1,4 +1,5 @@
 import { withMiddleware } from "@/lib/api-handler";
+import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,16 +8,16 @@ import { CartService } from "../../(services)/cart.service";
 // GET /api/cart - Get user's cart
 async function getCart(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
             );
         }
 
-        const cart = await CartService.getCart(userId);
+        const cart = await CartService.getCart(user.userId);
 
         return NextResponse.json({
             success: true,
@@ -35,9 +36,9 @@ async function getCart(request: NextRequest) {
 // POST /api/cart - Add item to cart
 async function addToCart(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -61,7 +62,7 @@ async function addToCart(request: NextRequest) {
             );
         }
 
-        const cart = await CartService.addItem(userId, {
+        const cart = await CartService.addItem(user.userId, {
             productId,
             quantity
         });
@@ -95,16 +96,16 @@ async function addToCart(request: NextRequest) {
 // DELETE /api/cart - Clear cart
 async function clearCart(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
             );
         }
 
-        const cart = await CartService.clearCart(userId);
+        const cart = await CartService.clearCart(user.userId);
 
         return NextResponse.json({
             success: true,

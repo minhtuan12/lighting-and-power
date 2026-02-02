@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { FeedbackService } from "../../(services)/feedback.service";
+import { authContext } from "@/lib/context";
 
 // GET /api/feedbacks?userId=xxx - Lấy feedbacks của user
 async function getFeedbacks(request: NextRequest) {
@@ -41,9 +42,9 @@ async function getFeedbacks(request: NextRequest) {
 // POST /api/feedbacks - Tạo feedback mới
 async function createFeedback(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -67,7 +68,7 @@ async function createFeedback(request: NextRequest) {
             );
         }
 
-        const feedback = await FeedbackService.createFeedback(userId, {
+        const feedback = await FeedbackService.createFeedback(user.userId, {
             productId,
             orderId,
             rating,

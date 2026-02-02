@@ -1,5 +1,6 @@
 import { FeedbackService } from "@/app/api/(services)/feedback.service";
 import { withMiddleware } from "@/lib/api-handler";
+import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +11,7 @@ async function updateFeedback(
     context?: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
         const params = await context?.params;
 
         if (!params?.id) {
@@ -20,7 +21,7 @@ async function updateFeedback(
             );
         }
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -31,7 +32,7 @@ async function updateFeedback(
         const { rating, comment, images } = body;
 
         const feedback = await FeedbackService.updateFeedback(
-            userId,
+            user.userId,
             params.id,
             { rating, comment, images }
         );
@@ -65,7 +66,7 @@ async function deleteFeedback(
     context?: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
         const params = await context?.params;
 
         if (!params?.id) {
@@ -75,14 +76,14 @@ async function deleteFeedback(
             );
         }
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
             );
         }
 
-        await FeedbackService.deleteFeedback(userId, params.id);
+        await FeedbackService.deleteFeedback(user.userId, params.id);
 
         return NextResponse.json({
             success: true,

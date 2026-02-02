@@ -1,5 +1,6 @@
 import { UserService } from "@/app/api/(services)/user.service";
 import { withMiddleware } from "@/lib/api-handler";
+import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,15 +8,15 @@ import { NextRequest, NextResponse } from "next/server";
 export async function getMe(request: NextRequest): Promise<any> {
     try {
         // const userId = request.user?.id;
-        const userId = request.headers.get('x-user-id');
-        if (!userId) {
+        const authUser = authContext.getStore();
+        if (!authUser?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found in token" },
                 { status: 401 }
             );
         }
 
-        const user = await UserService.getProfile(userId);
+        const user = await UserService.getProfile(authUser.userId);
 
         return NextResponse.json({
             success: true,

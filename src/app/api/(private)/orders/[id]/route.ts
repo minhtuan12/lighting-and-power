@@ -1,5 +1,6 @@
 import { OrderService } from "@/app/api/(services)/order.service";
 import { withMiddleware } from "@/lib/api-handler";
+import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +11,7 @@ async function getOrderDetail(
     context?: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
         const params = await context?.params;
 
         if (!params?.id) {
@@ -20,14 +21,14 @@ async function getOrderDetail(
             );
         }
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
             );
         }
 
-        const order = await OrderService.getOrderDetail(userId, params.id);
+        const order = await OrderService.getOrderDetail(user.userId, params.id);
 
         return NextResponse.json({
             success: true,

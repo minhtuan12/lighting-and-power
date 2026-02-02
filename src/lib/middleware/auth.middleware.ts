@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { authContext } from '../context';
 
 export async function verifyToken(request: NextRequest): Promise<any> {
     try {
@@ -28,17 +29,12 @@ export async function verifyToken(request: NextRequest): Promise<any> {
             );
         }
 
-        // ✅ Attach user to request object
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-user-id', decoded.id);
-        requestHeaders.set('x-user-role', decoded.role);
-        const modifiedRequest = new NextRequest(request, {
-            headers: requestHeaders,
+        authContext.enterWith({
+            userId: decoded.id,
+            role: decoded.role,
         });
 
-        // ✅ Return request đã modify
-        return modifiedRequest;
-
+        return null;
     } catch (error: any) {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             return NextResponse.json(
@@ -57,17 +53,16 @@ export async function verifyToken(request: NextRequest): Promise<any> {
 
 export function requireRole(...roles: string[]) {
     return async (request: NextRequest): Promise<any> => {
-        const userId = request.headers.get('x-user-id');
-        const role = request.headers.get('x-user-role');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: 'Unauthorized - User not found' },
                 { status: 401 }
             );
         }
 
-        if (!role || !roles.includes(role)) {
+        if (!user?.role || !roles.includes(user?.role)) {
             return NextResponse.json(
                 { success: false, message: 'Forbidden - Insufficient permissions' },
                 { status: 403 }

@@ -3,12 +3,13 @@ import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "../../(services)/auth.service";
+import { authContext } from "@/lib/context";
 
 async function changePassword(request: NextRequest) {
     try {
-        const userId = request.headers.get('x-user-id');
+        const user = authContext.getStore();
 
-        if (!userId) {
+        if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
                 { status: 401 }
@@ -26,7 +27,7 @@ async function changePassword(request: NextRequest) {
         }
 
         // Change password via service
-        const result = await AuthService.changePassword(userId, oldPassword, newPassword);
+        const result = await AuthService.changePassword(user.userId, oldPassword, newPassword);
 
         return NextResponse.json({
             success: true,
