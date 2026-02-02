@@ -3,7 +3,7 @@ import { getProductDetail } from "@/fetch-data/products";
 import { ICategory } from "@/types/category";
 import { SearchParams } from "@/types/general";
 import { IProductFilterParams } from "@/types/product";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 import { cache } from "react";
 
 export function convertNestedCategories(
@@ -233,14 +233,14 @@ export async function getDocumentTypes() {
     }
 }
 
-export async function isLoggedIn() {
-    try {
-        const cookieStore = await cookies();
-        return !!cookieStore.get('accessToken')?.value;
-    } catch (error) {
-        return false;
-    }
-}
+// export async function isLoggedIn() {
+//     try {
+//         const cookieStore = await cookies();
+//         return !!cookieStore.get('accessToken')?.value;
+//     } catch (error) {
+//         return false;
+//     }
+// }
 
 export const safeLocalStorage = {
     getItem: (key: string): string | null => {

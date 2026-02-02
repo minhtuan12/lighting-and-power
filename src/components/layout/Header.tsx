@@ -1,5 +1,5 @@
 import { routes } from '@/constants/routes';
-import { isLoggedIn } from '@/lib/utils';
+// import { isLoggedIn } from '@/lib/utils';
 import { ICategory } from '@/types/category';
 import { IConfig } from '@/types/config';
 import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd';
@@ -23,7 +23,8 @@ function convertCategories(categories: ICategory[]): MenuItem[] {
 
 export default async function Header({ config, categories }: { config: IConfig; categories: ICategory[] }) {
     const t = await getTranslations('common');
-    const isAuthenticated = await isLoggedIn();
+    //TODO
+    const isAuthenticated = false;
     const items: MenuItem[] = [
         {
             label: <Link href={routes.trangChu.url}>{t(routes.trangChu.key).toUpperCase()}</Link>,
