@@ -1,6 +1,39 @@
 import { EUserRole, IUser } from '@/types/user';
 import mongoose, { Schema } from 'mongoose';
 
+const AddressSchema = new Schema(
+    {
+        province: {
+            type: String,
+            required: [true, 'Province/City is required'],
+            trim: true
+        },
+        district: {
+            type: String,
+            required: [true, 'District is required'],
+            trim: true
+        },
+        ward: {
+            type: String,
+            required: [true, 'Ward is required'],
+            trim: true
+        },
+        street: {
+            type: String,
+            required: [true, 'Street address is required'],
+            trim: true
+        },
+        isDefault: {
+            type: Boolean,
+            default: false
+        }
+    },
+    {
+        _id: false,
+        timestamps: false
+    }
+);
+
 const UserSchema = new Schema<IUser>(
     {
         avatar: {
@@ -16,8 +49,6 @@ const UserSchema = new Schema<IUser>(
             type: String,
             trim: true,
             lowercase: true,
-            sparse: true,
-            unique: true,
             validate: {
                 validator: function (v: string) {
                     return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -28,8 +59,6 @@ const UserSchema = new Schema<IUser>(
         phone: {
             type: String,
             trim: true,
-            sparse: true,
-            unique: true
         },
         password: {
             type: String,
@@ -62,6 +91,10 @@ const UserSchema = new Schema<IUser>(
             default: [],
             select: false // Không select mặc định vì lý do bảo mật
         },
+        address: {
+            type: AddressSchema,
+            default: null,
+        },
     },
     {
         timestamps: true
@@ -70,6 +103,26 @@ const UserSchema = new Schema<IUser>(
 
 // Indexes
 UserSchema.index({ passwordExpiresAt: 1 });
+UserSchema.index({ 'addresses.isDefault': 1 });
+UserSchema.index(
+    { email: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            email: { $type: 'string', $gt: '' }
+        }
+    }
+);
+// Partial Unique Index: Phone unique chỉ khi có giá trị (không null/undefined)
+UserSchema.index(
+    { phone: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            phone: { $type: 'string', $gt: '' }
+        }
+    }
+);
 
 // Virtual: Kiểm tra password có hết hạn không
 UserSchema.virtual('isPasswordExpired').get(function () {

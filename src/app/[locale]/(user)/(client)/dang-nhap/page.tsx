@@ -1,5 +1,90 @@
 'use client'
 
-export default function DangNhap() {
-    return <div></div>
+import { routes } from '@/constants/routes';
+import { useAuth } from '@/hooks/use-me';
+import { showMessage } from '@/hooks/use-message';
+import { Button, Card, Form, Input } from 'antd';
+import { useTranslations } from 'next-intl';
+
+export default function () {
+    const t = useTranslations();
+    const v = useTranslations('validation');
+    const { loginAsync, isLoginLoading } = useAuth();
+    const [form] = Form.useForm();
+
+    const handleSubmit = async (values: any) => {
+        try {
+            await loginAsync({
+                emailOrPhone: values.emailOrPhone,
+                password: values.password,
+            });
+
+            showMessage.success(t('auth.loginSuccess'));
+            window.location.href = routes.trangChu.url;
+        } catch (error: any) {
+            showMessage.error(error?.message || t('auth.loginFailed'));
+        }
+    };
+
+    return (
+        <div className='w-full mt-10 flex items-center justify-center relative top-1/2'>
+            <Card className='w-[450px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl'
+                style={{
+                    background: 'rgba(255, 255, 255, 0.21)',
+                    backdropFilter: 'blur(3.5px)',
+                    WebkitBackdropFilter: 'blur(3.5px)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.75)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
+                }}>
+                <h3 className='text-center font-bold text-2xl mb-6'>{t('common.login')}</h3>
+                <Form form={form} onFinish={handleSubmit} layout="vertical">
+                    <Form.Item
+                        name="emailOrPhone"
+                        label={<div className='text-base font-semibold'>{t('auth.emailOrPhone')}</div>}
+                        rules={[{ required: true, message: v('required', { field: t('auth.emailOrPhone') }) }]}
+                    >
+                        <Input className="!h-11" placeholder={t('form.enter', { field: t('auth.emailOrPhone') })} size="large" />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="password"
+                        label={<div className='text-base font-semibold'>{t('auth.password')}</div>}
+                        rules={[
+                            { required: true, message: v('required', { field: t('auth.password') }) },
+                            { min: 6, message: v('min', { field: t('auth.password'), min: 6 }) },
+                            {
+                                pattern: /[A-Z]/,
+                                message: v('uppercasePassword')
+                            },
+                            {
+                                pattern: /[a-z]/,
+                                message: v('lowercasePassword')
+                            },
+                            {
+                                pattern: /[0-9]/,
+                                message: v('oneDigitPassword')
+                            },
+                            {
+                                pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+                                message: v('specialCharacterPassword')
+                            }
+                        ]}
+                    >
+                        <Input.Password className="!h-11" placeholder={t('form.enter', { field: t('auth.password') })} size="large" />
+                    </Form.Item>
+
+                    <Button
+                        size='large'
+                        type="primary"
+                        htmlType="submit"
+                        loading={isLoginLoading}
+                        block
+                    >
+                        {t('common.login')}
+                    </Button>
+                </Form>
+            </Card>
+        </div>
+    );
 }

@@ -3,6 +3,7 @@ import { getProductDetail } from "@/fetch-data/products";
 import { ICategory } from "@/types/category";
 import { SearchParams } from "@/types/general";
 import { IProductFilterParams } from "@/types/product";
+import { cookies } from "next/headers";
 import { cache } from "react";
 
 export function convertNestedCategories(
@@ -231,3 +232,27 @@ export async function getDocumentTypes() {
         return [];
     }
 }
+
+export async function isLoggedIn() {
+    try {
+        const cookieStore = await cookies();
+        return !!cookieStore.get('accessToken')?.value;
+    } catch (error) {
+        return false;
+    }
+}
+
+export const safeLocalStorage = {
+    getItem: (key: string): string | null => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem(key);
+    },
+    setItem: (key: string, value: string): void => {
+        if (typeof window === 'undefined') return;
+        localStorage.setItem(key, value);
+    },
+    removeItem: (key: string): void => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem(key);
+    }
+};

@@ -6,7 +6,8 @@
         "dev": "next dev -p 4000",
         "build": "next build",
         "start": "next start",
-        "seed:admin": "tsx scripts/seed-admin.ts"
+        "seed:admin": "dotenv -e .env -- tsx scripts/seed-admin.ts",
+        "db:sync": "dotenv -e .env -- tsx scripts/sync-indexes.ts"
     },
     "dependencies": {
         "@ant-design/icons": "^6.1.0",
@@ -53,6 +54,7 @@
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "babel-plugin-react-compiler": "1.0.0",
+        "dotenv-cli": "^11.0.0",
         "sass": "^1.97.1",
         "tailwindcss": "^4",
         "tsx": "^4.21.0",

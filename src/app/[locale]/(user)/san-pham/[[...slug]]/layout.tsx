@@ -47,7 +47,7 @@ export default async function ProductLayout(
 
     return (
         <Suspense fallback={<div className="pt-[174px]"><Loading /></div>}>
-            <Flex gap={10} vertical className="!pt-5 custom-breadcrumb">
+            <Flex gap={10} vertical className="custom-breadcrumb">
                 <Breadcrumb items={breadcrumb} separator='>' />
                 {
                     isLastChild && <Flex className="!mb-2">

@@ -18,7 +18,7 @@ export default async function Home() {
     const { data: documentsData } = await getDocuments();
     const categoriesWithChildren = categories.filter(c => !c.parentId && c.children && c.children?.length > 0);
 
-    return <Flex vertical gap={30}>
+    return <Flex vertical gap={30} className="!-mt-5">
         <Image
             src={'/images/banner.png'}
             alt='Banner L&P'

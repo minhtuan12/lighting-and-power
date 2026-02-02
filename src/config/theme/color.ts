@@ -17,7 +17,7 @@ export const themeToken = {
     colorBgLayout: '#f5f5f5',     // Layout background
 
     // Border
-    colorBorder: '#d9d9d9',
+    colorBorder: '#000F8F',
     borderRadius: 6,              // Global border radius
 
     // Typography
@@ -53,6 +53,11 @@ export const themeComponents = {
         paddingBlock: 8,
         paddingInline: 12,
         colorPrimaryHover: '#000F8F',
+        colorBorder: '#d9d9d9',
+        colorBorderHover: '#000F8F',
+        colorPrimary: '#1677ff',
+        activeBorderColor: '#000F8F',
+        hoverBorderColor: '#000F8F',
     },
 
     // Select

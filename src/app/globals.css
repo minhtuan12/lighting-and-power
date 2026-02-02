@@ -7,6 +7,20 @@
 @tailwind utilities;
 
 @layer components {
+    .ant-input-css-var {
+
+        &:hover,
+        &:focus {
+            border-color: var(--ant-primary-color) !important;
+        }
+
+        @apply shadow-sm !bg-[#f8fafc];
+    }
+
+    .ant-btn-primary {
+        background-color: var(--ant-primary-color) !important;
+    }
+
     .card-custom {
         .ant-card-head {
             @apply !bg-[var(--primary)] !text-white !font-semibold !py-[11px] !pl-[15px] !text-[15px] !block !min-h-0 !font-bold;
@@ -61,6 +75,11 @@
 }
 
 :root {
+    --ant-primary-color: #000F8F;
+    --ant-primary-hover-color: #242e8a;
+    --ant-success-color: #52c41a;
+    --ant-warning-color: #faad14;
+    --ant-error-color: #ff4d4f;
     --radius: 0.625rem;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

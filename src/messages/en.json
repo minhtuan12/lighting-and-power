@@ -27,7 +27,8 @@
         "confirmPassword": "Confirm Password",
         "loginSuccess": "Login successful",
         "registerSuccess": "Registration successful",
-        "invalidCredentials": "Invalid email/phone or password"
+        "invalidCredentials": "Invalid email/phone or password",
+        "emailOrPhone": "Email/Phone Number"
     },
     "product": {
         "authentic": "Authentic",

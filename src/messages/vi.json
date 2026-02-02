@@ -27,7 +27,8 @@
         "confirmPassword": "Xác nhận mật khẩu",
         "loginSuccess": "Đăng nhập thành công",
         "registerSuccess": "Đăng ký thành công",
-        "invalidCredentials": "Email/số điện thoại hoặc mật khẩu không đúng"
+        "invalidCredentials": "Email/số điện thoại hoặc mật khẩu không đúng",
+        "emailOrPhone": "Email/Số điện thoại"
     },
     "product": {
         "authentic": "Chính hãng",

@@ -1,4 +1,5 @@
 import { routes } from '@/constants/routes';
+import { isLoggedIn } from '@/lib/utils';
 import { ICategory } from '@/types/category';
 import { IConfig } from '@/types/config';
 import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd';
@@ -8,6 +9,7 @@ import Link from 'next/link';
 import Cart from '../Cart';
 import { Icon } from '../Icon';
 import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher';
+import UserMenu from './UserMenu';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -21,6 +23,7 @@ function convertCategories(categories: ICategory[]): MenuItem[] {
 
 export default async function Header({ config, categories }: { config: IConfig; categories: ICategory[] }) {
     const t = await getTranslations('common');
+    const isAuthenticated = await isLoggedIn();
     const items: MenuItem[] = [
         {
             label: <Link href={routes.trangChu.url}>{t(routes.trangChu.key).toUpperCase()}</Link>,
@@ -73,17 +76,20 @@ export default async function Header({ config, categories }: { config: IConfig; 
                         className='[&_li:first-child]:!pl-0 !bg-[#000F8F] [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]'
                     />
                     <Flex gap={35}>
-                        <Flex gap={35}>
-                            <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
-                                <Link href={routes.dangKy.url}>{t(routes.dangKy.key).toUpperCase()}</Link>
-                            </Button>
-                            <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
-                                <Link href={routes.dangNhap.url}>{t(routes.dangNhap.key).toUpperCase()}</Link>
-                            </Button>
-                        </Flex>
+                        {
+                            !isAuthenticated && <Flex gap={35}>
+                                <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
+                                    <Link href={routes.dangKy.url}>{t(routes.dangKy.key).toUpperCase()}</Link>
+                                </Button>
+                                <Button className='!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white'>
+                                    <Link href={routes.dangNhap.url}>{t(routes.dangNhap.key).toUpperCase()}</Link>
+                                </Button>
+                            </Flex>
+                        }
                         <Link href={routes.gioHang.url} className='flex items-center gap-2'>
                             <Cart />
                         </Link>
+                        {isAuthenticated && <UserMenu />}
                     </Flex>
                 </Flex>
             </div>

@@ -3,6 +3,14 @@ export enum EUserRole {
     user = 'user'
 }
 
+export interface IAddress {
+    province: string;
+    district: string;
+    ward: string;
+    street: string;
+    isDefault: boolean;
+}
+
 export interface IUser {
     _id: string;
     avatar?: string;
@@ -15,6 +23,7 @@ export interface IUser {
     passwordExpiresAt?: Date;
     mustChangePassword: boolean;
     passwordHistory: string[];
+    address: IAddress | null;
     createdAt: Date;
     updatedAt: Date;
 }
