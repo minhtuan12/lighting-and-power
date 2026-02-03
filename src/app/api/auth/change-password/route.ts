@@ -3,11 +3,11 @@ import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "../../(services)/auth.service";
-import { authContext } from "@/lib/context";
+import { getRequestUser } from "@/lib/context";
 
 async function changePassword(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(

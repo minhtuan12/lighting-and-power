@@ -21,7 +21,6 @@ const DocumentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['introduction', 'knowledge', 'guide', 'manual', 'other'],
             default: 'other'
         },
         contentType: {

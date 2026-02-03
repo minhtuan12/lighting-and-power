@@ -1,6 +1,6 @@
 import { OrderService } from "@/app/api/(services)/order.service";
 import { withMiddleware } from "@/lib/api-handler";
-import { authContext } from "@/lib/context";
+import { getRequestUser } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
@@ -11,7 +11,7 @@ async function getOrderDetail(
     context?: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
         const params = await context?.params;
 
         if (!params?.id) {

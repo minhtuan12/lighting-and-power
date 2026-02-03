@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { authContext } from '../context';
+import { getRequestUser, setRequestUser } from '../context';
 
 export async function verifyToken(request: NextRequest): Promise<any> {
     try {
@@ -29,7 +29,7 @@ export async function verifyToken(request: NextRequest): Promise<any> {
             );
         }
 
-        authContext.enterWith({
+        setRequestUser(request, {
             userId: decoded.id,
             role: decoded.role,
         });
@@ -53,7 +53,7 @@ export async function verifyToken(request: NextRequest): Promise<any> {
 
 export function requireRole(...roles: string[]) {
     return async (request: NextRequest): Promise<any> => {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(

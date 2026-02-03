@@ -3,12 +3,12 @@ import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { OrderService } from "../../(services)/order.service";
-import { authContext } from "@/lib/context";
+import { getRequestUser } from "@/lib/context";
 
 // POST /api/orders - Tạo đơn hàng mới
 async function createOrder(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(
@@ -77,7 +77,7 @@ async function createOrder(request: NextRequest) {
 // GET /api/orders - Lấy danh sách đơn hàng của user
 async function getOrders(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(

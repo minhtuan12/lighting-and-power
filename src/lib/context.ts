@@ -1,17 +1,22 @@
-import { AsyncLocalStorage } from 'async_hooks';
+import { NextRequest } from 'next/server';
 
-interface AuthContext {
+interface UserMetadata {
     userId: string;
     role: string;
     email?: string;
+    [key: string]: any;
 }
 
-export const authContext = new AsyncLocalStorage<AuthContext>();
+const requestMetadata = new WeakMap<NextRequest, UserMetadata>();
 
-export function setAuthContext(user: AuthContext) {
-    return user;
+export function setRequestUser(request: NextRequest, user: UserMetadata) {
+    requestMetadata.set(request, user);
 }
 
-export function getAuthContext(): AuthContext | undefined {
-    return authContext.getStore();
+export function getRequestUser(request: NextRequest): UserMetadata | undefined {
+    return requestMetadata.get(request);
+}
+
+export function hasRequestUser(request: NextRequest): boolean {
+    return requestMetadata.has(request);
 }

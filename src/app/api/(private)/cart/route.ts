@@ -1,14 +1,14 @@
 import { withMiddleware } from "@/lib/api-handler";
-import { authContext } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 import { CartService } from "../../(services)/cart.service";
+import { getRequestUser } from "@/lib/context";
 
 // GET /api/cart - Get user's cart
 async function getCart(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(
@@ -36,7 +36,7 @@ async function getCart(request: NextRequest) {
 // POST /api/cart - Add item to cart
 async function addToCart(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(
@@ -96,7 +96,7 @@ async function addToCart(request: NextRequest) {
 // DELETE /api/cart - Clear cart
 async function clearCart(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(

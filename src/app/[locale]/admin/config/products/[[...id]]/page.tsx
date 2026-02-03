@@ -117,7 +117,7 @@ const Product = () => {
             key: 'category',
             width: 150,
             render: (category: ICategory) => (
-                <span className="text-gray-700">{category.name}</span>
+                <span className="text-gray-700">{category?.name ?? ''}</span>
             ),
         },
         {
@@ -236,7 +236,7 @@ const Product = () => {
                 />
             ),
         },
-    ], [handleUpdateStatus, handleUpdateFeatured, isUpdating, searchText, selectedProduct]);
+    ], [handleUpdateStatus, handleUpdateFeatured, isUpdating, searchText, selectedProduct, data?.data?.products]);
 
     const debounceSearch = useDebounce((value: string) => setFilter(prev => ({ ...prev, search: value })), 400);
 

@@ -1,13 +1,13 @@
 import { CartService } from "@/app/api/(services)/cart.service";
 import { withMiddleware } from "@/lib/api-handler";
-import { authContext } from "@/lib/context";
+import { getRequestUser } from "@/lib/context";
 import { verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { NextRequest, NextResponse } from "next/server";
 
 async function syncCart(request: NextRequest) {
     try {
-        const user = authContext.getStore();
+        const user = getRequestUser(request);
 
         if (!user?.userId) {
             return NextResponse.json(
