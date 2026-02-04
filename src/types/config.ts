@@ -11,6 +11,7 @@ export interface IConfig {
         zalo?: string;
         telegram?: string;
     };
+    banners: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }

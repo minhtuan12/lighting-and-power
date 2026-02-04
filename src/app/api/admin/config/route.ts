@@ -3,6 +3,7 @@ import { withMiddleware } from '@/lib/api-handler';
 import { requireRole, verifyToken } from '@/lib/middleware';
 import { connectDbMiddleware } from '@/lib/middleware/connect-db';
 import { EUserRole } from '@/types/user';
+import { revalidateTag, updateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { ConfigService } from '../../(services)/config.service';
 
@@ -29,6 +30,9 @@ async function updateConfig(request: NextRequest) {
     try {
         const body = await request.json();
         const config = await ConfigService.updateConfig(body);
+
+        updateTag('config');
+        revalidateTag('config', { expire: 0 });
 
         return NextResponse.json({
             success: true,

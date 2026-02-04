@@ -4,15 +4,15 @@ export enum EUserRole {
 }
 
 export interface IAddress {
-    province: string;
-    district: string;
-    ward: string;
-    street: string;
+    provinceCode: number;
+    wardCode: number;
+    detail: string;
     isDefault: boolean;
 }
 
 export interface IUser {
     _id: string;
+    username?: string;
     avatar?: string;
     email?: string;
     phone?: string;

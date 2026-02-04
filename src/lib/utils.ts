@@ -56,7 +56,7 @@ export const getCategoryChain = cache(async (slugs: string[]): Promise<CategoryC
     let isLastChild = false;
     let isProductDetail = false;
 
-    if (slugs && !slugs.includes('chi-tiet')) {
+    if (slugs && (!slugs.includes('chi-tiet') && !slugs.includes('detail'))) {
         for (const slug of slugs) {
             const { data: ctg } = await getCategoryBySlug(slug);
 
@@ -228,19 +228,22 @@ export async function getDocumentTypes() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_CLOUDINARY_RAW_URL!}/document-types_xssill.json`, { cache: 'force-cache' });
         return await res.json();
     } catch (e) {
-        console.log(e);
+        console.log('Error get document types', e);
         return [];
     }
 }
 
-// export async function isLoggedIn() {
-//     try {
-//         const cookieStore = await cookies();
-//         return !!cookieStore.get('accessToken')?.value;
-//     } catch (error) {
-//         return false;
-//     }
-// }
+export const getProvinces = cache(async ({ provinceCode, depth = 1 }: { provinceCode?: number, depth?: number }) => {
+    try {
+        let url = process.env.NEXT_PUBLIC_VIETNAM_PROVINCES_API!;
+        url += provinceCode ? `/p/${provinceCode}` : '';
+        const res = await fetch(`${url}?depth=${depth}`, { next: { revalidate: 3600 * 24 * 30 } });
+        return await res.json();
+    } catch (e) {
+        console.log('Error get provinces', e);
+        return null;
+    }
+})
 
 export const safeLocalStorage = {
     getItem: (key: string): string | null => {
@@ -256,3 +259,23 @@ export const safeLocalStorage = {
         localStorage.removeItem(key);
     }
 };
+
+export const priceRates = {
+    VND: {
+        rate: 1,
+        locale: 'vi-VN',
+    },
+    USD: {
+        rate: 0.000039,
+        locale: "en-US",
+    },
+}
+
+export function formatPrice(price: number, currency: string) {
+    const priceRate = priceRates[currency as keyof typeof priceRates];
+
+    return new Intl.NumberFormat(priceRate.locale, {
+        style: "currency",
+        currency: currency,
+    }).format(price / priceRate.rate);
+}

@@ -54,7 +54,7 @@ export default async function ({ params, searchParams }: SlugPageProps) {
     }
 
     if (isLastChild) {
-        if (slugs.includes('chi-tiet')) {
+        if (slugs.includes('chi-tiet') || slugs.includes('detail')) {
             // Product Detail
             return <ProductDetail slug={lastSlug} />
         } else {

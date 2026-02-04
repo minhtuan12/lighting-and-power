@@ -15,6 +15,10 @@ const ConfigSchema = new Schema<IConfig>(
             zalo: String,
             telegram: String,
         },
+        banners: {
+            type: [String],
+            required: true
+        },
     },
     {
         timestamps: true

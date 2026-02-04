@@ -14,6 +14,7 @@ export class AuthService {
 
     static async register(data: {
         fullName: string;
+        username?: string;
         email?: string;
         phone?: string;
         password: string;
@@ -37,6 +38,13 @@ export class AuthService {
             }
         }
 
+        if (data.username) {
+            const existingUsername = await User.findOne({ username: data.username });
+            if (existingUsername) {
+                throw new Error('Username already exists');
+            }
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -46,9 +54,10 @@ export class AuthService {
 
         // Create user
         const user = await User.create({
+            username: data.username || null,
             fullName: data.fullName,
-            email: data.email || null,
             phone: data.phone || null,
+            email: data.email || null,
             password: hashedPassword,
             role: EUserRole.user,
             passwordChangedAt: new Date(),

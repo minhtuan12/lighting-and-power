@@ -6,10 +6,10 @@ import { EUserRole } from "@/types/user";
 import { revalidateTag, updateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-async function bulkDeleteProducts(request: NextRequest) {
+async function bulkUpdateStatus(request: NextRequest) {
     try {
         const body = await request.json();
-        const { ids } = body;
+        const { ids, status } = body;
 
         if (!Array.isArray(ids) || ids.length === 0) {
             return NextResponse.json(
@@ -18,8 +18,14 @@ async function bulkDeleteProducts(request: NextRequest) {
             );
         }
 
-        const result = await ProductService.deleteMany(ids);
+        if (!status) {
+            return NextResponse.json(
+                { success: false, message: 'Status is required' },
+                { status: 400 }
+            );
+        }
 
+        const result = await ProductService.bulkUpdateStatus(ids, status);
         updateTag('products');
         revalidateTag('products', { expire: 0 });
 
@@ -28,7 +34,7 @@ async function bulkDeleteProducts(request: NextRequest) {
             data: result
         });
     } catch (error: any) {
-        console.error('Bulk delete products error:', error);
+        console.error('Bulk update status error:', error);
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
             { status: 500 }
@@ -36,8 +42,8 @@ async function bulkDeleteProducts(request: NextRequest) {
     }
 }
 
-export const POST = withMiddleware(
-    bulkDeleteProducts,
+export const PUT = withMiddleware(
+    bulkUpdateStatus,
     connectDbMiddleware,
     verifyToken,
     requireRole(EUserRole.admin),

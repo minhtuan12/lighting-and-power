@@ -27,6 +27,7 @@ export class ConfigService {
             address: config.address,
             workingHours: config.workingHours,
             social: config.social,
+            banners: config.banners,
         };
     }
 
@@ -75,6 +76,7 @@ export class ConfigService {
             email: 'thanhphuvsvccd2@gmail.com',
             address: '2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP.Hồ Chí Minh',
             workingHours: '8:00 - 22:00 (Hàng ngày)',
+            banners: ['/images/banner.png'],
         });
 
         return config.toObject();

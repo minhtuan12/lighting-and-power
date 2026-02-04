@@ -15,7 +15,8 @@ export async function getCategories(params?: Record<string, any>): Promise<ICate
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/categories${queryString}`, {
             next: {
-                revalidate: 3600 * 1 // Cache for 3 hour
+                revalidate: 3600 * 3, // Cache for 3 hour
+                tags: ['categories']
             }
         });
 
@@ -39,7 +40,8 @@ export async function getCategoryBySlug(slug: string): Promise<IOneCategoryRespo
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/categories/${slug}`, {
             next: {
-                revalidate: 3600 * 1 // Cache for 3 hour
+                revalidate: 3600 * 3, // Cache for 3 hour
+                tags: ['categories', `category:${slug}`]
             }
         });
 

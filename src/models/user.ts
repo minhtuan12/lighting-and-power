@@ -3,22 +3,17 @@ import mongoose, { Schema } from 'mongoose';
 
 const AddressSchema = new Schema(
     {
-        province: {
-            type: String,
+        provinceCode: {
+            type: Number,
             required: [true, 'Province/City is required'],
             trim: true
         },
-        district: {
-            type: String,
-            required: [true, 'District is required'],
-            trim: true
-        },
-        ward: {
-            type: String,
+        wardCode: {
+            type: Number,
             required: [true, 'Ward is required'],
             trim: true
         },
-        street: {
+        detail: {
             type: String,
             required: [true, 'Street address is required'],
             trim: true
@@ -36,6 +31,10 @@ const AddressSchema = new Schema(
 
 const UserSchema = new Schema<IUser>(
     {
+        username: {
+            type: String,
+            trim: true
+        },
         avatar: {
             type: String,
             trim: true

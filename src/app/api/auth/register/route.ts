@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     try {
         await connectDb();
 
-        const { fullName, email, phone, password } = await request.json();
+        const { username, fullName, email, phone, password } = await request.json();
 
         // Validate input
         if (!fullName || !password) {
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
 
         // Register via service
         const { account } = await AuthService.register({
+            username,
             fullName,
             email,
             phone,

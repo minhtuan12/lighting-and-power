@@ -9,7 +9,8 @@ export async function getConfig(): Promise<IConfigResponse> {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/config`, {
             next: {
-                revalidate: 3600 * 12 // Cache for 12 hour
+                revalidate: 3600 * 12, // Cache for 12 hour
+                tags: ['config']
             }
         });
 
@@ -19,7 +20,7 @@ export async function getConfig(): Promise<IConfigResponse> {
 
         return res.json();
     } catch (error) {
-        console.error('Error fetching footer data:', error);
+        console.error('Error fetching config:', error);
 
         // Fallback data
         return {
@@ -29,7 +30,8 @@ export async function getConfig(): Promise<IConfigResponse> {
                 address: '2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP.Thuận An, Bình Dương',
                 email: 'thanhphuysvccd2@gmail.com',
                 hotline: '0853 887 855',
-                social: {}
+                social: {},
+                banners: ['/images/banner.png']
             }
         };
     }

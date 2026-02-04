@@ -14,7 +14,8 @@ export async function getDocuments(): Promise<IDcoumentResponse> {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL!}/api/documents`, {
             next: {
-                revalidate: 3600 * 1 // Cache for 3 hour
+                revalidate: 3600 * 3, // Cache for 3 hour
+                tags: ['documents']
             }
         });
 

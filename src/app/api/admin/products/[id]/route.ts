@@ -3,6 +3,7 @@ import { requireRole, verifyToken } from "@/lib/middleware";
 import { connectDbMiddleware } from "@/lib/middleware/connect-db";
 import { cloudinaryService } from "@/service/cloudinary";
 import { EUserRole } from "@/types/user";
+import { revalidateTag, updateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { ProductService } from "../../../(services)/product.service";
 
@@ -87,6 +88,11 @@ async function updateProduct(request: NextRequest, context?: { params: Promise<{
 
         const product = await ProductService.update(params.id, body);
 
+        updateTag(`product:${params.id}`);
+        revalidateTag(`product:${params.id}`, { expire: 0 });
+        updateTag(`product:${product.slug}`);
+        revalidateTag(`product:${product.slug}`, { expire: 0 });
+
         return NextResponse.json({
             success: true,
             message: "Product updated successfully",
@@ -150,6 +156,9 @@ async function deleteProduct(request: NextRequest, context?: { params: Promise<{
         }
 
         const result = await ProductService.delete(params.id);
+
+        updateTag('products');
+        revalidateTag('products', { expire: 0 });
 
         return NextResponse.json({
             success: true,
