@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDb from "../db";
+import { getRequestUser, setRequestUser } from "../context";
 
 export async function connectDbMiddleware(request: NextRequest): Promise<NextResponse | null> {
     try {
+        const locale = request.headers.get('Accept-Language') || 'vi';
+        setRequestUser(request, {
+            ...(getRequestUser(request)),
+            locale,
+        });
         await connectDb();
         return null; // No error, continue
     } catch (error: any) {

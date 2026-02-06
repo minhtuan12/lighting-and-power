@@ -1,3 +1,4 @@
+import { UserService } from '@/app/api/(services)/user.service';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,7 +30,15 @@ export async function verifyToken(request: NextRequest): Promise<any> {
             );
         }
 
+        if (!await UserService.getProfile(decoded.id)) {
+            return NextResponse.json(
+                { success: false, message: 'Account not found' },
+                { status: 404 }
+            );
+        }w
+
         setRequestUser(request, {
+            ...(getRequestUser(request)),
             userId: decoded.id,
             role: decoded.role,
         });

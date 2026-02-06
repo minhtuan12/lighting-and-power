@@ -1,7 +1,12 @@
+import { getLocale } from "./utils";
+
 const API_BASE_URL = '/api';
 
 export async function fetchAPI(endpoint: string, options?: RequestInit) {
     const headers: HeadersInit = {}
+
+    const locale = getLocale();
+    headers['Accept-Language'] = locale;
 
     if (!(options?.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';

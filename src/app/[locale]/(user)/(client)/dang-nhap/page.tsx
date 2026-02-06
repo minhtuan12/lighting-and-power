@@ -3,8 +3,11 @@
 import { routes } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-me';
 import { showMessage } from '@/hooks/use-message';
+import { EUserRole } from '@/types/user';
 import { Button, Card, Form, Input } from 'antd';
+import { LogIn } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useCallback } from 'react';
 
 export default function () {
     const t = useTranslations();
@@ -12,11 +15,12 @@ export default function () {
     const { loginAsync, isLoginLoading } = useAuth();
     const [form] = Form.useForm();
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = useCallback(async (values: any) => {
         try {
             await loginAsync({
                 emailOrPhone: values.emailOrPhone,
                 password: values.password,
+                role: EUserRole.user,
             });
 
             showMessage.success(t('auth.loginSuccess'));
@@ -24,7 +28,7 @@ export default function () {
         } catch (error: any) {
             showMessage.error(error?.message || t('auth.loginFailed'));
         }
-    };
+    }, []);
 
     return (
         <div className='w-full mt-10 flex items-center justify-center relative top-1/2'>
@@ -80,8 +84,9 @@ export default function () {
                         htmlType="submit"
                         loading={isLoginLoading}
                         block
+                        className='space-x-2'
                     >
-                        {t('common.login')}
+                        <LogIn size={16} />{t('common.login')}
                     </Button>
                 </Form>
             </Card>

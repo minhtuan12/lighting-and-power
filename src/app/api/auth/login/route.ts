@@ -1,18 +1,23 @@
-import connectDb from "@/lib/db";
+import { withMiddleware } from "@/lib/api-handler";
+import { getRequestUser } from "@/lib/context";
+import { connectDbMiddleware } from "@/lib/middleware/connect-db";
+import { messages } from "@/messages/server";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "../../(services)/auth.service";
 
-export async function POST(request: NextRequest) {
-    try {
-        await connectDb();
+async function login(request: NextRequest) {
+    const lang = getRequestUser(request)?.locale ?? 'vi';
+    const iMessage = messages[lang as keyof typeof messages];
+    const iMessageAuth = iMessage.auth;
 
-        const { emailOrPhone, password } = await request.json();
+    try {
+        const { emailOrPhone, password, role } = await request.json();
 
         // Validate input
         if (!emailOrPhone || !password) {
             return NextResponse.json(
-                { success: false, message: "Email/phone and password are required" },
+                { success: false, message: iMessageAuth.required },
                 { status: 400 }
             );
         }
@@ -20,7 +25,8 @@ export async function POST(request: NextRequest) {
         // Login via service - returns account and tokens
         const { account, accessToken, refreshToken, requirePasswordChange, message, userId } = await AuthService.login(
             emailOrPhone,
-            password
+            password,
+            role,
         );
 
         if (requirePasswordChange && message) {
@@ -33,27 +39,29 @@ export async function POST(request: NextRequest) {
 
         if (!accessToken) {
             return NextResponse.json(
-                { message: 'Failed to generate tokens' },
+                { message: iMessageAuth.generateTokens },
                 { status: 500 }
             );
         }
 
         // Create response with tokens
-        const response = NextResponse.json({
-            success: true,
-            message: "Login successful",
-            data: {
-                ...account,
-            }
-        });
+
 
         const cookieStore = await cookies();
         cookieStore.set('accessToken', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'lax',
-            maxAge: 60 * 120,
+            maxAge: 3600 * 24 * 7,
             path: '/',
+        });
+
+        const response = NextResponse.json({
+            success: true,
+            message: iMessageAuth.successful,
+            data: {
+                ...account,
+            }
         });
 
         return response;
@@ -64,22 +72,27 @@ export async function POST(request: NextRequest) {
         // Handle specific errors
         if (error.message === 'Account not found' || error.message === 'Invalid credentials') {
             return NextResponse.json(
-                { success: false, message: "Invalid email/phone or password" },
+                { success: false, message: iMessageAuth.invalid },
                 { status: 401 }
             );
         }
 
         if (error.message === 'Account inactive') {
             return NextResponse.json(
-                { success: false, message: "Account has been deactivated" },
+                { success: false, message: iMessageAuth.inactive },
                 { status: 403 }
             );
         }
 
         // Generic error
         return NextResponse.json(
-            { success: false, message: "An error occurred, please try again later" },
+            { success: false, message: iMessage.error },
             { status: 500 }
         );
     }
 }
+
+export const POST = withMiddleware(
+    login,
+    connectDbMiddleware,
+)

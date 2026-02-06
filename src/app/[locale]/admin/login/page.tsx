@@ -51,7 +51,7 @@ function AdminLogin() {
         setIsLoading(true);
 
         try {
-            const result = await loginAsync({ emailOrPhone, password });
+            const result = await loginAsync({ emailOrPhone, password, role: EUserRole.admin });
 
             // Check if password change required
             // if (result.requirePasswordChange) {

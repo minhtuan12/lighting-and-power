@@ -70,4 +70,9 @@ export const routes = {
         url: '/gio-hang',
         key: 'cart',
     },
+    trangCaNhan: {
+        title: 'Trang cá nhân',
+        url: '/trang-ca-nhan',
+        key: 'profile',
+    },
 }

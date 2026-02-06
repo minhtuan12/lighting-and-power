@@ -3,7 +3,6 @@ import { getProductDetail } from "@/fetch-data/products";
 import { ICategory } from "@/types/category";
 import { SearchParams } from "@/types/general";
 import { IProductFilterParams } from "@/types/product";
-// import { cookies } from "next/headers";
 import { cache } from "react";
 
 export function convertNestedCategories(
@@ -259,6 +258,10 @@ export const safeLocalStorage = {
         localStorage.removeItem(key);
     }
 };
+
+export function getLocale() {
+    return safeLocalStorage.getItem('locale') || 'vi';
+}
 
 export const priceRates = {
     VND: {

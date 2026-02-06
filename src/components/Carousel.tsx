@@ -68,11 +68,7 @@ export default function Carousel<T extends CarouselItem = any>({
                 {/* items Container */}
                 <nav
                     ref={scrollRef}
-                    className={`
-                        grid grid-flow-col auto-cols-[215px] gap-4 overflow-x-auto py-[10px] relative w-full 
-                        ${needsScroll ? 'justify-start' : 'justify-center'} 
-                        ${className}
-                    `}
+                    className={`grid grid-flow-col auto-cols-[215px] gap-4 overflow-x-auto py-[10px] relative w-full ${needsScroll ? 'justify-start' : 'justify-center'} ${className}`}
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',

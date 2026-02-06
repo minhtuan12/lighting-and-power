@@ -1,6 +1,6 @@
 import { PAGE_LIMIT } from '@/constants/common';
 import User from '@/models/user';
-import { EUserRole } from '@/types/user';
+import { EUserRole, IAddress } from '@/types/user';
 
 export class UserService {
     static async getAccounts(
@@ -50,11 +50,36 @@ export class UserService {
         return user;
     }
 
+    static async getUserByInfo(emailOrPhoneOrUsername: string, exceptId?: string) {
+        let conds: any = {
+            $or: [
+                { email: emailOrPhoneOrUsername },
+                { phone: emailOrPhoneOrUsername },
+                { username: emailOrPhoneOrUsername },
+            ]
+        };
+        if (exceptId) {
+            conds = {
+                ...conds,
+                _id: { $ne: exceptId },
+            };
+        }
+        const user = await User.findOne(conds);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return user;
+    }
+
     static async updateProfile(userId: string, data: {
-        name?: string;
+        fullName?: string;
         email?: string;
         phone?: string;
         avatar?: string;
+        username?: string;
+        address?: IAddress;
     }) {
         const user = await User.findById(userId);
 
@@ -63,10 +88,12 @@ export class UserService {
         }
 
         // Update only provided fields
-        if (data.name) user.name = data.name;
+        if (data.fullName) user.name = data.fullName;
         if (data.email) user.email = data.email;
         if (data.phone) user.phone = data.phone;
         if (data.avatar) user.avatar = data.avatar;
+        if (data.username) user.username = data.username;
+        if (data.address) user.address = data.address;
 
         await user.save();
 
