@@ -1,23 +1,22 @@
-import Config from '@/models/config';
-import { IConfig } from '@/types/config';
+import Config from "@/models/config"
+import { IConfig } from "@/types/config"
 
 export class ConfigService {
-
     // ============ GET CONFIG ============
 
     static async getConfig() {
-        let config = await Config.findOne().lean();
+        let config = await Config.findOne().lean()
 
         // Create default config if not exists
         if (!config) {
-            config = await this.createDefaultConfig();
+            config = await this.createDefaultConfig()
         }
 
-        return config;
+        return config
     }
 
     static async getPublicConfig() {
-        const config = await this.getConfig();
+        const config = await this.getConfig()
 
         // Return only public fields (exclude sensitive data)
         return {
@@ -28,57 +27,57 @@ export class ConfigService {
             workingHours: config.workingHours,
             social: config.social,
             banners: config.banners,
-        };
+        }
     }
 
     // ============ UPDATE CONFIG ============
 
     static async updateConfig(data: Partial<IConfig>) {
-        let config = await Config.findOne();
+        let config = await Config.findOne()
 
         if (!config) {
-            config = await this.createDefaultConfig();
+            config = await this.createDefaultConfig()
         }
 
         // Update fields
-        Object.keys(data).forEach(key => {
+        Object.keys(data).forEach((key) => {
             if (data[key as keyof IConfig] !== undefined) {
-                (config as any)[key] = data[key as keyof IConfig];
+                ;(config as any)[key] = data[key as keyof IConfig]
             }
-        });
+        })
 
-        await config.save();
-        return config;
+        await config.save()
+        return config
     }
 
     static async updateSection(section: string, data: any) {
-        let config = await Config.findOne();
+        let config = await Config.findOne()
 
         if (!config) {
-            config = await this.createDefaultConfig();
+            config = await this.createDefaultConfig()
         }
 
-        (config as any)[section] = {
+        ;(config as any)[section] = {
             ...(config as any)[section],
-            ...data
-        };
+            ...data,
+        }
 
-        await config.save();
-        return config;
+        await config.save()
+        return config
     }
 
     // ============ HELPERS ============
 
     private static async createDefaultConfig() {
         const config = await Config.create({
-            companyName: 'Tiệm Điện Tử L&P',
-            hotline: '0853 887 855',
-            email: 'thanhphuvsvccd2@gmail.com',
-            address: '2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP.Hồ Chí Minh',
-            workingHours: '8:00 - 22:00 (Hàng ngày)',
-            banners: ['/images/banner.png'],
-        });
+            companyName: "Tiệm Điện Tử L&P",
+            hotline: "0853 887 855",
+            email: "thanhphuvsvccd2@gmail.com",
+            address: "2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP.Hồ Chí Minh",
+            workingHours: "8:00 - 22:00 (Hàng ngày)",
+            banners: ["/images/banner.png"],
+        })
 
-        return config.toObject();
+        return config.toObject()
     }
 }

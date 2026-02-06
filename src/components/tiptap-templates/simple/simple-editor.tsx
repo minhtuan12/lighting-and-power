@@ -108,7 +108,11 @@ const MainToolbarContent = ({
                 ) : (
                     <ColorHighlightPopoverButton onClick={onHighlighterClick} />
                 )}
-                {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+                {!isMobile ? (
+                    <LinkPopover />
+                ) : (
+                    <LinkButton onClick={onLinkClick} />
+                )}
             </ToolbarGroup>
 
             <ToolbarSeparator />
@@ -160,17 +164,17 @@ const MobileToolbarContent = ({
 )
 
 interface IProps {
-    value?: string;
-    onChange?: (value: string) => void;
-    placeholder?: string;
+    value?: string
+    onChange?: (value: string) => void
+    placeholder?: string
 }
 
 export function SimpleEditor({ value, onChange, placeholder }: IProps) {
     const isMobile = useIsBreakpoint()
     const { height } = useWindowSize()
-    const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
-        "main"
-    )
+    const [mobileView, setMobileView] = useState<
+        "main" | "highlighter" | "link"
+    >("main")
     const toolbarRef = useRef<HTMLDivElement>(null)
 
     const editor = useEditor({
@@ -225,20 +229,26 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
                     style={{
                         ...(isMobile
                             ? {
-                                bottom: `calc(100% - ${height - rect.y}px)`,
-                            }
+                                  bottom: `calc(100% - ${height - rect.y}px)`,
+                              }
                             : {}),
                     }}
                 >
                     {mobileView === "main" ? (
                         <MainToolbarContent
-                            onHighlighterClick={() => setMobileView("highlighter")}
+                            onHighlighterClick={() =>
+                                setMobileView("highlighter")
+                            }
                             onLinkClick={() => setMobileView("link")}
                             isMobile={isMobile}
                         />
                     ) : (
                         <MobileToolbarContent
-                            type={mobileView === "highlighter" ? "highlighter" : "link"}
+                            type={
+                                mobileView === "highlighter"
+                                    ? "highlighter"
+                                    : "link"
+                            }
                             onBack={() => setMobileView("main")}
                         />
                     )}
@@ -248,7 +258,7 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
                     editor={editor}
                     role="presentation"
                     className="simple-editor-content"
-                    placeholder={placeholder ?? ''}
+                    placeholder={placeholder ?? ""}
                 />
             </EditorContext.Provider>
         </div>

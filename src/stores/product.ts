@@ -1,8 +1,8 @@
-import { IProduct } from '@/types/product';
-import { atom } from 'jotai';
+import { IProduct } from "@/types/product"
+import { atom } from "jotai"
 
 // Selected product atom
-export const selectedProductAtom = atom<IProduct | null>(null);
+export const selectedProductAtom = atom<IProduct | null>(null)
 
 // Product filter atom
 export const filterProductAtom = atom({
@@ -14,6 +14,6 @@ export const filterProductAtom = atom({
     search: undefined as string | undefined,
     minPrice: undefined as number | undefined,
     maxPrice: undefined as number | undefined,
-    sortBy: 'newest' as 'name' | 'price' | 'soldCount' | 'rating' | 'newest',
-    sortOrder: 'desc' as 'asc' | 'desc',
-});
+    sortBy: "newest" as "name" | "price" | "soldCount" | "rating" | "newest",
+    sortOrder: "desc" as "asc" | "desc",
+})

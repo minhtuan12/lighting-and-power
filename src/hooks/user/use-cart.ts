@@ -1,86 +1,80 @@
-import { fetchAPI } from '@/lib/api-client';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchAPI } from "@/lib/api-client"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 interface UpdateItem {
-    quantity: number;
+    quantity: number
 }
 
-const CART_API_URL = '/cart';
-const CART_ITEMS_API_URL = '/cart/items';
+const CART_API_URL = "/cart"
+const CART_ITEMS_API_URL = "/cart/items"
 
 // Query keys
 const CART_KEYS = {
-    all: ['cart'] as const,
-    lists: () => [...CART_KEYS.all, 'list'] as const,
+    all: ["cart"] as const,
+    lists: () => [...CART_KEYS.all, "list"] as const,
     list: () => [...CART_KEYS.lists()] as const,
-};
+}
 
 // API functions
 const cartAPI = {
     get: () => {
-        return fetchAPI(CART_API_URL);
+        return fetchAPI(CART_API_URL)
     },
 
-    addItem: (data: {
-        productId: string;
-        quantity: number;
-    }) => {
+    addItem: (data: { productId: string; quantity: number }) => {
         return fetchAPI(CART_API_URL, {
-            method: 'POST',
+            method: "POST",
             body: JSON.stringify(data),
-        });
+        })
     },
 
-    updateItem: (
-        itemId: string,
-        data: UpdateItem,
-    ) => {
+    updateItem: (itemId: string, data: UpdateItem) => {
         return fetchAPI(`${CART_ITEMS_API_URL}/${itemId}`, {
-            method: 'PATCH',
+            method: "PATCH",
             body: JSON.stringify(data),
-        });
+        })
     },
 
     removeItem: (itemId: string) => {
         return fetchAPI(`${CART_ITEMS_API_URL}/${itemId}`, {
-            method: 'DELETE',
-        });
+            method: "DELETE",
+        })
     },
-};
+}
 
 // Hook
 export function useCart() {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: CART_KEYS.list(),
         queryFn: cartAPI.get,
-    });
+    })
 
     // ➕ Add item
     const addItemMutation = useMutation({
         mutationFn: cartAPI.addItem,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() });
+            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() })
         },
-    });
+    })
 
     // ✏️ Update item
     const updateItemMutation = useMutation({
-        mutationFn: ({ itemId, data }: { itemId: string, data: UpdateItem }) =>
+        mutationFn: ({ itemId, data }: { itemId: string; data: UpdateItem }) =>
             cartAPI.updateItem(itemId, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() });
+            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() })
         },
-    });
+    })
 
     // ❌ Remove item
     const removeItemMutation = useMutation({
         mutationFn: cartAPI.removeItem,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() });
+            queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() })
         },
-    });
+    })
 
     return {
         // Data
@@ -103,5 +97,5 @@ export function useCart() {
         isAdding: addItemMutation.isPending,
         isUpdating: updateItemMutation.isPending,
         isRemoving: removeItemMutation.isPending,
-    };
+    }
 }

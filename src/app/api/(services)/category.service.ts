@@ -1,117 +1,119 @@
-import { PAGE_LIMIT } from '@/constants/common';
-import Category from '@/models/category';
-import { ICategory } from '@/types/category';
+import { PAGE_LIMIT } from "@/constants/common"
+import Category from "@/models/category"
+import { ICategory } from "@/types/category"
 
 interface PaginationResult {
-    data: ICategory[];
+    data: ICategory[]
     pagination: {
-        page: number;
-        total: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPrevPage: boolean;
-    };
+        page: number
+        total: number
+        totalPages: number
+        hasNextPage: boolean
+        hasPrevPage: boolean
+    }
 }
 
 export class CategoryService {
-
     // ================= CREATE =================
 
     static async create(data: {
-        name: string;
-        slug?: string;
-        description?: string;
-        parentId?: string | null;
-        isActive?: boolean;
-        metaTitle?: string;
-        metaDescription?: string;
-        metaKeywords?: string;
+        name: string
+        slug?: string
+        description?: string
+        parentId?: string | null
+        isActive?: boolean
+        metaTitle?: string
+        metaDescription?: string
+        metaKeywords?: string
     }) {
         // Check if slug already exists
         if (data.slug) {
-            const existingSlug = await Category.findOne({ slug: data.slug });
+            const existingSlug = await Category.findOne({ slug: data.slug })
             if (existingSlug) {
-                throw new Error('Slug already exists');
+                throw new Error("Slug already exists")
             }
         }
 
-        let level = 0;
-        let parentId = data.parentId || null;
+        let level = 0
+        let parentId = data.parentId || null
 
         // Calculate level based on parent
         if (parentId) {
-            const parent = await Category.findById(parentId);
+            const parent = await Category.findById(parentId)
             if (!parent) {
-                throw new Error('Parent category not found');
+                throw new Error("Parent category not found")
             }
             if (parent.level >= 3) {
-                throw new Error('Maximum category depth reached (4 levels)');
+                throw new Error("Maximum category depth reached (4 levels)")
             }
-            level = parent.level + 1;
+            level = parent.level + 1
         }
 
         const category = await Category.create({
             ...data,
             parentId,
             level,
-            isActive: data.isActive !== undefined ? data.isActive : true
-        });
+            isActive: data.isActive !== undefined ? data.isActive : true,
+        })
 
-        return category;
+        return category
     }
 
     // ================= READ =================
 
-    static async getAll(filters?: {
-        parentId?: string | null;
-        level?: number;
-        isActive?: boolean;
-        search?: string;
-    }, options?: { page?: number }): Promise<PaginationResult> {
-        const query: any = {};
+    static async getAll(
+        filters?: {
+            parentId?: string | null
+            level?: number
+            isActive?: boolean
+            search?: string
+        },
+        options?: { page?: number },
+    ): Promise<PaginationResult> {
+        const query: any = {}
 
         if (filters?.parentId !== undefined) {
-            query.parentId = filters.parentId === null ? null : filters.parentId;
+            query.parentId = filters.parentId === null ? null : filters.parentId
         }
 
         if (filters?.level !== undefined) {
-            query.level = filters.level;
+            query.level = filters.level
         }
 
         if (filters?.isActive !== undefined) {
-            query.isActive = filters.isActive;
+            query.isActive = filters.isActive
         }
 
         if (filters?.search) {
             query.$or = [
-                { name: { $regex: filters.search, $options: 'i' } },
-                { description: { $regex: filters.search, $options: 'i' } }
-            ];
+                { name: { $regex: filters.search, $options: "i" } },
+                { description: { $regex: filters.search, $options: "i" } },
+            ]
         }
 
-        const page = options?.page || 1;
-        const skip = (page - 1) * PAGE_LIMIT;
+        const page = options?.page || 1
+        const skip = (page - 1) * PAGE_LIMIT
 
-        const total = await Category.countDocuments(query);
+        const total = await Category.countDocuments(query)
         const categories = await Category.find(query)
             .sort({ name: 1 })
             .skip(skip)
             .limit(PAGE_LIMIT)
-            .lean();
+            .lean()
 
         const categoriesWithCount = await Promise.all(
             categories.map(async (category) => {
                 const childrenCount = await Category.countDocuments({
-                    parentId: category._id
-                });
+                    parentId: category._id,
+                })
 
                 return {
                     ...category,
-                    childrenCount
-                };
-            })
-        );
-        const totalPages = Math.ceil(total / PAGE_LIMIT);
+                    childrenCount,
+                }
+            }),
+        )
+        const totalPages = Math.ceil(total / PAGE_LIMIT)
 
         return {
             data: categoriesWithCount as ICategory[],
@@ -121,198 +123,214 @@ export class CategoryService {
                 totalPages,
                 hasNextPage: page < totalPages,
                 hasPrevPage: page > 1,
-            }
-        };
+            },
+        }
     }
 
-    static async getTree(isActiveOnly: boolean = true, { parentSlug }: Record<string, any>) {
-        const query: any = {};
+    static async getTree(
+        isActiveOnly: boolean = true,
+        { parentSlug }: Record<string, any>,
+    ) {
+        const query: any = {}
         if (isActiveOnly) {
-            query.isActive = true;
+            query.isActive = true
         }
 
-        let parentId = null;
+        let parentId = null
         if (parentSlug !== undefined) {
             const parent = await Category.findOne({
                 slug: parentSlug,
-                ...(isActiveOnly ? { isActive: true } : {})
-            }).lean();
+                ...(isActiveOnly ? { isActive: true } : {}),
+            }).lean()
             if (parent) {
-                parentId = parent._id;
+                parentId = parent._id
             }
         }
 
         const allCategories = await Category.find(query)
             .sort({ order: 1, name: 1 })
-            .lean();
+            .lean()
 
         const categoriesWithCount = await Promise.all(
             allCategories.map(async (category) => {
                 const childrenCount = await Category.countDocuments({
-                    parentId: category._id
-                });
+                    parentId: category._id,
+                })
 
                 return {
                     ...category,
-                    childrenCount
-                };
-            })
-        );
+                    childrenCount,
+                }
+            }),
+        )
 
         // Build tree structure
         const buildTree = (parentId: string | null = null): any[] => {
             return categoriesWithCount
-                .filter(cat => {
-                    const catParentId = cat.parentId?.toString() ?? null;
-                    return catParentId === parentId;
+                .filter((cat) => {
+                    const catParentId = cat.parentId?.toString() ?? null
+                    return catParentId === parentId
                 })
-                .map(cat => ({
+                .map((cat) => ({
                     ...cat,
-                    children: buildTree(cat._id.toString())
-                }));
-        };
+                    children: buildTree(cat._id.toString()),
+                }))
+        }
 
-        return buildTree(parentId ? String(parentId) : null);
+        return buildTree(parentId ? String(parentId) : null)
     }
 
     static async getById(id: string) {
-        const category = await Category.findById(id).lean();
+        const category = await Category.findById(id).lean()
         if (!category) {
-            throw new Error('Category not found');
+            throw new Error("Category not found")
         }
-        return category;
+        return category
     }
 
     static async getBySlug(slug: string) {
-        const category = await Category.findOne({ slug }).lean();
+        const category = await Category.findOne({ slug }).lean()
         if (!category) {
-            throw new Error('Category not found');
+            throw new Error("Category not found")
         }
         return {
             ...category,
             childrenCount: await Category.countDocuments({
                 parentId: category._id,
                 isActive: true,
-            })
-        };
+            }),
+        }
     }
 
     static async getBreadcrumb(categoryId: string) {
-        const breadcrumb: any[] = [];
-        let currentId = categoryId;
+        const breadcrumb: any[] = []
+        let currentId = categoryId
 
         while (currentId) {
-            const category = await Category.findById(currentId).lean();
-            if (!category) break;
+            const category = await Category.findById(currentId).lean()
+            if (!category) break
 
             breadcrumb.unshift({
                 _id: category._id,
                 name: category.name,
                 slug: category.slug,
-            });
+            })
 
-            currentId = category.parentId?.toString() || '';
+            currentId = category.parentId?.toString() || ""
         }
 
-        return breadcrumb;
+        return breadcrumb
     }
 
     // ================= UPDATE =================
 
-    static async update(id: string, data: {
-        name?: string;
-        slug?: string;
-        image?: string;
-        description?: string;
-        parentId?: string | null;
-        isActive?: boolean;
-        metaTitle?: string;
-        metaDescription?: string;
-        metaKeywords?: string;
-    }) {
-        const category = await Category.findById(id);
+    static async update(
+        id: string,
+        data: {
+            name?: string
+            slug?: string
+            image?: string
+            description?: string
+            parentId?: string | null
+            isActive?: boolean
+            metaTitle?: string
+            metaDescription?: string
+            metaKeywords?: string
+        },
+    ) {
+        const category = await Category.findById(id)
         if (!category) {
-            throw new Error('Category not found');
+            throw new Error("Category not found")
         }
 
         // Check if new slug already exists
         if (data.slug && data.slug !== category.slug) {
             const existingSlug = await Category.findOne({
                 slug: data.slug,
-                _id: { $ne: id }
-            });
+                _id: { $ne: id },
+            })
             if (existingSlug) {
-                throw new Error('Slug already exists');
+                throw new Error("Slug already exists")
             }
         }
 
         // Check if moving to new parent
-        if (data.parentId !== undefined && data.parentId !== category.parentId?.toString()) {
+        if (
+            data.parentId !== undefined &&
+            data.parentId !== category.parentId?.toString()
+        ) {
             // Prevent circular reference
             if (data.parentId === id) {
-                throw new Error('Category cannot be its own parent');
+                throw new Error("Category cannot be its own parent")
             }
 
             // Check if new parent is a descendant
             if (data.parentId) {
-                const isDescendant = await this.isDescendant(id, data.parentId);
+                const isDescendant = await this.isDescendant(id, data.parentId)
                 if (isDescendant) {
-                    throw new Error('Cannot move category to its own descendant');
+                    throw new Error(
+                        "Cannot move category to its own descendant",
+                    )
                 }
 
-                const parent = await Category.findById(data.parentId);
+                const parent = await Category.findById(data.parentId)
                 if (!parent) {
-                    throw new Error('Parent category not found');
+                    throw new Error("Parent category not found")
                 }
                 if (parent.level >= 3) {
-                    throw new Error('Maximum category depth reached');
+                    throw new Error("Maximum category depth reached")
                 }
 
-                category.level = parent.level + 1;
+                category.level = parent.level + 1
             } else {
-                category.level = 0;
+                category.level = 0
             }
 
-            category.parentId = data.parentId as any;
+            category.parentId = data.parentId as any
 
             // Update all children levels
-            await this.updateChildrenLevels(id, category.level);
+            await this.updateChildrenLevels(id, category.level)
         }
 
         // Update other fields
-        if (data.name !== undefined) category.name = data.name;
-        if (data.slug !== undefined) category.slug = data.slug;
-        if (data.image !== undefined) category.image = data.image;
-        if (data.description !== undefined) category.description = data.description;
+        if (data.name !== undefined) category.name = data.name
+        if (data.slug !== undefined) category.slug = data.slug
+        if (data.image !== undefined) category.image = data.image
+        if (data.description !== undefined)
+            category.description = data.description
         if (data.isActive !== undefined) {
-            category.isActive = data.isActive;
+            category.isActive = data.isActive
 
             // Update all its children status to false if it is not active
             if (!data.isActive) {
-                await Category.updateMany({ parentId: id }, { isActive: false });
+                await Category.updateMany({ parentId: id }, { isActive: false })
             }
         }
-        if (data.metaTitle !== undefined) category.metaTitle = data.metaTitle;
-        if (data.metaDescription !== undefined) category.metaDescription = data.metaDescription;
-        if (data.metaKeywords !== undefined) category.metaKeywords = data.metaKeywords;
+        if (data.metaTitle !== undefined) category.metaTitle = data.metaTitle
+        if (data.metaDescription !== undefined)
+            category.metaDescription = data.metaDescription
+        if (data.metaKeywords !== undefined)
+            category.metaKeywords = data.metaKeywords
 
-        await category.save();
+        await category.save()
 
-        return category;
+        return category
     }
 
     // ================= DELETE =================
 
     static async delete(id: string) {
-        const category = await Category.findById(id);
+        const category = await Category.findById(id)
         if (!category) {
-            throw new Error('Category not found');
+            throw new Error("Category not found")
         }
 
         // Check if has children
-        const childrenCount = await Category.countDocuments({ parentId: id });
+        const childrenCount = await Category.countDocuments({ parentId: id })
         if (childrenCount > 0) {
-            throw new Error('Cannot delete category with subcategories. Delete subcategories first.');
+            throw new Error(
+                "Cannot delete category with subcategories. Delete subcategories first.",
+            )
         }
 
         // Check if has products (you'll need to implement this based on your Product model)
@@ -321,35 +339,41 @@ export class CategoryService {
         //     throw new Error('Cannot delete category with products. Remove products first.');
         // }
 
-        await Category.findByIdAndDelete(id);
+        await Category.findByIdAndDelete(id)
 
-        return { success: true, message: 'Category deleted successfully' };
+        return { success: true, message: "Category deleted successfully" }
     }
 
     // ================= HELPERS =================
 
-    private static async isDescendant(ancestorId: string, descendantId: string): Promise<boolean> {
-        let currentId = descendantId;
+    private static async isDescendant(
+        ancestorId: string,
+        descendantId: string,
+    ): Promise<boolean> {
+        let currentId = descendantId
 
         while (currentId) {
-            const category = await Category.findById(currentId);
-            if (!category) break;
-            if (category.parentId?.toString() === ancestorId) return true;
-            currentId = category.parentId?.toString() || '';
+            const category = await Category.findById(currentId)
+            if (!category) break
+            if (category.parentId?.toString() === ancestorId) return true
+            currentId = category.parentId?.toString() || ""
         }
 
-        return false;
+        return false
     }
 
-    private static async updateChildrenLevels(parentId: string, parentLevel: number) {
-        const children = await Category.find({ parentId });
+    private static async updateChildrenLevels(
+        parentId: string,
+        parentLevel: number,
+    ) {
+        const children = await Category.find({ parentId })
 
         for (const child of children) {
-            child.level = parentLevel + 1;
-            await child.save();
+            child.level = parentLevel + 1
+            await child.save()
 
             // Recursively update grandchildren
-            await this.updateChildrenLevels(child._id.toString(), child.level);
+            await this.updateChildrenLevels(child._id.toString(), child.level)
         }
     }
 }

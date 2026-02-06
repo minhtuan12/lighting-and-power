@@ -1,45 +1,46 @@
-import { routes } from '@/constants/routes';
-import { createNavigation } from 'next-intl/navigation';
-import { defineRouting } from 'next-intl/routing';
+import { routes } from "@/constants/routes"
+import { createNavigation } from "next-intl/navigation"
+import { defineRouting } from "next-intl/routing"
 
 export const routing = defineRouting({
-    locales: ['en', 'vi'],
-    defaultLocale: 'vi',
+    locales: ["en", "vi"],
+    defaultLocale: "vi",
     pathnames: {
-        '/': '/',
+        "/": "/",
         [routes.sanPham.url]: {
-            en: '/products',
-            vi: '/san-pham'
+            en: "/products",
+            vi: "/san-pham",
         },
         [routes.lienHe.url]: {
-            en: '/contact',
-            vi: '/lien-he'
+            en: "/contact",
+            vi: "/lien-he",
         },
         [routes.chiTietSanPham.url]: {
-            en: '/products/detail',
-            vi: '/san-pham/chi-tiet'
+            en: "/products/detail",
+            vi: "/san-pham/chi-tiet",
         },
         [routes.dangKy.url]: {
-            en: '/register',
-            vi: '/dang-ky'
+            en: "/register",
+            vi: "/dang-ky",
         },
         [routes.dangNhap.url]: {
-            en: '/login',
-            vi: '/dang-nhap'
+            en: "/login",
+            vi: "/dang-nhap",
         },
         [routes.gioHang.url]: {
-            en: '/cart',
-            vi: '/gio-hang'
+            en: "/cart",
+            vi: "/gio-hang",
         },
         [routes.trangCaNhan.url]: {
-            en: '/profile',
-            vi: '/trang-ca-nhan'
+            en: "/profile",
+            vi: "/trang-ca-nhan",
         },
         [routes.taiLieuDienTu.url]: {
-            en: '/documents',
-            vi: '/tai-lieu-dien-tu'
+            en: "/documents",
+            vi: "/tai-lieu-dien-tu",
         },
-    }
-});
+    },
+})
 
-export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
+export const { Link, redirect, usePathname, useRouter } =
+    createNavigation(routing)

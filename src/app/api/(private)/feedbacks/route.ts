@@ -1,71 +1,73 @@
-import { withMiddleware } from "@/lib/api-handler";
-import { verifyToken } from "@/lib/middleware";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { NextRequest, NextResponse } from "next/server";
-import { FeedbackService } from "../../(services)/feedback.service";
-import { getRequestUser } from "@/lib/context";
+import { withMiddleware } from "@/lib/api-handler"
+import { verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { NextRequest, NextResponse } from "next/server"
+import { FeedbackService } from "../../(services)/feedback.service"
+import { getRequestUser } from "@/lib/context"
 
 // GET /api/feedbacks?userId=xxx - Lấy feedbacks của user
 async function getFeedbacks(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
-        const page = parseInt(searchParams.get('page') || '1');
-        const limit = parseInt(searchParams.get('limit') || '10');
+        const { searchParams } = new URL(request.url)
+        const userId = searchParams.get("userId")
+        const page = parseInt(searchParams.get("page") || "1")
+        const limit = parseInt(searchParams.get("limit") || "10")
 
         if (!userId) {
             return NextResponse.json(
                 { success: false, message: "User ID is required" },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         const result = await FeedbackService.getUserFeedbacks(userId, {
             page,
-            limit
-        });
+            limit,
+        })
 
         return NextResponse.json({
             success: true,
-            data: result
-        });
-
+            data: result,
+        })
     } catch (error: any) {
-        console.error('Get feedbacks error:', error);
+        console.error("Get feedbacks error:", error)
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
 // POST /api/feedbacks - Tạo feedback mới
 async function createFeedback(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = getRequestUser(request)
 
         if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const body = await request.json();
-        const { productId, orderId, rating, comment, images } = body;
+        const body = await request.json()
+        const { productId, orderId, rating, comment, images } = body
 
         if (!productId || !orderId) {
             return NextResponse.json(
-                { success: false, message: "Product ID and Order ID are required" },
-                { status: 400 }
-            );
+                {
+                    success: false,
+                    message: "Product ID and Order ID are required",
+                },
+                { status: 400 },
+            )
         }
 
         if (!rating || rating < 1 || rating > 5) {
             return NextResponse.json(
                 { success: false, message: "Rating must be between 1 and 5" },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         const feedback = await FeedbackService.createFeedback(user.userId, {
@@ -73,42 +75,39 @@ async function createFeedback(request: NextRequest) {
             orderId,
             rating,
             comment,
-            images
-        });
+            images,
+        })
 
         return NextResponse.json({
             success: true,
             message: "Feedback created successfully",
-            data: feedback
-        });
-
+            data: feedback,
+        })
     } catch (error: any) {
-        console.error('Create feedback error:', error);
+        console.error("Create feedback error:", error)
 
-        if (error.message.includes('not found') ||
-            error.message.includes('already reviewed') ||
-            error.message.includes('delivered orders')) {
+        if (
+            error.message.includes("not found") ||
+            error.message.includes("already reviewed") ||
+            error.message.includes("delivered orders")
+        ) {
             return NextResponse.json(
                 { success: false, message: error.message },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
-export const GET = withMiddleware(
-    getFeedbacks,
-    connectDbMiddleware
-);
+export const GET = withMiddleware(getFeedbacks, connectDbMiddleware)
 
 export const POST = withMiddleware(
     createFeedback,
     connectDbMiddleware,
-    verifyToken
-);
-
+    verifyToken,
+)

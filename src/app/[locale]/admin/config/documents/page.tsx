@@ -1,32 +1,55 @@
-'use client'
+"use client"
 
-import { FloatingInput, FloatingSelect, FloatingTextArea } from '@/components/inputs/FloatingInputs';
-import SearchBar from '@/components/SearchBar';
-import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor';
-import { ALLOWED_FILE_TYPES, CONTENT_TYPES, MAX_FILE_SIZE, PAGE_LIMIT } from '@/constants/common';
-import { useDocuments } from '@/hooks/admin/use-documents';
-import useDebounce from '@/hooks/use-debounce';
-import { showMessage } from '@/hooks/use-message';
-import { getDocumentTypes } from '@/lib/utils';
-import { breadcrumbAtom, filterDocumentAtom } from '@/stores';
-import { IDocument, IDocumentType } from '@/types/document';
-import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Modal, Popconfirm, Select, Space, Switch, Table, Tag, Upload } from 'antd';
-import { useAtom, useSetAtom } from 'jotai';
-import { Download, Edit2, FileText, Filter, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {
+    FloatingInput,
+    FloatingSelect,
+    FloatingTextArea,
+} from "@/components/inputs/FloatingInputs"
+import SearchBar from "@/components/SearchBar"
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor"
+import {
+    ALLOWED_FILE_TYPES,
+    CONTENT_TYPES,
+    MAX_FILE_SIZE,
+    PAGE_LIMIT,
+} from "@/constants/common"
+import { useDocuments } from "@/hooks/admin/use-documents"
+import useDebounce from "@/hooks/use-debounce"
+import { showMessage } from "@/hooks/use-message"
+import { getDocumentTypes } from "@/lib/utils"
+import { breadcrumbAtom, filterDocumentAtom } from "@/stores"
+import { IDocument, IDocumentType } from "@/types/document"
+import { LoadingOutlined } from "@ant-design/icons"
+import {
+    Button,
+    Card,
+    Form,
+    Modal,
+    Popconfirm,
+    Select,
+    Space,
+    Switch,
+    Table,
+    Tag,
+    Upload,
+} from "antd"
+import { useAtom, useSetAtom } from "jotai"
+import { Download, Edit2, FileText, Filter, Plus, Trash2 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export const Documents = () => {
-    const [form] = Form.useForm();
-    const [searchText, setSearchText] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingDocument, setEditingDocument] = useState<IDocument | null>(null);
-    const [contentType, setContentType] = useState<'text' | 'file'>('text');
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([]);
+    const [form] = Form.useForm()
+    const [searchText, setSearchText] = useState("")
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingDocument, setEditingDocument] = useState<IDocument | null>(
+        null,
+    )
+    const [contentType, setContentType] = useState<"text" | "file">("text")
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([])
 
-    const [filter, setFilter] = useAtom(filterDocumentAtom);
-    const setBreadcrumb = useSetAtom(breadcrumbAtom);
+    const [filter, setFilter] = useAtom(filterDocumentAtom)
+    const setBreadcrumb = useSetAtom(breadcrumbAtom)
 
     const {
         documents: data,
@@ -39,78 +62,82 @@ export const Documents = () => {
         updateDocumentAsync,
         deleteDocumentAsync,
         uploadFileAsync,
-    } = useDocuments({ ...filter });
+    } = useDocuments({ ...filter })
 
     const handleOpenModal = (doc?: IDocument) => {
         if (doc) {
-            setEditingDocument(doc);
-            setContentType(doc.contentType);
+            setEditingDocument(doc)
+            setContentType(doc.contentType)
             form.setFieldsValue({
                 title: doc.title,
                 description: doc.description,
                 type: doc.type,
                 contentType: doc.contentType,
                 content: doc.content,
-            });
+            })
         } else {
-            setEditingDocument(null);
-            setContentType('text');
-            form.resetFields();
+            setEditingDocument(null)
+            setContentType("text")
+            form.resetFields()
         }
-        setSelectedFile(null);
-        setIsModalOpen(true);
-    };
+        setSelectedFile(null)
+        setIsModalOpen(true)
+    }
 
     const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingDocument(null);
-        setContentType('text');
-        setSelectedFile(null);
-        form.resetFields();
-    };
+        setIsModalOpen(false)
+        setEditingDocument(null)
+        setContentType("text")
+        setSelectedFile(null)
+        form.resetFields()
+    }
 
     const handleSubmit = async (values: any) => {
         try {
-            let documentData: Omit<IDocument, '_id'> = {
+            let documentData: Omit<IDocument, "_id"> = {
                 title: values.title,
                 description: values.description,
                 type: values.type,
                 contentType,
                 isPublished: true,
-            };
+            }
 
-            if (contentType === 'text') {
+            if (contentType === "text") {
                 // Text content
-                documentData.content = values.content;
+                documentData.content = values.content
             } else {
                 // File upload
                 if (!selectedFile && !editingDocument) {
-                    showMessage.error('Vui lòng chọn file');
-                    return;
+                    showMessage.error("Vui lòng chọn file")
+                    return
                 }
 
                 if (selectedFile) {
                     // Validate file
                     if (!ALLOWED_FILE_TYPES.includes(selectedFile.type)) {
-                        showMessage.error('Loại file không hỗ trợ. Chỉ PDF, Word, Text được chấp nhận');
-                        return;
+                        showMessage.error(
+                            "Loại file không hỗ trợ. Chỉ PDF, Word, Text được chấp nhận",
+                        )
+                        return
                     }
 
                     if (selectedFile.size > MAX_FILE_SIZE) {
-                        showMessage.error(`File quá lớn. Tối đa ${MAX_FILE_SIZE / 1024 / 1024}MB`);
-                        return;
+                        showMessage.error(
+                            `File quá lớn. Tối đa ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+                        )
+                        return
                     }
 
                     // Upload file
                     const uploadResult = await uploadFileAsync({
                         file: selectedFile,
-                        folder: 'lightingpower',
-                    });
+                        folder: "lightingpower",
+                    })
 
-                    documentData.fileUrl = uploadResult.secure_url;
-                    documentData.fileName = selectedFile.name;
-                    documentData.fileSize = selectedFile.size;
-                    documentData.mimeType = selectedFile.type;
+                    documentData.fileUrl = uploadResult.secure_url
+                    documentData.fileName = selectedFile.name
+                    documentData.fileSize = selectedFile.size
+                    documentData.mimeType = selectedFile.type
                 }
             }
 
@@ -118,84 +145,93 @@ export const Documents = () => {
                 await updateDocumentAsync({
                     id: editingDocument._id!,
                     data: documentData,
-                });
-                showMessage.success('Cập nhật tài liệu thành công');
+                })
+                showMessage.success("Cập nhật tài liệu thành công")
             } else {
-                await createDocumentAsync(documentData);
-                showMessage.success('Tạo tài liệu thành công');
+                await createDocumentAsync(documentData)
+                showMessage.success("Tạo tài liệu thành công")
             }
 
-            handleCloseModal();
+            handleCloseModal()
         } catch (error: any) {
-            showMessage.error(error.message || 'Có lỗi xảy ra');
+            showMessage.error(error.message || "Có lỗi xảy ra")
         }
-    };
+    }
 
     const handleDelete = async (record: IDocument) => {
         if (record._id) {
             try {
-                await deleteDocumentAsync(record._id);
-                showMessage.success('Xóa tài liệu thành công');
+                await deleteDocumentAsync(record._id)
+                showMessage.success("Xóa tài liệu thành công")
             } catch (error: any) {
-                showMessage.error(error.message || 'Lỗi xóa tài liệu');
+                showMessage.error(error.message || "Lỗi xóa tài liệu")
             }
         }
-    };
+    }
 
     const handleUpdateStatus = async (status: boolean, record: IDocument) => {
         if (record._id) {
-            setEditingDocument(record);
+            setEditingDocument(record)
             try {
                 await updateDocumentAsync({
                     id: String(record._id),
-                    data: { ...record, isPublished: status }
-                });
-                showMessage.success('Cập nhật thành công');
+                    data: { ...record, isPublished: status },
+                })
+                showMessage.success("Cập nhật thành công")
             } catch (error: any) {
-                showMessage.error(error.message || 'Đã có lỗi xảy ra');
+                showMessage.error(error.message || "Đã có lỗi xảy ra")
             } finally {
-                setEditingDocument(null);
+                setEditingDocument(null)
             }
         }
     }
 
     const columns = [
         {
-            title: 'Tiêu đề',
-            dataIndex: 'title',
-            key: 'title',
+            title: "Tiêu đề",
+            dataIndex: "title",
+            key: "title",
             width: 250,
-            render: (text: string) => <span className="font-semibold">{text}</span>,
+            render: (text: string) => (
+                <span className="font-semibold">{text}</span>
+            ),
         },
         {
-            title: 'Loại',
-            dataIndex: 'type',
-            key: 'type',
+            title: "Loại",
+            dataIndex: "type",
+            key: "type",
             width: 150,
-            align: 'center',
+            align: "center",
             render: (type: string) => {
-                const typeConfig = documentTypes.find(t => t.value === type);
-                return <Tag color={typeConfig?.color} variant='outlined'>{typeConfig?.label}</Tag>;
+                const typeConfig = documentTypes.find((t) => t.value === type)
+                return (
+                    <Tag color={typeConfig?.color} variant="outlined">
+                        {typeConfig?.label}
+                    </Tag>
+                )
             },
         },
         {
-            title: 'Nội dung',
-            dataIndex: 'contentType',
-            key: 'contentType',
+            title: "Nội dung",
+            dataIndex: "contentType",
+            key: "contentType",
             width: 100,
-            align: 'center',
+            align: "center",
             render: (contentType: string) => (
-                <Tag color={contentType === 'text' ? 'blue' : 'green'} variant='outlined'>
-                    {contentType === 'text' ? 'Văn bản' : 'File'}
+                <Tag
+                    color={contentType === "text" ? "blue" : "green"}
+                    variant="outlined"
+                >
+                    {contentType === "text" ? "Văn bản" : "File"}
                 </Tag>
             ),
         },
         {
-            title: 'Xuất bản',
-            dataIndex: 'isPublished',
-            key: 'isPublished',
+            title: "Xuất bản",
+            dataIndex: "isPublished",
+            key: "isPublished",
             width: 100,
-            align: 'center',
+            align: "center",
             render: (isPublished: boolean, record: IDocument) => (
                 <Switch
                     loading={isUpdating && editingDocument?._id === record._id}
@@ -205,22 +241,22 @@ export const Documents = () => {
             ),
         },
         {
-            title: 'Hành động',
-            key: 'action',
+            title: "Hành động",
+            key: "action",
             width: 150,
-            align: 'center' as const,
+            align: "center" as const,
             render: (_: any, record: IDocument) => (
                 <Space size={8}>
-                    {record.contentType === 'file' && record.fileUrl && (
+                    {record.contentType === "file" && record.fileUrl && (
                         <Button
                             type="text"
                             size="small"
                             icon={<Download size={16} />}
                             onClick={() => {
-                                const a = document.createElement('a');
-                                a.href = record.fileUrl!;
-                                a.download = record.fileName || 'document';
-                                a.click();
+                                const a = document.createElement("a")
+                                a.href = record.fileUrl!
+                                a.download = record.fileName || "document"
+                                a.click()
                             }}
                             title="Tải file"
                         />
@@ -250,75 +286,82 @@ export const Documents = () => {
                 </Space>
             ),
         },
-    ];
+    ]
 
-    const isSubmitting = isCreating || isUpdating || isUploading;
+    const isSubmitting = isCreating || isUpdating || isUploading
 
-    const debounceSearch = useDebounce((value: string) => setFilter(prev => ({ ...prev, search: value })), 400);
+    const debounceSearch = useDebounce(
+        (value: string) => setFilter((prev) => ({ ...prev, search: value })),
+        400,
+    )
 
     const handleSearch = (value: string) => {
-        setSearchText(value);
-        debounceSearch(value);
+        setSearchText(value)
+        debounceSearch(value)
     }
     useEffect(() => {
         async function fetchDocumentTypes() {
-            const data = await getDocumentTypes();
-            setDocumentTypes(data);
+            const data = await getDocumentTypes()
+            setDocumentTypes(data)
         }
 
-        fetchDocumentTypes();
-        setBreadcrumb([{ title: 'Quản lý tài liệu' }]);
-    }, [setBreadcrumb, setDocumentTypes]);
+        fetchDocumentTypes()
+        setBreadcrumb([{ title: "Quản lý tài liệu" }])
+    }, [setBreadcrumb, setDocumentTypes])
 
     return (
         <Card
-            variant='borderless'
+            variant="borderless"
             className="rounded-xl shadow-sm [&>.ant-card-body]:!pb-2"
         >
             <div className="mb-6">
-                <div className='flex justify-between items-center'>
-                    <Space className='space-x-2'>
+                <div className="flex justify-between items-center">
+                    <Space className="space-x-2">
                         <div className="grid grid-cols-4 gap-4">
                             <SearchBar
-                                placeholder='Tìm kiếm theo tên tài liệu'
+                                placeholder="Tìm kiếm theo tên tài liệu"
                                 value={searchText}
                                 onChange={(e) => handleSearch(e.target.value)}
                             />
 
                             <Select
                                 showSearch={{
-                                    optionFilterProp: 'label',
+                                    optionFilterProp: "label",
                                     filterOption: (input, option) =>
-                                        (option?.label as string ?? '')
+                                        ((option?.label as string) ?? "")
                                             .toLowerCase()
-                                            .includes(input.toLowerCase())
+                                            .includes(input.toLowerCase()),
                                 }}
                                 allowClear
-                                placeholder='Lọc theo loại tài liệu'
+                                placeholder="Lọc theo loại tài liệu"
                                 value={filter.type || undefined}
-                                onChange={e => setFilter(prev => ({
-                                    ...prev,
-                                    type: e
-                                }))}
+                                onChange={(e) =>
+                                    setFilter((prev) => ({
+                                        ...prev,
+                                        type: e,
+                                    }))
+                                }
                                 options={documentTypes}
                                 suffixIcon={<Filter size={16} />}
                             />
 
                             <Select
                                 showSearch={{
-                                    optionFilterProp: 'label',
+                                    optionFilterProp: "label",
                                     filterOption: (input, option) =>
-                                        (option?.label as string ?? '')
+                                        ((option?.label as string) ?? "")
                                             .toLowerCase()
-                                            .includes(input.toLowerCase())
+                                            .includes(input.toLowerCase()),
                                 }}
                                 allowClear
-                                placeholder='Lọc theo loại nội dung'
+                                placeholder="Lọc theo loại nội dung"
                                 value={filter.contentType || undefined}
-                                onChange={e => setFilter(prev => ({
-                                    ...prev,
-                                    contentType: e
-                                }))}
+                                onChange={(e) =>
+                                    setFilter((prev) => ({
+                                        ...prev,
+                                        contentType: e,
+                                    }))
+                                }
                                 options={CONTENT_TYPES}
                                 suffixIcon={<Filter size={16} />}
                             />
@@ -348,15 +391,21 @@ export const Documents = () => {
                 }}
                 loading={{
                     indicator: <LoadingOutlined />,
-                    spinning: isDeleting || isLoading
+                    spinning: isDeleting || isLoading,
                 }}
                 className="custom-table rounded-lg"
-                scroll={{ y: 'calc(100vh - 320px)' }}
+                scroll={{ y: "calc(100vh - 320px)" }}
             />
 
             {/* Modal */}
             <Modal
-                title={<div className='mb-6 text-lg'>{editingDocument ? 'Chỉnh sửa tài liệu' : 'Thêm tài liệu mới'}</div>}
+                title={
+                    <div className="mb-6 text-lg">
+                        {editingDocument
+                            ? "Chỉnh sửa tài liệu"
+                            : "Thêm tài liệu mới"}
+                    </div>
+                }
                 open={isModalOpen}
                 onCancel={handleCloseModal}
                 footer={null}
@@ -367,27 +416,42 @@ export const Documents = () => {
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={{
-                        type: documentTypes?.[0]?.value ?? '',
+                        type: documentTypes?.[0]?.value ?? "",
                         contentType: CONTENT_TYPES[0].value,
                     }}
                 >
                     <Form.Item
                         name="title"
-                        rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Vui lòng nhập tiêu đề",
+                            },
+                        ]}
                     >
-                        <FloatingInput label='Tiêu đề' placeholder="Nhập tiêu đề tài liệu" />
+                        <FloatingInput
+                            label="Tiêu đề"
+                            placeholder="Nhập tiêu đề tài liệu"
+                        />
                     </Form.Item>
 
-                    <Form.Item
-                        name="description"
-                    >
-                        <FloatingTextArea label='Mô tả ngắn' rows={3} placeholder="Mô tả ngắn về tài liệu" />
+                    <Form.Item name="description">
+                        <FloatingTextArea
+                            label="Mô tả ngắn"
+                            rows={3}
+                            placeholder="Mô tả ngắn về tài liệu"
+                        />
                     </Form.Item>
 
                     <div className="grid grid-cols-2 gap-4">
                         <Form.Item
                             name="type"
-                            rules={[{ required: true, message: 'Chọn loại tài liệu' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Chọn loại tài liệu",
+                                },
+                            ]}
                         >
                             <FloatingSelect
                                 label="Chọn loại"
@@ -397,10 +461,15 @@ export const Documents = () => {
 
                         <Form.Item
                             name="contentType"
-                            rules={[{ required: true, message: 'Chọn loại nội dung' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Chọn loại nội dung",
+                                },
+                            ]}
                         >
                             <FloatingSelect
-                                label='Loại nội dung'
+                                label="Loại nội dung"
                                 placeholder="Chọn loại nội dung"
                                 options={CONTENT_TYPES}
                                 onChange={setContentType}
@@ -408,13 +477,21 @@ export const Documents = () => {
                         </Form.Item>
                     </div>
 
-                    {contentType === 'text' ? (
+                    {contentType === "text" ? (
                         <Form.Item
                             label="Nội dung"
                             name="content"
-                            rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập nội dung",
+                                },
+                            ]}
                         >
-                            <SimpleEditor value={editingDocument?.content} placeholder="Nhập nội dung tài liệu" />
+                            <SimpleEditor
+                                value={editingDocument?.content}
+                                placeholder="Nhập nội dung tài liệu"
+                            />
                         </Form.Item>
                     ) : (
                         <Form.Item label="Tải file">
@@ -422,14 +499,21 @@ export const Documents = () => {
                                 maxCount={1}
                                 accept=".pdf,.doc,.docx,.txt,.md"
                                 beforeUpload={(file) => {
-                                    setSelectedFile(file);
-                                    return false;
+                                    setSelectedFile(file)
+                                    return false
                                 }}
                             >
                                 <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-400 cursor-pointer w-full">
-                                    <FileText size={32} className="mx-auto text-gray-400 mb-2" />
-                                    <p className="text-gray-600">Kéo file vào đây hoặc click để chọn</p>
-                                    <p className="text-xs text-gray-500 mt-1">PDF, Word, Text (Max 50MB)</p>
+                                    <FileText
+                                        size={32}
+                                        className="mx-auto text-gray-400 mb-2"
+                                    />
+                                    <p className="text-gray-600">
+                                        Kéo file vào đây hoặc click để chọn
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        PDF, Word, Text (Max 50MB)
+                                    </p>
                                     {selectedFile && (
                                         <p className="text-green-600 font-semibold mt-2">
                                             ✓ {selectedFile.name}
@@ -441,21 +525,21 @@ export const Documents = () => {
                     )}
 
                     <Form.Item>
-                        <Space className='justify-end w-full'>
+                        <Space className="justify-end w-full">
                             <Button onClick={handleCloseModal}>Hủy</Button>
                             <Button
                                 type="primary"
                                 htmlType="submit"
                                 loading={isSubmitting}
                             >
-                                {editingDocument ? 'Cập nhật' : 'Tạo mới'}
+                                {editingDocument ? "Cập nhật" : "Tạo mới"}
                             </Button>
                         </Space>
                     </Form.Item>
                 </Form>
             </Modal>
         </Card>
-    );
-};
+    )
+}
 
-export default Documents;
+export default Documents

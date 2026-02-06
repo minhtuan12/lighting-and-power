@@ -1,82 +1,85 @@
-import createIntlMiddleware from 'next-intl/middleware';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import { routes } from './constants/routes';
-import { routing } from './i18n/routing';
+import createIntlMiddleware from "next-intl/middleware"
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import { routes } from "./constants/routes"
+import { routing } from "./i18n/routing"
 
 const protectedRoutes = [
     // routes.gioHang.url,
     routes.taiLieuDienTu.url,
 ]
 
-const authRoutes = [routes.dangKy.url, routes.dangNhap.url];
+const authRoutes = [routes.dangKy.url, routes.dangNhap.url]
 
-const intlMiddleware = createIntlMiddleware(routing);
+const intlMiddleware = createIntlMiddleware(routing)
 
 function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
     return (request: NextRequest): NextResponse | null => {
-        const accessToken = request.cookies.get('accessToken')?.value;
+        const accessToken = request.cookies.get("accessToken")?.value
 
         // Check auth routes
-        const isAuthRoute = authRoutes.some(route =>
-            pathnameWithoutLocale.includes(route)
-        );
+        const isAuthRoute = authRoutes.some((route) =>
+            pathnameWithoutLocale.includes(route),
+        )
 
         if (isAuthRoute && accessToken) {
-            return NextResponse.redirect(new URL(`/${locale}`, request.url));
+            return NextResponse.redirect(new URL(`/${locale}`, request.url))
         }
 
         // Check protected routes
-        const isProtected = protectedRoutes.some(route =>
-            pathnameWithoutLocale.includes(route)
-        );
+        const isProtected = protectedRoutes.some((route) =>
+            pathnameWithoutLocale.includes(route),
+        )
 
         if (isProtected && !accessToken) {
-            const loginUrl = new URL(`/${locale}${routes.dangNhap.url}`, request.url);
+            const loginUrl = new URL(
+                `/${locale}${routes.dangNhap.url}`,
+                request.url,
+            )
 
             // optional: redirect back sau login
-            loginUrl.searchParams.set('redirect', pathnameWithoutLocale);
-            return NextResponse.redirect(loginUrl);
+            loginUrl.searchParams.set("redirect", pathnameWithoutLocale)
+            return NextResponse.redirect(loginUrl)
         }
 
-        return null;
-    };
+        return null
+    }
 }
 
 export default async function proxy(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+    const { pathname } = request.nextUrl
 
     // Run i18n middleware first
-    const intlResponse = intlMiddleware(request);
+    const intlResponse = intlMiddleware(request)
 
     // Extract locale from pathname
-    const pathnameLocale = pathname.split('/')[1];
-    const isValidLocale = routing.locales.includes(pathnameLocale as any);
+    const pathnameLocale = pathname.split("/")[1]
+    const isValidLocale = routing.locales.includes(pathnameLocale as any)
 
     if (!isValidLocale) {
-        return intlResponse;
+        return intlResponse
     }
 
     // Get pathname without locale
-    const pathnameWithoutLocale = pathname.replace(`/${pathnameLocale}`, '') || '/';
+    const pathnameWithoutLocale =
+        pathname.replace(`/${pathnameLocale}`, "") || "/"
 
     // Run auth middleware
-    const authMiddleware = createAuthMiddleware(pathnameLocale, pathnameWithoutLocale);
-    const authResponse = authMiddleware(request);
+    const authMiddleware = createAuthMiddleware(
+        pathnameLocale,
+        pathnameWithoutLocale,
+    )
+    const authResponse = authMiddleware(request)
 
     // If auth middleware returns a response (redirect), use it
     if (authResponse) {
-        return authResponse;
+        return authResponse
     }
 
     // Otherwise, use i18n response
-    return intlResponse;
+    return intlResponse
 }
 
 export const config = {
-    matcher: [
-        '/',
-        '/(vi|en|zh)/:path*',
-        '/((?!api|_next|_vercel|.*\\..*).*)'
-    ],
-};
+    matcher: ["/", "/(vi|en|zh)/:path*", "/((?!api|_next|_vercel|.*\\..*).*)"],
+}

@@ -1,13 +1,13 @@
-import { ICategory } from "@/types/category";
+import { ICategory } from "@/types/category"
 
 interface ICategoryResponse {
-    success: boolean;
-    data: ICategory[];
+    success: boolean
+    data: ICategory[]
 }
 
 interface IOneCategoryResponse {
-    success: boolean;
-    data: ICategory | null;
+    success: boolean
+    data: ICategory | null
 }
 
 export async function getCategories(
@@ -15,7 +15,7 @@ export async function getCategories(
 ): Promise<ICategoryResponse> {
     const queryString = params
         ? `?${new URLSearchParams(params as Record<string, any>).toString()}`
-        : "";
+        : ""
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL!}/api/categories${queryString}`,
@@ -25,21 +25,21 @@ export async function getCategories(
                     tags: ["categories"],
                 },
             },
-        );
+        )
 
         if (!res.ok) {
-            throw new Error("Failed to fetch categories");
+            throw new Error("Failed to fetch categories")
         }
 
-        return res.json();
+        return res.json()
     } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching categories:", error)
 
         // Fallback data
         return {
             success: false,
             data: [],
-        };
+        }
     }
 }
 
@@ -55,20 +55,20 @@ export async function getCategoryBySlug(
                     tags: ["categories", `category:${slug}`],
                 },
             },
-        );
+        )
 
         if (!res.ok) {
-            throw new Error("Failed to fetch category");
+            throw new Error("Failed to fetch category")
         }
 
-        return res.json();
+        return res.json()
     } catch (error) {
-        console.error("Error fetching category:", error);
+        console.error("Error fetching category:", error)
 
         // Fallback data
         return {
             success: false,
             data: null,
-        };
+        }
     }
 }

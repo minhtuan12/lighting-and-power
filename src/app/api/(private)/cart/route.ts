@@ -1,149 +1,140 @@
-import { withMiddleware } from "@/lib/api-handler";
-import { verifyToken } from "@/lib/middleware";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { NextRequest, NextResponse } from "next/server";
-import { CartService } from "../../(services)/cart.service";
-import { getRequestUser } from "@/lib/context";
+import { withMiddleware } from "@/lib/api-handler"
+import { verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { NextRequest, NextResponse } from "next/server"
+import { CartService } from "../../(services)/cart.service"
+import { getRequestUser } from "@/lib/context"
 
 // GET /api/cart - Get user's cart
 async function getCart(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = getRequestUser(request)
 
         if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const cart = await CartService.getCart(user.userId);
+        const cart = await CartService.getCart(user.userId)
 
         return NextResponse.json({
             success: true,
-            data: cart
-        });
-
+            data: cart,
+        })
     } catch (error: any) {
-        console.error('Get cart error:', error);
+        console.error("Get cart error:", error)
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
 // POST /api/cart - Add item to cart
 async function addToCart(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = getRequestUser(request)
 
         if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const body = await request.json();
-        const { productId, quantity } = body;
+        const body = await request.json()
+        const { productId, quantity } = body
 
         if (!productId) {
             return NextResponse.json(
                 { success: false, message: "Product ID is required" },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         if (!quantity || quantity < 1) {
             return NextResponse.json(
                 { success: false, message: "Valid quantity is required" },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         const cart = await CartService.addItem(user.userId, {
             productId,
-            quantity
-        });
+            quantity,
+        })
 
         return NextResponse.json({
             success: true,
             message: "Item added to cart",
-            data: cart
-        });
-
+            data: cart,
+        })
     } catch (error: any) {
-        console.error('Add to cart error:', error);
+        console.error("Add to cart error:", error)
 
-        if (error.message.includes('not found') ||
-            error.message.includes('not available') ||
-            error.message.includes('available in stock') ||
-            error.message.includes('Minimum order')) {
+        if (
+            error.message.includes("not found") ||
+            error.message.includes("not available") ||
+            error.message.includes("available in stock") ||
+            error.message.includes("Minimum order")
+        ) {
             return NextResponse.json(
                 { success: false, message: error.message },
-                { status: 400 }
-            );
+                { status: 400 },
+            )
         }
 
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
 // DELETE /api/cart - Clear cart
 async function clearCart(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = getRequestUser(request)
 
         if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const cart = await CartService.clearCart(user.userId);
+        const cart = await CartService.clearCart(user.userId)
 
         return NextResponse.json({
             success: true,
             message: "Cart cleared",
-            data: cart
-        });
-
+            data: cart,
+        })
     } catch (error: any) {
-        console.error('Clear cart error:', error);
+        console.error("Clear cart error:", error)
 
-        if (error.message === 'Cart not found') {
+        if (error.message === "Cart not found") {
             return NextResponse.json(
                 { success: false, message: error.message },
-                { status: 404 }
-            );
+                { status: 404 },
+            )
         }
 
         return NextResponse.json(
             { success: false, message: "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
-export const GET = withMiddleware(
-    getCart,
-    connectDbMiddleware,
-    verifyToken
-);
+export const GET = withMiddleware(getCart, connectDbMiddleware, verifyToken)
 
-export const POST = withMiddleware(
-    addToCart,
-    connectDbMiddleware,
-    verifyToken
-);
+export const POST = withMiddleware(addToCart, connectDbMiddleware, verifyToken)
 
 export const DELETE = withMiddleware(
     clearCart,
     connectDbMiddleware,
-    verifyToken
-);
+    verifyToken,
+)

@@ -1,38 +1,38 @@
-import { ProductService } from "@/app/api/(services)/product.service";
-import { withMiddleware } from "@/lib/api-handler";
-import { requireRole, verifyToken } from "@/lib/middleware";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { EUserRole } from "@/types/user";
-import { revalidateTag, updateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { ProductService } from "@/app/api/(services)/product.service"
+import { withMiddleware } from "@/lib/api-handler"
+import { requireRole, verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { EUserRole } from "@/types/user"
+import { revalidateTag, updateTag } from "next/cache"
+import { NextRequest, NextResponse } from "next/server"
 
 async function bulkDeleteProducts(request: NextRequest) {
     try {
-        const body = await request.json();
-        const { ids } = body;
+        const body = await request.json()
+        const { ids } = body
 
         if (!Array.isArray(ids) || ids.length === 0) {
             return NextResponse.json(
-                { success: false, message: 'IDs array is required' },
-                { status: 400 }
-            );
+                { success: false, message: "IDs array is required" },
+                { status: 400 },
+            )
         }
 
-        const result = await ProductService.deleteMany(ids);
+        const result = await ProductService.deleteMany(ids)
 
-        updateTag('products');
-        revalidateTag('products', { expire: 0 });
+        updateTag("products")
+        revalidateTag("products", { expire: 0 })
 
         return NextResponse.json({
             success: true,
-            data: result
-        });
+            data: result,
+        })
     } catch (error: any) {
-        console.error('Bulk delete products error:', error);
+        console.error("Bulk delete products error:", error)
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 

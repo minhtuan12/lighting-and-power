@@ -1,57 +1,61 @@
-'use client'
+"use client"
 
-import { routes } from '@/constants/routes';
-import { useAuth } from '@/hooks/use-me';
-import { showMessage } from '@/hooks/use-message';
-import { EUserRole } from '@/types/user';
-import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { routes } from "@/constants/routes"
+import { useAuth } from "@/hooks/use-me"
+import { showMessage } from "@/hooks/use-message"
+import { EUserRole } from "@/types/user"
+import { AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { useRouter } from "next/navigation"
+import React, { useEffect, useState } from "react"
 
 function AdminLogin() {
-    const [emailOrPhone, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [emailOrPhone, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
 
-    const router = useRouter();
-    const { loginAsync, isAuthenticated } = useAuth();
+    const router = useRouter()
+    const { loginAsync, isAuthenticated } = useAuth()
 
     const validateForm = () => {
         if (!emailOrPhone) {
-            setError('Vui lòng nhập email');
-            return false;
+            setError("Vui lòng nhập email")
+            return false
         }
 
         if (!/\S+@\S+\.\S+/.test(emailOrPhone)) {
-            setError('Email không hợp lệ');
-            return false;
+            setError("Email không hợp lệ")
+            return false
         }
 
         if (!password) {
-            setError('Vui lòng nhập mật khẩu');
-            return false;
+            setError("Vui lòng nhập mật khẩu")
+            return false
         }
 
         if (password.length < 6) {
-            setError('Mật khẩu phải có ít nhất 6 ký tự');
-            return false;
+            setError("Mật khẩu phải có ít nhất 6 ký tự")
+            return false
         }
 
-        return true;
-    };
+        return true
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
+        e.preventDefault()
+        setError("")
 
-        if (!validateForm()) return;
+        if (!validateForm()) return
 
-        setIsLoading(true);
+        setIsLoading(true)
 
         try {
-            const result = await loginAsync({ emailOrPhone, password, role: EUserRole.admin });
+            const result = await loginAsync({
+                emailOrPhone,
+                password,
+                role: EUserRole.admin,
+            })
 
             // Check if password change required
             // if (result.requirePasswordChange) {
@@ -61,23 +65,23 @@ function AdminLogin() {
 
             // Check role
             if (result.data.role !== EUserRole.admin) {
-                showMessage.error('Bạn không có quyền truy cập trang quản trị');
-                return;
+                showMessage.error("Bạn không có quyền truy cập trang quản trị")
+                return
             }
 
-            router.push(routes.account.url);
-            router.refresh();
+            router.push(routes.account.url)
+            router.refresh()
         } catch (err: any) {
-            showMessage.error(err.message || 'Đăng nhập thất bại');
+            showMessage.error(err.message || "Đăng nhập thất bại")
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
         if (isAuthenticated) {
-            router.push(routes.account.url);
-            return;
+            router.push(routes.account.url)
+            return
         }
     }, [isAuthenticated])
 
@@ -93,8 +97,12 @@ function AdminLogin() {
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
                             <Lock className="w-8 h-8 text-purple-600" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Admin Portal</h1>
-                        <p className="text-purple-100">Đăng nhập để quản lý hệ thống</p>
+                        <h1 className="text-2xl font-bold text-white mb-2">
+                            Admin Portal
+                        </h1>
+                        <p className="text-purple-100">
+                            Đăng nhập để quản lý hệ thống
+                        </p>
                     </div>
 
                     {/* Form */}
@@ -109,7 +117,10 @@ function AdminLogin() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Email Input */}
                             <div>
-                                <label htmlFor="emailOrPhone" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label
+                                    htmlFor="emailOrPhone"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                >
                                     Email
                                 </label>
                                 <div className="relative">
@@ -118,7 +129,9 @@ function AdminLogin() {
                                         id="emailOrPhone"
                                         type="emailOrPhone"
                                         value={emailOrPhone}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
                                         className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
                                         placeholder="example@example.com"
                                         disabled={isLoading}
@@ -128,27 +141,40 @@ function AdminLogin() {
 
                             {/* Password Input */}
                             <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label
+                                    htmlFor="password"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                >
                                     Mật khẩu
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <input
                                         id="password"
-                                        type={showPassword ? 'text' : 'password'}
+                                        type={
+                                            showPassword ? "text" : "password"
+                                        }
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
                                         className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
                                         placeholder="••••••••"
                                         disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                         disabled={isLoading}
                                     >
-                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        {showPassword ? (
+                                            <EyeOff className="w-5 h-5" />
+                                        ) : (
+                                            <Eye className="w-5 h-5" />
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -161,9 +187,25 @@ function AdminLogin() {
                             >
                                 {isLoading ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <svg
+                                            className="animate-spin h-5 w-5 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
                                         </svg>
                                         <span>Đang đăng nhập...</span>
                                     </>
@@ -176,7 +218,7 @@ function AdminLogin() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default AdminLogin;
+export default AdminLogin

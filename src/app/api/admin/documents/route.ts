@@ -1,60 +1,59 @@
-
-import connectDb from "@/lib/db";
-import { revalidateTag, updateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
-import { DocumentService } from "../../(services)/document.service";
+import connectDb from "@/lib/db"
+import { revalidateTag, updateTag } from "next/cache"
+import { NextRequest, NextResponse } from "next/server"
+import { DocumentService } from "../../(services)/document.service"
 
 // ===================== GET /api/admin/documents =====================
 async function getDocuments(request: NextRequest) {
     try {
-        await connectDb();
-        const { searchParams } = new URL(request.url);
-        const type = searchParams.get('type');
-        const contentType = searchParams.get('contentType');
-        const isPublished = searchParams.get('isPublished');
-        const search = searchParams.get('search');
-        const page = parseInt(searchParams.get('page') || '1');
+        await connectDb()
+        const { searchParams } = new URL(request.url)
+        const type = searchParams.get("type")
+        const contentType = searchParams.get("contentType")
+        const isPublished = searchParams.get("isPublished")
+        const search = searchParams.get("search")
+        const page = parseInt(searchParams.get("page") || "1")
 
-        const filters: any = { page };
+        const filters: any = { page }
 
-        if (type) filters.type = type;
-        if (contentType) filters.contentType = contentType;
-        if (isPublished !== null) filters.isPublished = isPublished === 'true';
-        if (search) filters.search = search;
+        if (type) filters.type = type
+        if (contentType) filters.contentType = contentType
+        if (isPublished !== null) filters.isPublished = isPublished === "true"
+        if (search) filters.search = search
 
-        const data = await DocumentService.getAll(filters);
+        const data = await DocumentService.getAll(filters)
 
         return NextResponse.json({
             success: true,
-            data
-        });
+            data,
+        })
     } catch (error: any) {
-        console.error('Get documents error:', error);
+        console.error("Get documents error:", error)
         return NextResponse.json(
-            { success: false, message: error.message || 'An error occurred' },
-            { status: 500 }
-        );
+            { success: false, message: error.message || "An error occurred" },
+            { status: 500 },
+        )
     }
 }
 
 // ===================== POST /api/admin/documents =====================
 async function createDocument(request: NextRequest) {
     try {
-        await connectDb();
-        const body = await request.json();
+        await connectDb()
+        const body = await request.json()
 
         if (!body.title) {
             return NextResponse.json(
-                { success: false, message: 'Title is required' },
-                { status: 400 }
-            );
+                { success: false, message: "Title is required" },
+                { status: 400 },
+            )
         }
 
         if (!body.contentType) {
             return NextResponse.json(
-                { success: false, message: 'Content type is required' },
-                { status: 400 }
-            );
+                { success: false, message: "Content type is required" },
+                { status: 400 },
+            )
         }
 
         const document = await DocumentService.create({
@@ -68,25 +67,30 @@ async function createDocument(request: NextRequest) {
             fileSize: body.fileSize,
             mimeType: body.mimeType,
             isPublished: body.isPublished ?? true,
-        });
+        })
 
-        updateTag('documents');
-        revalidateTag('documents', { expire: 0 });
+        updateTag("documents")
+        revalidateTag("documents", { expire: 0 })
 
-        return NextResponse.json({
-            success: true,
-            message: 'Document created successfully',
-            data: document
-        }, { status: 201 });
-    } catch (error: any) {
-        console.error('Create document error:', error);
         return NextResponse.json(
-            { success: false, message: error.message || 'Failed to create document' },
-            { status: 500 }
-        );
+            {
+                success: true,
+                message: "Document created successfully",
+                data: document,
+            },
+            { status: 201 },
+        )
+    } catch (error: any) {
+        console.error("Create document error:", error)
+        return NextResponse.json(
+            {
+                success: false,
+                message: error.message || "Failed to create document",
+            },
+            { status: 500 },
+        )
     }
 }
 
-export const GET = getDocuments;
-export const POST = createDocument;
-
+export const GET = getDocuments
+export const POST = createDocument

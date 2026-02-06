@@ -1,54 +1,52 @@
-import { UserService } from "@/app/api/(services)/user.service";
-import { withMiddleware } from "@/lib/api-handler";
-import { getRequestUser } from "@/lib/context";
-import { verifyToken } from "@/lib/middleware";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { NextRequest, NextResponse } from "next/server";
+import { UserService } from "@/app/api/(services)/user.service"
+import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
+import { verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function getMe(request: NextRequest): Promise<any> {
     try {
         // const userId = request.user?.id;
-        const authUser = getRequestUser(request);
+        const authUser = getRequestUser(request)
         if (!authUser?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found in token" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const user = await UserService.getProfile(authUser.userId);
+        const user = await UserService.getProfile(authUser.userId)
 
         return NextResponse.json({
             success: true,
-            data: user
-        });
-
+            data: user,
+        })
     } catch (error: any) {
-        console.error('Get me error:', error);
+        console.error("Get me error:", error)
 
-        if (error.message === 'User not found') {
+        if (error.message === "User not found") {
             return NextResponse.json(
                 { success: false, message: "User not found" },
-                { status: 404 }
-            );
+                { status: 404 },
+            )
         }
 
-        if (error.message === 'Account inactive') {
+        if (error.message === "Account inactive") {
             return NextResponse.json(
                 { success: false, message: "Account has been deactivated" },
-                { status: 403 }
-            );
+                { status: 403 },
+            )
         }
 
         return NextResponse.json(
-            { success: false, message: "An error occurred, please try again later" },
-            { status: 500 }
-        );
+            {
+                success: false,
+                message: "An error occurred, please try again later",
+            },
+            { status: 500 },
+        )
     }
 }
 
-export const GET = withMiddleware(
-    getMe,
-    connectDbMiddleware,
-    verifyToken,
-)
+export const GET = withMiddleware(getMe, connectDbMiddleware, verifyToken)

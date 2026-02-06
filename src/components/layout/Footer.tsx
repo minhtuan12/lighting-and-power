@@ -1,27 +1,33 @@
-import { ICategory } from '@/types/category';
-import { IConfig } from '@/types/config';
-import { Col, Flex, Row } from 'antd';
-import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
-import { Icon } from '../Icon';
+import { ICategory } from "@/types/category"
+import { IConfig } from "@/types/config"
+import { Col, Flex, Row } from "antd"
+import { getTranslations } from "next-intl/server"
+import Link from "next/link"
+import { Icon } from "../Icon"
 
 const social = [
-    { key: 'facebook', icon: <Icon src='/images/fb.png' /> },
-    { key: 'tiktok', icon: <Icon src='/images/tiktok.png' /> },
-    { key: 'youtube', icon: <Icon src='/images/youtube.png' /> },
-];
+    { key: "facebook", icon: <Icon src="/images/fb.png" /> },
+    { key: "tiktok", icon: <Icon src="/images/tiktok.png" /> },
+    { key: "youtube", icon: <Icon src="/images/youtube.png" /> },
+]
 
-export default async function Footer({ config, categories }: { config: IConfig, categories: ICategory[] }) {
-    const t = await getTranslations('common');
+export default async function Footer({
+    config,
+    categories,
+}: {
+    config: IConfig
+    categories: ICategory[]
+}) {
+    const t = await getTranslations("common")
     return (
         <footer className="bg-[#363636] text-gray-100 w-full">
             <div className="max-w-[1140px] mx-auto px-4 py-12">
                 {/* Main Content */}
                 <Row gutter={64}>
-                    <Col span={10} className='flex flex-col justify-between'>
+                    <Col span={10} className="flex flex-col justify-between">
                         <Flex vertical>
                             <div className="flex items-center gap-2 mb-6">
-                                <Icon src='/images/logo.png' size={300} />
+                                <Icon src="/images/logo.png" size={300} />
                             </div>
 
                             <div className="mb-6">
@@ -29,9 +35,12 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                     {config.companyName.toUpperCase()}
                                 </h3>
                                 <div className="space-y-2 text-sm text-white font-normal text-[13px]">
-                                    <p>{t('address')}: {config.address}</p>
+                                    <p>
+                                        {t("address")}: {config.address}
+                                    </p>
                                     <div className="flex items-center text-white">
-                                        {t('email')}:&nbsp;<a
+                                        {t("email")}:&nbsp;
+                                        <a
                                             href={`mailto:${config.email}`}
                                             className="hover:text-orange-500 transition-colors"
                                         >
@@ -39,8 +48,9 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                         </a>
                                     </div>
                                     <div className="flex items-center">
-                                        Hotline:&nbsp;<a
-                                            href={`tel:${config.hotline.replace(/\s/g, '')}`}
+                                        Hotline:&nbsp;
+                                        <a
+                                            href={`tel:${config.hotline.replace(/\s/g, "")}`}
                                             className="hover:text-orange-500 !transition-colors"
                                         >
                                             {config.hotline}
@@ -51,12 +61,21 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                         </Flex>
 
                         {/* Social Links */}
-                        <Flex gap={12} align='center'>
-                            <p className="text-sm font-semibold text-gray-300">{t('contact')}:</p>
+                        <Flex gap={12} align="center">
+                            <p className="text-sm font-semibold text-gray-300">
+                                {t("contact")}:
+                            </p>
                             <div className="flex gap-3">
                                 {social.map(({ key, icon }) => {
-                                    const url = config?.social && config.social?.[key as keyof typeof config.social] !== undefined ?
-                                        config.social[key as keyof typeof config.social] : '#';
+                                    const url =
+                                        config?.social &&
+                                        config.social?.[
+                                            key as keyof typeof config.social
+                                        ] !== undefined
+                                            ? config.social[
+                                                  key as keyof typeof config.social
+                                              ]
+                                            : "#"
                                     return (
                                         <Link
                                             key={key}
@@ -67,7 +86,7 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                         >
                                             {icon}
                                         </Link>
-                                    );
+                                    )
                                 })}
                             </div>
                         </Flex>
@@ -82,8 +101,13 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                         href={`/category/${item.slug}`}
                                         className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
                                     >
-                                        <Icon src='/images/right-arrow.png' size={8} />
-                                        <span className="line-clamp-1">{item.name}</span>
+                                        <Icon
+                                            src="/images/right-arrow.png"
+                                            size={8}
+                                        />
+                                        <span className="line-clamp-1">
+                                            {item.name}
+                                        </span>
                                     </Link>
                                 </li>
                             ))}
@@ -99,8 +123,13 @@ export default async function Footer({ config, categories }: { config: IConfig, 
                                         href={`/category/${item.slug}`}
                                         className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
                                     >
-                                        <Icon src='/images/right-arrow.png' size={8} />
-                                        <span className="line-clamp-1 text-ellipsis">{item.name}</span>
+                                        <Icon
+                                            src="/images/right-arrow.png"
+                                            size={8}
+                                        />
+                                        <span className="line-clamp-1 text-ellipsis">
+                                            {item.name}
+                                        </span>
                                     </Link>
                                 </li>
                             ))}
@@ -113,9 +142,12 @@ export default async function Footer({ config, categories }: { config: IConfig, 
 
                 {/* Bottom Section */}
                 <div className="pt-6 text-center text-sm text-gray-400">
-                    <p>&copy; {new Date().getFullYear()} {config.companyName}. All rights reserved.</p>
+                    <p>
+                        &copy; {new Date().getFullYear()} {config.companyName}.
+                        All rights reserved.
+                    </p>
                 </div>
             </div>
         </footer>
-    );
+    )
 }

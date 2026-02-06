@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import JotaiProvider from "@/app/[locale]/(providers)/jotai-provider";
-import QueryProvider from "@/app/[locale]/(providers)/query-provider";
-import { useLogout } from "@/hooks/use-me";
-import { IUser } from "@/types/user";
-import { UserOutlined } from "@ant-design/icons";
-import { Avatar, Dropdown, Flex } from "antd";
-import { MenuProps } from "antd/lib";
-import { ChevronDown, LogOut } from "lucide-react";
-import { Suspense } from "react";
-import Loading from "../Loading";
+import JotaiProvider from "@/app/[locale]/(providers)/jotai-provider"
+import QueryProvider from "@/app/[locale]/(providers)/query-provider"
+import { useLogout } from "@/hooks/use-me"
+import { IUser } from "@/types/user"
+import { UserOutlined } from "@ant-design/icons"
+import { Avatar, Dropdown, Flex } from "antd"
+import { MenuProps } from "antd/lib"
+import { ChevronDown, LogOut } from "lucide-react"
+import { Suspense } from "react"
+import Loading from "../Loading"
 
 function UserMenuContent({ user }: { user: IUser }) {
-    const { logoutAsync } = useLogout();
+    const { logoutAsync } = useLogout()
     const items: MenuProps["items"] = [
         {
             key: "1",
@@ -36,7 +36,7 @@ function UserMenuContent({ user }: { user: IUser }) {
                 </Flex>
             ),
         },
-    ];
+    ]
 
     return (
         <Suspense fallback={<Loading size="small" />}>
@@ -51,7 +51,7 @@ function UserMenuContent({ user }: { user: IUser }) {
                 </Flex>
             </Dropdown>
         </Suspense>
-    );
+    )
 }
 
 export default function UserMenu({ user }: { user: IUser }) {
@@ -61,5 +61,5 @@ export default function UserMenu({ user }: { user: IUser }) {
                 <UserMenuContent user={user} />
             </QueryProvider>
         </JotaiProvider>
-    );
+    )
 }

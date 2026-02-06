@@ -1,17 +1,17 @@
-import { routes } from "@/constants/routes";
-import { getCurrentUser } from "@/fetch-data/auth";
-import { ICategory } from "@/types/category";
-import { IConfig } from "@/types/config";
-import { Button, Col, Flex, Input, Menu, MenuProps, Row } from "antd";
-import { ChevronDown } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import Cart from "../Cart";
-import { Icon } from "../Icon";
-import LanguageCurrencySwitcher from "../LanguageCurrencySwitcher";
-import UserMenu from "./UserMenu";
+import { routes } from "@/constants/routes"
+import { getCurrentUser } from "@/fetch-data/auth"
+import { ICategory } from "@/types/category"
+import { IConfig } from "@/types/config"
+import { Button, Col, Flex, Input, Menu, MenuProps, Row } from "antd"
+import { ChevronDown } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import Link from "next/link"
+import Cart from "../Cart"
+import { Icon } from "../Icon"
+import LanguageCurrencySwitcher from "../LanguageCurrencySwitcher"
+import UserMenu from "./UserMenu"
 
-type MenuItem = Required<MenuProps>["items"][number];
+type MenuItem = Required<MenuProps>["items"][number]
 
 function convertCategories(categories: ICategory[]): MenuItem[] {
     return categories.map((cat: ICategory) => ({
@@ -20,18 +20,18 @@ function convertCategories(categories: ICategory[]): MenuItem[] {
         ...(cat?.children && cat.children.length > 0
             ? { children: convertCategories(cat?.children || []) }
             : {}),
-    }));
+    }))
 }
 
 export default async function Header({
     config,
     categories,
 }: {
-    config: IConfig;
-    categories: ICategory[];
+    config: IConfig
+    categories: ICategory[]
 }) {
-    const t = await getTranslations("common");
-    const { success, data } = await getCurrentUser();
+    const t = await getTranslations("common")
+    const { success, data } = await getCurrentUser()
     const items: MenuItem[] = [
         {
             label: (
@@ -73,7 +73,7 @@ export default async function Header({
             ),
             key: routes.lienHe.url,
         },
-    ];
+    ]
 
     return (
         <header className="fixed top-0 z-[999] w-full bg-white">
@@ -158,5 +158,5 @@ export default async function Header({
                 </Flex>
             </div>
         </header>
-    );
+    )
 }

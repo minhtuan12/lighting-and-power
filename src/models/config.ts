@@ -1,5 +1,5 @@
-import { IConfig } from '@/types/config';
-import mongoose, { Schema } from 'mongoose';
+import { IConfig } from "@/types/config"
+import mongoose, { Schema } from "mongoose"
 
 const ConfigSchema = new Schema<IConfig>(
     {
@@ -17,17 +17,18 @@ const ConfigSchema = new Schema<IConfig>(
         },
         banners: {
             type: [String],
-            required: true
+            required: true,
         },
     },
     {
-        timestamps: true
-    }
-);
+        timestamps: true,
+    },
+)
 
 // Only allow one config document
-ConfigSchema.index({}, { unique: true });
+ConfigSchema.index({}, { unique: true })
 
-const Config = mongoose.models.Config || mongoose.model<IConfig>('Config', ConfigSchema);
+const Config =
+    mongoose.models.Config || mongoose.model<IConfig>("Config", ConfigSchema)
 
-export default Config;
+export default Config

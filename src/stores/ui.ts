@@ -1,4 +1,4 @@
-import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
-import { atom } from "jotai";
+import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb"
+import { atom } from "jotai"
 
-export const breadcrumbAtom = atom<BreadcrumbItemType[]>([]);
+export const breadcrumbAtom = atom<BreadcrumbItemType[]>([])

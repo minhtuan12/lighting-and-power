@@ -1,51 +1,48 @@
-
-import { withMiddleware } from '@/lib/api-handler';
-import { requireRole, verifyToken } from '@/lib/middleware';
-import { connectDbMiddleware } from '@/lib/middleware/connect-db';
-import { EUserRole } from '@/types/user';
-import { revalidateTag, updateTag } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
-import { ConfigService } from '../../(services)/config.service';
+import { withMiddleware } from "@/lib/api-handler"
+import { requireRole, verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { EUserRole } from "@/types/user"
+import { revalidateTag, updateTag } from "next/cache"
+import { NextRequest, NextResponse } from "next/server"
+import { ConfigService } from "../../(services)/config.service"
 
 // GET - Public config (for frontend)
 async function getConfig(request: NextRequest) {
     try {
-        const config = await ConfigService.getConfig();
+        const config = await ConfigService.getConfig()
 
         return NextResponse.json({
             success: true,
-            data: config
-        });
-
+            data: config,
+        })
     } catch (error: any) {
-        console.error('Get config error:', error);
+        console.error("Get config error:", error)
         return NextResponse.json(
             { success: false, message: error.message },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
 async function updateConfig(request: NextRequest) {
     try {
-        const body = await request.json();
-        const config = await ConfigService.updateConfig(body);
+        const body = await request.json()
+        const config = await ConfigService.updateConfig(body)
 
-        updateTag('config');
-        revalidateTag('config', { expire: 0 });
+        updateTag("config")
+        revalidateTag("config", { expire: 0 })
 
         return NextResponse.json({
             success: true,
-            message: 'Config updated successfully',
-            data: config
-        });
-
+            message: "Config updated successfully",
+            data: config,
+        })
     } catch (error: any) {
-        console.error('Update config error:', error);
+        console.error("Update config error:", error)
         return NextResponse.json(
             { success: false, message: error.message },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
@@ -53,12 +50,12 @@ export const GET = withMiddleware(
     getConfig,
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin)
+    requireRole(EUserRole.admin),
 )
 
 export const PUT = withMiddleware(
     updateConfig,
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin)
+    requireRole(EUserRole.admin),
 )

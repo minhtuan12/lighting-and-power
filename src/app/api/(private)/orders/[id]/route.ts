@@ -1,59 +1,58 @@
-import { OrderService } from "@/app/api/(services)/order.service";
-import { withMiddleware } from "@/lib/api-handler";
-import { getRequestUser } from "@/lib/context";
-import { verifyToken } from "@/lib/middleware";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { NextRequest, NextResponse } from "next/server";
+import { OrderService } from "@/app/api/(services)/order.service"
+import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
+import { verifyToken } from "@/lib/middleware"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { NextRequest, NextResponse } from "next/server"
 
 // GET /api/orders/[id] - Lấy chi tiết đơn hàng
 async function getOrderDetail(
     request: NextRequest,
-    context?: { params: Promise<{ id: string }> }
+    context?: { params: Promise<{ id: string }> },
 ) {
     try {
-        const user = getRequestUser(request);
-        const params = await context?.params;
+        const user = getRequestUser(request)
+        const params = await context?.params
 
         if (!params?.id) {
             return NextResponse.json(
                 { success: false, message: "Order ID not found" },
-                { status: 404 }
-            );
+                { status: 404 },
+            )
         }
 
         if (!user?.userId) {
             return NextResponse.json(
                 { success: false, message: "User ID not found" },
-                { status: 401 }
-            );
+                { status: 401 },
+            )
         }
 
-        const order = await OrderService.getOrderDetail(user.userId, params.id);
+        const order = await OrderService.getOrderDetail(user.userId, params.id)
 
         return NextResponse.json({
             success: true,
-            data: order
-        });
-
+            data: order,
+        })
     } catch (error: any) {
-        console.error('Get order detail error:', error);
+        console.error("Get order detail error:", error)
 
-        if (error.message === 'Order not found') {
+        if (error.message === "Order not found") {
             return NextResponse.json(
                 { success: false, message: error.message },
-                { status: 404 }
-            );
+                { status: 404 },
+            )
         }
 
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
-            { status: 500 }
-        );
+            { status: 500 },
+        )
     }
 }
 
 export const GET = withMiddleware(
     getOrderDetail,
     connectDbMiddleware,
-    verifyToken
-);
+    verifyToken,
+)

@@ -1,39 +1,42 @@
-import { DocumentService } from "@/app/api/(services)/document.service";
-import { withMiddleware } from "@/lib/api-handler";
-import { connectDbMiddleware } from "@/lib/middleware/connect-db";
-import { NextRequest, NextResponse } from "next/server";
+import { DocumentService } from "@/app/api/(services)/document.service"
+import { withMiddleware } from "@/lib/api-handler"
+import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { NextRequest, NextResponse } from "next/server"
 
-async function getDocumentById(request: NextRequest, context?: { params: Promise<{ id: string }> }) {
+async function getDocumentById(
+    request: NextRequest,
+    context?: { params: Promise<{ id: string }> },
+) {
     try {
-        const params = await context?.params;
+        const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
-                { success: false, message: 'Document not found' },
-                { status: 404 }
-            );
+                { success: false, message: "Document not found" },
+                { status: 404 },
+            )
         }
 
-        const document = await DocumentService.getById(params.id);
+        const document = await DocumentService.getById(params.id)
 
         return NextResponse.json({
             success: true,
-            data: document
-        });
+            data: document,
+        })
     } catch (error: any) {
-        console.error('Get document error:', error);
+        console.error("Get document error:", error)
 
-        if (error.message === 'Document not found') {
+        if (error.message === "Document not found") {
             return NextResponse.json(
-                { success: false, message: 'Document not found' },
-                { status: 404 }
-            );
+                { success: false, message: "Document not found" },
+                { status: 404 },
+            )
         }
 
         return NextResponse.json(
-            { success: false, message: error.message || 'An error occurred' },
-            { status: 500 }
-        );
+            { success: false, message: error.message || "An error occurred" },
+            { status: 500 },
+        )
     }
 }
 
-export const GET = withMiddleware(getDocumentById, connectDbMiddleware);
+export const GET = withMiddleware(getDocumentById, connectDbMiddleware)
