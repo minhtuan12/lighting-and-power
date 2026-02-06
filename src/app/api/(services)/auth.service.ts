@@ -72,12 +72,13 @@ export class AuthService {
         return { account: safeAccount };
     }
 
-    static async login(emailOrPhone: string, password: string) {
+    static async login(emailOrPhone: string, password: string, role: string) {
         const account = await User.findOne({
             $or: [
                 { email: emailOrPhone },
                 { phone: emailOrPhone }
-            ]
+            ],
+            role,
         });
 
         if (!account) throw new Error('Account not found');

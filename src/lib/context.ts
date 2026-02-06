@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
 
 interface UserMetadata {
-    userId: string;
-    role: string;
+    userId?: string;
+    role?: string;
     email?: string;
+    locale?: string;
     [key: string]: any;
 }
 

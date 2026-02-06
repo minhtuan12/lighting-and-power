@@ -19,6 +19,10 @@
 
     .ant-btn-primary {
         background-color: var(--ant-primary-color) !important;
+
+        &:hover {
+            background-color: var(--primary-hover) !important;
+        }
     }
 
     .card-custom {

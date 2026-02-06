@@ -1,12 +1,13 @@
-import { routes } from '@/constants/routes';
-import { fetchAPI } from '@/lib/api-client';
-import { EUserRole, IUser } from '@/types/user';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { routes } from "@/constants/routes";
+import { fetchAPI } from "@/lib/api-client";
+import { EUserRole, IUser } from "@/types/user";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export interface LoginCredentials {
     emailOrPhone: string;
     password: string;
+    role: EUserRole;
 }
 
 export interface LoginResponse {
@@ -15,32 +16,32 @@ export interface LoginResponse {
 
 // ============= QUERY KEYS =============
 const AUTH_KEYS = {
-    me: ['auth', 'me'] as const,
-    user: ['auth', 'user'] as const,
+    me: ["auth", "me"] as const,
+    user: ["auth", "user"] as const,
 };
 
 // ============= API FUNCTIONS =============
 const authAPI = {
     login: (credentials: LoginCredentials): Promise<LoginResponse> => {
-        return fetchAPI('/auth/login', {
-            method: 'POST',
+        return fetchAPI("/auth/login", {
+            method: "POST",
             body: JSON.stringify(credentials),
         });
     },
 
     logout: (): Promise<void> => {
-        return fetchAPI('/auth/logout', {
-            method: 'POST',
+        return fetchAPI("/auth/logout", {
+            method: "POST",
         });
     },
 
     getMe: (): Promise<LoginResponse> => {
-        return fetchAPI('/auth/me');
+        return fetchAPI("/auth/me");
     },
 
     refreshToken: (refreshToken: string): Promise<LoginResponse> => {
-        return fetchAPI('/auth/refresh', {
-            method: 'POST',
+        return fetchAPI("/auth/refresh", {
+            method: "POST",
             body: JSON.stringify({ refreshToken }),
         });
     },
@@ -60,7 +61,7 @@ export function useLogin() {
             queryClient.invalidateQueries({ queryKey: AUTH_KEYS.me });
         },
         onError: (error: Error) => {
-            console.error('Login failed:', error.message);
+            console.error("Login failed:", error.message);
 
             // Clear user cache
             queryClient.setQueryData(AUTH_KEYS.me, null);
@@ -93,18 +94,18 @@ export function useLogout() {
             queryClient.setQueryData(AUTH_KEYS.me, null);
 
             // Redirect to login
-            router.push(routes.dangNhap.url);
+            router.push(routes.trangChu.url);
             router.refresh(); // Refresh để server components update
         },
         onError: (error: Error) => {
-            console.error('Logout failed:', error.message);
+            console.error("Logout failed:", error.message);
 
             // Vẫn clear cache dù API fail
             queryClient.setQueryData(AUTH_KEYS.me, null);
             queryClient.clear();
 
             // Redirect anyway
-            router.push(routes.dangNhap.url);
+            router.push(routes.trangChu.url);
             router.refresh();
         },
     });
@@ -120,14 +121,7 @@ export function useLogout() {
 export function useMe() {
     const queryClient = useQueryClient();
 
-    const {
-        data,
-        isLoading,
-        isError,
-        error,
-        refetch,
-        isFetching,
-    } = useQuery({
+    const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
         queryKey: AUTH_KEYS.me,
         queryFn: authAPI.getMe,
         retry: false, // Không retry nếu fail
@@ -158,7 +152,13 @@ export function useMe() {
 
 // ============= useAuth Hook (Combined) =============
 export function useAuth() {
-    const { login, loginAsync, isLoading: isLoginLoading, error: loginError, data: loginData } = useLogin();
+    const {
+        login,
+        loginAsync,
+        isLoading: isLoginLoading,
+        error: loginError,
+        data: loginData,
+    } = useLogin();
     const { logout, logoutAsync, isLoading: isLogoutLoading } = useLogout();
     const {
         user,

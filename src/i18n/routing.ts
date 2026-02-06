@@ -31,6 +31,10 @@ export const routing = defineRouting({
             en: '/cart',
             vi: '/gio-hang'
         },
+        [routes.trangCaNhan.url]: {
+            en: '/profile',
+            vi: '/trang-ca-nhan'
+        },
         [routes.taiLieuDienTu.url]: {
             en: '/documents',
             vi: '/tai-lieu-dien-tu'
