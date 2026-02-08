@@ -98,10 +98,9 @@ const CategoryForm = () => {
     const handleSubmit = async (values: any) => {
         try {
             // Upload images first
-            showMessage.loading("Đang tải ảnh lên...")
             let uploadedImageUrl: string = ""
-
             if (imageFile && typeof imageFile !== "string") {
+                showMessage.loading("Đang tải ảnh lên...")
                 uploadedImageUrl = await uploadImagesToCloudinary(imageFile)
             }
             const formData: Partial<ICategory> = {

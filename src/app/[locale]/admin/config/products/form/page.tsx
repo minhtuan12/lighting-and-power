@@ -169,14 +169,9 @@ const ProductForm = () => {
             )
 
             // Upload images first
-            showMessage.loading("Đang tải ảnh lên...")
             let uploadedImageUrls: string[] = []
-
-            if (isEdit && id) {
-                // For edit: only upload new images (that have files)
-                uploadedImageUrls = await uploadImagesToCloudinary(validFiles)
-            } else {
-                // For create: upload all images
+            if (validFiles.length > 0) {
+                showMessage.loading("Đang tải ảnh lên...")
                 uploadedImageUrls = await uploadImagesToCloudinary(validFiles)
             }
 

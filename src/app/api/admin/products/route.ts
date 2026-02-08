@@ -2,9 +2,9 @@ import { withMiddleware } from "@/lib/api-handler"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { EUserRole } from "@/types/user"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { ProductService } from "../../(services)/product.service"
-import { revalidateTag, updateTag } from "next/cache"
 
 // ===================== GET /api/admin/products =====================
 async function getProducts(request: NextRequest) {
@@ -117,7 +117,6 @@ async function createProduct(request: NextRequest) {
             relatedProducts,
         })
 
-        updateTag("products")
         revalidateTag("products", { expire: 0 })
 
         return NextResponse.json(
