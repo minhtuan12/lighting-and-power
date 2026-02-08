@@ -93,8 +93,10 @@ export const Settings = () => {
             const validFiles = imageFiles.filter(
                 (f) => f !== null && f !== undefined,
             )
-            uploadedImageUrls = await uploadImagesToCloudinary(validFiles)
-            showMessage.loading("Đang tải ảnh lên...")
+            if (validFiles.length > 0) {
+                showMessage.loading("Đang tải ảnh lên...")
+                uploadedImageUrls = await uploadImagesToCloudinary(validFiles)
+            }
 
             let configData: Omit<IConfig, "_id"> = {
                 companyName: values.companyName,
@@ -136,7 +138,7 @@ export const Settings = () => {
                 email: config.email,
                 address: config.address,
                 workingHours: config.workingHours,
-                social: config.social,
+                ...(config.social ?? {}),
             })
 
             if (config.banners && config.banners.length > 0) {
@@ -253,7 +255,7 @@ export const Settings = () => {
                                     <Form.Item name={value}>
                                         <FloatingInput
                                             label={label}
-                                            placeholder={`Link ${label}`}
+                                            placeholder={`${label === 'Zalo' ? '' : 'Link'} ${label}`}
                                         />
                                     </Form.Item>
                                 </Col>

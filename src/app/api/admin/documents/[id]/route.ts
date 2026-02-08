@@ -3,7 +3,7 @@ import { withMiddleware } from "@/lib/api-handler"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { EUserRole } from "@/types/user"
-import { revalidateTag, updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
 // ===================== PUT /api/admin/documents/[id] =====================
@@ -22,7 +22,6 @@ async function updateDocument(
         const body = await request.json()
         const document = await DocumentService.update(params.id, body)
 
-        updateTag(`documents:${params.id}`)
         revalidateTag(`documents:${params.id}`, { expire: 0 })
 
         return NextResponse.json({
@@ -62,7 +61,6 @@ async function deleteDocument(
         }
         const result = await DocumentService.delete(params.id)
 
-        updateTag("documents")
         revalidateTag("documents", { expire: 0 })
 
         return NextResponse.json({

@@ -4,7 +4,7 @@ import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { SlugGenerator } from "@/lib/slug"
 import Category from "@/models/category"
 import { EUserRole } from "@/types/user"
-import { revalidateTag, updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { CategoryService } from "../../(services)/category.service"
 
@@ -86,7 +86,6 @@ async function createCategory(request: NextRequest) {
             metaKeywords,
         })
 
-        updateTag("cagtegories")
         revalidateTag("categories", { expire: 0 })
 
         return NextResponse.json(

@@ -1,5 +1,5 @@
 import connectDb from "@/lib/db"
-import { revalidateTag, updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { DocumentService } from "../../(services)/document.service"
 
@@ -69,7 +69,6 @@ async function createDocument(request: NextRequest) {
             isPublished: body.isPublished ?? true,
         })
 
-        updateTag("documents")
         revalidateTag("documents", { expire: 0 })
 
         return NextResponse.json(
