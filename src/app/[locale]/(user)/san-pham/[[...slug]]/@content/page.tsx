@@ -34,14 +34,14 @@ function CategoriesContent({ categories, slugs }: ICategoryContent) {
                 return (
                     <Link
                         href={link}
-                        className="hover:shadow-md flex flex-col justify-between !w-[190px] gap-3 border border-[#D6D6D6] rounded-[10px] !px-3 !pt-3 !pb-5 h-[218px]"
+                        className="hover:shadow-md flex flex-col !w-[190px] gap-3 border border-[#D6D6D6] rounded-[10px] !px-3 !pt-3 !pb-5 h-[218px]"
                         key={c._id}
                     >
                         <DefaultImage
                             src={"/images/electronic.jpg"}
                             className="w-full h-[135px]"
                         />
-                        <h3 className="line-clamp-2 w-full text-[13px] text-black">
+                        <h3 className="line-clamp-2 w-full text-[13px] text-black px-1">
                             {c.name}
                         </h3>
                     </Link>

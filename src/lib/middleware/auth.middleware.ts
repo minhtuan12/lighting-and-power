@@ -36,7 +36,6 @@ export async function verifyToken(request: NextRequest): Promise<any> {
                 { status: 404 },
             )
         }
-        w
 
         setRequestUser(request, {
             ...getRequestUser(request),

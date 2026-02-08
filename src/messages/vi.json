@@ -14,21 +14,31 @@
         "email": "Email",
         "language": "Ngôn ngữ",
         "currency": "Tiền tệ",
-        "apply": "Áp dụng"
+        "apply": "Áp dụng",
+        "profile": "Trang cá nhân",
+        "logout": "Đăng xuất"
     },
     "form": {
-        "enter": "Nhập {field}"
+        "enter": "Nhập {field}",
+        "ctaSave": "Lưu thay đổi",
+        "select": "Chọn {field}",
+        "updateFailed": "Cập nhật thất bại",
+        "updateSuccess": "Cập nhật thành công"
     },
     "auth": {
         "fullName": "Họ và tên",
         "email": "Email",
         "phone": "Số điện thoại",
+        "username": "Tên tài khoản",
         "password": "Mật khẩu",
         "confirmPassword": "Xác nhận mật khẩu",
         "loginSuccess": "Đăng nhập thành công",
         "registerSuccess": "Đăng ký thành công",
         "invalidCredentials": "Email/số điện thoại hoặc mật khẩu không đúng",
-        "emailOrPhone": "Email/Số điện thoại"
+        "emailOrPhone": "Email/Số điện thoại",
+        "city": "Tỉnh/Thành phố",
+        "ward": "Phường/Xã",
+        "detailAddress": "Địa chỉ cụ thể"
     },
     "product": {
         "authentic": "Chính hãng",
@@ -80,5 +90,11 @@
         "oneDigitPassword": "Mật khẩu phải có ít nhất 1 số",
         "specialCharacterPassword": "Mật khẩu phải có ít nhất 1 ký tự đặc biệt",
         "passwordNotMatch": "Mật khẩu không khớp"
+    },
+    "profile": {
+        "memberSince": "Thành viên từ {date}",
+        "orders": "Đơn hàng của tôi",
+        "info": "Thông tin cá nhân",
+        "setAddressDefault": "Đặt làm địa chỉ mặc định"
     }
 }

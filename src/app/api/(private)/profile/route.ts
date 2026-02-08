@@ -4,6 +4,7 @@ import { getRequestUser } from "@/lib/context"
 import { verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { messages } from "@/messages/server"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function updateMe(request: NextRequest): Promise<any> {
@@ -20,7 +21,7 @@ export async function updateMe(request: NextRequest): Promise<any> {
         const user = await UserService.getProfile(authUser?.userId as string)
 
         if (email) {
-            if (user.email) {
+            if (user.email && email !== user.email) {
                 return NextResponse.json(
                     { success: false, message: iMessageAuth.cannotChangeEmail },
                     { status: 400 },
@@ -34,7 +35,7 @@ export async function updateMe(request: NextRequest): Promise<any> {
             }
         }
         if (phone) {
-            if (user.phone) {
+            if (user.phone && phone !== user.phone) {
                 return NextResponse.json(
                     { success: false, message: iMessageAuth.cannotChangePhone },
                     { status: 400 },
@@ -65,6 +66,9 @@ export async function updateMe(request: NextRequest): Promise<any> {
             username,
             address,
         })
+
+        revalidateTag('user', { expire: 0 })
+        revalidateTag('me', { expire: 0 })
 
         return NextResponse.json({
             success: true,

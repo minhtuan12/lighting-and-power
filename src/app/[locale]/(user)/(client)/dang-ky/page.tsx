@@ -49,6 +49,7 @@ export default function () {
                 <Form form={form} onFinish={handleSubmit} layout="vertical">
                     <Form.Item
                         name="fullName"
+                        required
                         label={
                             <div className="text-base font-semibold">
                                 {t("auth.fullName")}
@@ -156,6 +157,7 @@ export default function () {
 
                     <Form.Item
                         name="password"
+                        required
                         label={
                             <div className="text-base font-semibold">
                                 {t("auth.password")}
@@ -204,6 +206,7 @@ export default function () {
                     </Form.Item>
 
                     <Form.Item
+                        required
                         name="confirmPassword"
                         label={
                             <div className="text-base font-semibold">
