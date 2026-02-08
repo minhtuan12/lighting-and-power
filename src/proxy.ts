@@ -1,5 +1,4 @@
 import createIntlMiddleware from 'next-intl/middleware'
-import { revalidateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -28,8 +27,6 @@ function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
                     user.role === EUserRole.admin)
             ) {
                 cookieStore.delete('accessToken')
-                revalidateTag('user', { expire: 0 })
-                revalidateTag('me', { expire: 0 })
                 return NextResponse.redirect(new URL(request.url))
             }
         }
