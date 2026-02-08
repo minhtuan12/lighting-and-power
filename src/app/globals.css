@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import '../styles/_variables.scss';
 @import '../styles/_keyframe-animations.scss';
 
@@ -8,13 +8,16 @@
 
 @layer components {
     .ant-input-css-var {
-
         &:hover,
         &:focus {
             border-color: var(--ant-primary-color) !important;
         }
 
         @apply shadow-sm !bg-[#f8fafc];
+    }
+
+    .ant-input-disabled {
+        background-color: #eaeaea !important;
     }
 
     .ant-btn-primary {
@@ -33,6 +36,10 @@
         .ant-card-body {
             @apply !bg-[#E5F6FF] !p-0 !h-auto;
         }
+    }
+
+    .ant-switch-checked {
+        background-color: var(--primary) !important;
     }
 }
 
@@ -79,7 +86,7 @@
 }
 
 :root {
-    --ant-primary-color: #000F8F;
+    --ant-primary-color: #000f8f;
     --ant-primary-hover-color: #242e8a;
     --ant-success-color: #52c41a;
     --ant-warning-color: #faad14;
@@ -91,8 +98,9 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: #000F8F;
+    --primary: #000f8f;
     --primary-hover: #010b66;
+    --light-primary: #e1e8ff;
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -111,14 +119,14 @@
     --chart-5: oklch(0.769 0.188 70.08);
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: #000F8F;
+    --sidebar-primary: #000f8f;
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.97 0 0);
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
     --scrollbar-width: 19px;
-    --border: '#B0B0B0',
+    --border: '#B0B0B0';
 }
 
 .dark {
@@ -201,7 +209,7 @@ a {
     display: none;
 }
 
-button[aria-label="Download"] {
+button[aria-label='Download'] {
     display: none !important;
 }
 
@@ -239,7 +247,7 @@ button[aria-label="Download"] {
     font-size: 14px;
 }
 
-.custom-table .ant-table-thead>tr>th {
+.custom-table .ant-table-thead > tr > th {
     background: #f9fafb;
     color: #6b7280;
     font-weight: 600;
@@ -249,12 +257,12 @@ button[aria-label="Download"] {
     padding: 10px 16px;
 }
 
-.custom-table .ant-table-tbody>tr>td {
+.custom-table .ant-table-tbody > tr > td {
     padding: 14px 16px;
     border-bottom: 1px solid #f3f4f6;
 }
 
-.custom-table .ant-table-tbody>tr:hover>td {
+.custom-table .ant-table-tbody > tr:hover > td {
     background: #f9fafb;
 }
 
@@ -296,11 +304,11 @@ button[aria-label="Download"] {
 }
 
 .ant-menu-vertical {
-    background-color: #D9D9D9 !important;
+    background-color: #d9d9d9 !important;
 }
 
 .ant-menu-sub .ant-menu-item {
-    border-bottom: 1px solid #AFAFAF !important;
+    border-bottom: 1px solid #afafaf !important;
 
     &:last-child {
         border: none !important;
@@ -371,11 +379,10 @@ button[aria-label="Download"] {
 }
 
 .detail-product-table {
-
     th,
     td {
         font-size: 14px;
-        border: 1px solid #BEBEBE !important;
+        border: 1px solid #bebebe !important;
     }
 
     th {

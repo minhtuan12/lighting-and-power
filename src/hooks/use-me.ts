@@ -2,7 +2,9 @@ import { routes } from "@/constants/routes"
 import { fetchAPI } from "@/lib/api-client"
 import { EUserRole, IUser } from "@/types/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
+import { showMessage } from "./use-message"
 
 export interface LoginCredentials {
     emailOrPhone: string
@@ -12,6 +14,26 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
     data: IUser
+}
+
+export interface UpdateProfileData {
+    username?: string
+    avatar?: string
+    email?: string
+    phone?: string
+    fullName?: string
+    address?: {
+        provinceCode?: number
+        wardCode?: number
+        detail?: string
+        isDefault?: boolean
+    }
+}
+
+export interface UpdateProfileResponse {
+    success: boolean
+    data?: IUser
+    message?: string
 }
 
 // ============= QUERY KEYS =============
@@ -190,5 +212,55 @@ export function useAuth() {
         isLoading: isLoginLoading || isLogoutLoading || isMeLoading,
         refetchMe,
         clearUser,
+    }
+}
+
+
+// ============= API FUNCTION =============
+const profileAPI = {
+    updateProfile: (data: UpdateProfileData): Promise<UpdateProfileResponse> => {
+        return fetchAPI("/profile", {
+            method: "PATCH",
+            body: JSON.stringify(data),
+        })
+    },
+}
+
+// ============= useUpdateProfile Hook =============
+export function useUpdateProfile() {
+    const queryClient = useQueryClient()
+    const t = useTranslations()
+    const router = useRouter()
+
+    const updateProfileMutation = useMutation({
+        mutationFn: profileAPI.updateProfile,
+        onSuccess: async (response) => {
+            if (response.success) {
+                queryClient.setQueryData(AUTH_KEYS.me, {
+                    data: response.data,
+                })
+
+                queryClient.invalidateQueries({ queryKey: AUTH_KEYS.me })
+                router.refresh()
+                showMessage.success(t('form.updateSuccess') || 'Cập nhật thành công')
+            } else {
+                showMessage.error(response.message || t('form.updateFailed') || 'Cập nhật thất bại')
+            }
+        },
+        onError: (error: any) => {
+            console.error("Update profile failed:", error)
+            const errorMessage = error?.message || t('form.updateFailed') || 'Cập nhật thất bại'
+            showMessage.error(errorMessage)
+        },
+    })
+
+    return {
+        updateProfile: updateProfileMutation.mutate,
+        updateProfileAsync: updateProfileMutation.mutateAsync,
+        isLoading: updateProfileMutation.isPending,
+        isSuccess: updateProfileMutation.isSuccess,
+        isError: updateProfileMutation.isError,
+        error: updateProfileMutation.error,
+        data: updateProfileMutation.data,
     }
 }

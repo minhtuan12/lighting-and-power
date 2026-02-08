@@ -14,21 +14,31 @@
         "email": "Email",
         "language": "Language",
         "currency": "Currency",
-        "apply": "Apply"
+        "apply": "Apply",
+        "profile": "Profile",
+        "logout": "Log out"
     },
     "form": {
-        "enter": "Enter {field}"
+        "enter": "Enter {field}",
+        "ctaSave": "Save Changes",
+        "select": "Select {field}",
+        "updateFailed": "Failed to update",
+        "updateSuccess": "Updated Successfully"
     },
     "auth": {
         "fullName": "Full Name",
         "email": "Email",
         "phone": "Phone Number",
+        "username": "Username",
         "password": "Password",
         "confirmPassword": "Confirm Password",
         "loginSuccess": "Login successful",
         "registerSuccess": "Registration successful",
         "invalidCredentials": "Invalid email/phone or password",
-        "emailOrPhone": "Email/Phone Number"
+        "emailOrPhone": "Email/Phone Number",
+        "city": "Province/City",
+        "ward": "Ward/Commune",
+        "detailAddress": "Detailed Address"
     },
     "product": {
         "authentic": "Authentic",
@@ -79,5 +89,11 @@
         "oneDigitPassword": "Password must contain at least 1 digit",
         "specialCharacterPassword": "Password must contain at least 1 special character",
         "passwordNotMatch": "Passwords do not match"
+    },
+    "profile": {
+        "memberSince": "Member since {date}",
+        "orders": "My Orders",
+        "info": "Account Details",
+        "setAddressDefault": "Set as Default Address"
     }
 }

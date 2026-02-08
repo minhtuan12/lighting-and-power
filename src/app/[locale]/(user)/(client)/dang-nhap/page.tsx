@@ -48,6 +48,7 @@ export default function () {
                 </h3>
                 <Form form={form} onFinish={handleSubmit} layout="vertical">
                     <Form.Item
+                        required
                         name="emailOrPhone"
                         label={
                             <div className="text-base font-semibold">
@@ -73,6 +74,7 @@ export default function () {
                     </Form.Item>
 
                     <Form.Item
+                        required
                         name="password"
                         label={
                             <div className="text-base font-semibold">

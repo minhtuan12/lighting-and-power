@@ -1,5 +1,3 @@
-// app/api/upload/image/route.ts
-
 import { cloudinaryService } from "@/service/cloudinary"
 import { NextRequest, NextResponse } from "next/server"
 

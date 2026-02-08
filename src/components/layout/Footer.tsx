@@ -1,3 +1,4 @@
+import { routes } from "@/constants/routes"
 import { ICategory } from "@/types/category"
 import { IConfig } from "@/types/config"
 import { Col, Flex, Row } from "antd"
@@ -69,12 +70,12 @@ export default async function Footer({
                                 {social.map(({ key, icon }) => {
                                     const url =
                                         config?.social &&
-                                        config.social?.[
+                                            config.social?.[
                                             key as keyof typeof config.social
-                                        ] !== undefined
+                                            ] !== undefined
                                             ? config.social[
-                                                  key as keyof typeof config.social
-                                              ]
+                                            key as keyof typeof config.social
+                                            ]
                                             : "#"
                                     return (
                                         <Link
@@ -98,7 +99,7 @@ export default async function Footer({
                             {categories.slice(0, 10).map((item) => (
                                 <li key={item._id}>
                                     <Link
-                                        href={`/category/${item.slug}`}
+                                        href={`${routes.sanPham.url}/${item.slug}`}
                                         className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
                                     >
                                         <Icon
@@ -120,7 +121,7 @@ export default async function Footer({
                             {categories.slice(11, 20).map((item) => (
                                 <li key={item._id}>
                                     <Link
-                                        href={`/category/${item.slug}`}
+                                        href={`${routes.sanPham.url}/${item.slug}`}
                                         className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
                                     >
                                         <Icon

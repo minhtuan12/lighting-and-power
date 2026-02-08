@@ -130,7 +130,7 @@ export default async function Header({
                     <Menu
                         items={items}
                         mode="horizontal"
-                        className="[&_li:first-child]:!pl-0 !bg-[#000F8F] [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]"
+                        className="flex-1 [&_li:first-child]:!pl-0 !bg-[#000F8F] [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]"
                     />
                     <Flex gap={35}>
                         {!success && (

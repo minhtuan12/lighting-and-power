@@ -65,11 +65,6 @@ export class UserService {
             }
         }
         const user = await User.findOne(conds)
-
-        if (!user) {
-            throw new Error("User not found")
-        }
-
         return user
     }
 

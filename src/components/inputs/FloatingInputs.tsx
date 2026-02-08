@@ -17,6 +17,7 @@ interface FloatingLabelProps {
     containerClassName?: string
     isFocused?: boolean
     hasValue?: boolean
+    disabled?: boolean
 }
 
 const FloatingLabelWrapper = ({
@@ -27,11 +28,12 @@ const FloatingLabelWrapper = ({
     containerClassName = "",
     isFocused = false,
     hasValue = false,
+    disabled = false,
 }: FloatingLabelProps) => {
     const isActive = isFocused || hasValue
 
     return (
-        <div className={`${styles.floatingWrapper} ${containerClassName}`}>
+        <div className={`${styles.floatingWrapper} ${containerClassName} ${disabled ? '!bg-[#eaeaea]' : ''}`}>
             <div
                 className={`${styles.inputContainer} ${isActive ? styles.active : ""}`}
             >
@@ -79,6 +81,7 @@ export const FloatingInput = memo(
                 containerClassName={containerClassName}
                 isFocused={isFocused}
                 hasValue={hasValue}
+                disabled={props.disabled}
             >
                 <Input
                     placeholder={placeholder}
@@ -128,6 +131,7 @@ export const FloatingTextArea = memo(
                 containerClassName={containerClassName}
                 isFocused={isFocused}
                 hasValue={hasValue}
+                disabled={props.disabled}
             >
                 <Input.TextArea
                     placeholder={placeholder}
@@ -177,6 +181,7 @@ export const FloatingInputNumber = memo(
                 containerClassName={containerClassName}
                 isFocused={isFocused}
                 hasValue={hasValue}
+                disabled={props.disabled}
             >
                 <InputNumber
                     placeholder={placeholder}
@@ -223,6 +228,7 @@ export const FloatingSelect = ({
             containerClassName={containerClassName}
             isFocused={isFocused}
             hasValue={hasValue}
+            disabled={props.disabled}
         >
             <Select
                 {...props}
@@ -280,9 +286,9 @@ export const FloatingCascader = ({
                     {...(props.multiple === true
                         ? props
                         : (() => {
-                              const { multiple, ...rest } = props
-                              return rest
-                          })())}
+                            const { multiple, ...rest } = props
+                            return rest
+                        })())}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={styles.fullWidth}
@@ -326,6 +332,7 @@ export const FloatingTreeSelect = memo(
                 containerClassName={containerClassName}
                 isFocused={isFocused}
                 hasValue={hasValue}
+                disabled={props.disabled}
             >
                 <TreeSelect
                     placeholder={placeholder}
