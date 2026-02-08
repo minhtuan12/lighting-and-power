@@ -1,21 +1,38 @@
-import createIntlMiddleware from "next-intl/middleware"
-import type { NextRequest } from "next/server"
-import { NextResponse } from "next/server"
-import { routes } from "./constants/routes"
-import { routing } from "./i18n/routing"
+import createIntlMiddleware from 'next-intl/middleware'
+import { revalidateTag } from 'next/cache'
+import { cookies } from 'next/headers'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { routes } from './constants/routes'
+import { getCurrentUser } from './fetch-data/auth'
+import { routing } from './i18n/routing'
+import { EUserRole } from './types/user'
 
-const protectedRoutes = [
-    // routes.gioHang.url,
-    routes.taiLieuDienTu.url,
-]
+const protectedRoutes = [routes.gioHang.url, routes.taiLieuDienTu.url]
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url]
 
 const intlMiddleware = createIntlMiddleware(routing)
 
 function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
-    return (request: NextRequest): NextResponse | null => {
-        const accessToken = request.cookies.get("accessToken")?.value
+    return async (request: NextRequest): Promise<NextResponse | null> => {
+        const accessToken = request.cookies.get('accessToken')?.value
+        const cookieStore = await cookies()
+        const { data: user } = await getCurrentUser()
+
+        if (user) {
+            if (
+                (request.url.includes('admin') &&
+                    user.role === EUserRole.user) ||
+                (!request.url.includes('admin') &&
+                    user.role === EUserRole.admin)
+            ) {
+                cookieStore.delete('accessToken')
+                revalidateTag('user', { expire: 0 })
+                revalidateTag('me', { expire: 0 })
+                return NextResponse.redirect(new URL(request.url))
+            }
+        }
 
         // Check auth routes
         const isAuthRoute = authRoutes.some((route) =>
@@ -38,7 +55,7 @@ function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
             )
 
             // optional: redirect back sau login
-            loginUrl.searchParams.set("redirect", pathnameWithoutLocale)
+            loginUrl.searchParams.set('redirect', pathnameWithoutLocale)
             return NextResponse.redirect(loginUrl)
         }
 
@@ -53,7 +70,7 @@ export default async function proxy(request: NextRequest) {
     const intlResponse = intlMiddleware(request)
 
     // Extract locale from pathname
-    const pathnameLocale = pathname.split("/")[1]
+    const pathnameLocale = pathname.split('/')[1]
     const isValidLocale = routing.locales.includes(pathnameLocale as any)
 
     if (!isValidLocale) {
@@ -62,7 +79,7 @@ export default async function proxy(request: NextRequest) {
 
     // Get pathname without locale
     const pathnameWithoutLocale =
-        pathname.replace(`/${pathnameLocale}`, "") || "/"
+        pathname.replace(`/${pathnameLocale}`, '') || '/'
 
     // Run auth middleware
     const authMiddleware = createAuthMiddleware(
@@ -81,5 +98,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/", "/(vi|en|zh)/:path*", "/((?!api|_next|_vercel|.*\\..*).*)"],
+    matcher: ['/', '/(vi|en|zh)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
 }

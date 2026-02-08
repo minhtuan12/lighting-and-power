@@ -21,6 +21,8 @@ export default async function Home() {
         (c) => !c.parentId && c.children && c.children?.length > 0,
     )
 
+    console.log(config, categories, documentsData)
+
     return (
         <Flex vertical gap={30} className="!-mt-5">
             <Carousel autoplay autoplaySpeed={3000}>

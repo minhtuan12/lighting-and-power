@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function getMe(request: NextRequest): Promise<any> {
     try {
-        // const userId = request.user?.id;
         const authUser = getRequestUser(request)
         if (!authUser?.userId) {
             return NextResponse.json(
