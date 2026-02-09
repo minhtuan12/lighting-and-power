@@ -16,7 +16,8 @@
         "currency": "Tiền tệ",
         "apply": "Áp dụng",
         "profile": "Trang cá nhân",
-        "logout": "Đăng xuất"
+        "logout": "Đăng xuất",
+        "shipAddress": "Địa chỉ nhận hàng"
     },
     "form": {
         "enter": "Nhập {field}",

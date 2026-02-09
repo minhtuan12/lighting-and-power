@@ -16,7 +16,8 @@
         "currency": "Currency",
         "apply": "Apply",
         "profile": "Profile",
-        "logout": "Log out"
+        "logout": "Log out",
+        "shipAddress": "Shipping Address"
     },
     "form": {
         "enter": "Enter {field}",
