@@ -304,11 +304,16 @@ button[aria-label='Download'] {
 }
 
 .ant-menu-vertical {
-    background-color: #d9d9d9 !important;
+    background-color: #4a4453 !important;
 }
 
-.ant-menu-sub .ant-menu-item {
-    border-bottom: 1px solid #afafaf !important;
+.ant-menu-submenu-arrow {
+    color: white !important;
+}
+
+.ant-menu-sub .ant-menu-item,
+.ant-menu-submenu-title {
+    /* border-bottom: 1px solid #afafaf !important; */
 
     &:last-child {
         border: none !important;

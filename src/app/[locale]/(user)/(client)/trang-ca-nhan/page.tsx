@@ -1,79 +1,113 @@
-"use client";
+'use client'
 
-import Loading from "@/components/Loading";
-import { routes } from "@/constants/routes";
-import { useAuth } from "@/hooks/use-me";
-import { Avatar, Breadcrumb, Card, Flex, Row, Typography } from "antd";
-import { Package, UserRound } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { lazy, useCallback, useMemo, useState } from "react";
+import Loading from '@/components/Loading'
+import { routes } from '@/constants/routes'
+import { useAuth } from '@/hooks/use-me'
+import { Avatar, Breadcrumb, Card, Flex, Row, Typography } from 'antd'
+import { Lock, Package, UserRound } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 
-const { Title, Text } = Typography;
+const { Title, Text } = Typography
 
-const LazyInfoTab = lazy(() => import("./(tabs)/info"));
-const LazyOrdersTab = lazy(() => import("./(tabs)/orders"));
+const LazyInfoTab = lazy(() => import('./(tabs)/info'))
+const LazyChangePasswordTab = lazy(() => import('./(tabs)/password'))
+const LazyOrdersTab = lazy(() => import('./(tabs)/orders'))
 
 export default function () {
-    const t = useTranslations();
-    const { user } = useAuth();
+    const t = useTranslations()
+    const { user } = useAuth()
 
-    const [activeTab, setActiveTab] = useState("info");
+    const [activeTab, setActiveTab] = useState('info')
 
     const getColor = useCallback(
         (key: string) => {
-            return activeTab === key ? "#3c50e0" : "#707070";
+            return activeTab === key ? '#3c50e0' : '#707070'
         },
         [activeTab],
-    );
+    )
 
     const menu = useMemo(
         () => [
             {
-                key: "info",
-                icon: <UserRound size={25} color={getColor("info")} />,
+                key: 'info',
+                icon: (
+                    <UserRound
+                        size={25}
+                        color={getColor('info')}
+                    />
+                ),
             },
             {
-                key: "orders",
-                icon: <Package size={25} color={getColor("orders")} />,
+                key: 'password',
+                icon: (
+                    <Lock
+                        size={25}
+                        color={getColor('password')}
+                    />
+                ),
+            },
+            {
+                key: 'orders',
+                icon: (
+                    <Package
+                        size={25}
+                        color={getColor('orders')}
+                    />
+                ),
             },
         ],
-        [activeTab],
-    );
+        [activeTab, getColor],
+    )
 
     const renderTab = useCallback(() => {
         switch (activeTab) {
-            case "orders":
-                return <LazyOrdersTab />;
-            case "info":
-                return <LazyInfoTab />;
+            case 'orders':
+                return <LazyOrdersTab />
+            case 'info':
+                return <LazyInfoTab />
+            case 'password':
+                return <LazyChangePasswordTab />
             default:
-                return <LazyInfoTab />;
+                return <LazyInfoTab />
         }
-    }, [activeTab]);
+    }, [activeTab])
 
     if (!user) {
-        return <Loading size="large" className="!mt-50" />;
+        return (
+            <Loading
+                size="large"
+                className="!mt-50"
+            />
+        )
     }
 
     return (
-        <Flex gap={10} vertical className="custom-breadcrumb !mb-30">
+        <Flex
+            gap={10}
+            vertical
+            className="custom-breadcrumb !mb-30"
+        >
             <Breadcrumb
                 items={[
-                    { title: t("common.home"), href: routes.trangChu.url },
-                    { title: t("common.profile") },
+                    { title: t('common.home'), href: routes.trangChu.url },
+                    { title: t('common.profile') },
                 ]}
                 separator=">"
             />
-            <Flex gap={30} className="!mt-2">
+            <Flex
+                gap={30}
+                className="!mt-2"
+            >
                 <Card
                     className="w-[350px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
                     style={{
-                        background: "rgba(255, 255, 255, 0.21)",
-                        backdropFilter: "blur(3.5px)",
-                        WebkitBackdropFilter: "blur(3.5px)",
-                        borderRadius: "16px",
-                        border: "1px solid rgba(255, 255, 255, 0.75)",
-                        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+                        background: 'rgba(255, 255, 255, 0.21)',
+                        backdropFilter: 'blur(3.5px)',
+                        WebkitBackdropFilter: 'blur(3.5px)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255, 255, 255, 0.75)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     <Flex
@@ -81,19 +115,32 @@ export default function () {
                         align="center"
                         className="!border-b !border-gray-200 !h-15 !pb-5"
                     >
-                        <Avatar src={user.avatar} icon={<UserRound />} size={45} />
+                        <Avatar
+                            src={user.avatar}
+                            icon={<UserRound />}
+                            size={45}
+                        />
                         <Flex vertical>
-                            <Title level={5} style={{ marginBottom: 0 }}>
+                            <Title
+                                level={5}
+                                style={{ marginBottom: 0 }}
+                            >
                                 {user.fullName}
                             </Title>
                             <Text>
-                                {t("profile.memberSince", {
-                                    date: new Date(user.createdAt as string).getFullYear(),
+                                {t('profile.memberSince', {
+                                    date: new Date(
+                                        user.createdAt as string,
+                                    ).getFullYear(),
                                 })}
                             </Text>
                         </Flex>
                     </Flex>
-                    <Flex vertical className="!mt-4" gap={10}>
+                    <Flex
+                        vertical
+                        className="!mt-4"
+                        gap={10}
+                    >
                         {menu.map((item) => (
                             <Row
                                 key={item.key}
@@ -102,8 +149,8 @@ export default function () {
                                 style={{
                                     background:
                                         activeTab !== item.key
-                                            ? "#f9fafb"
-                                            : "var(--light-primary)",
+                                            ? '#f9fafb'
+                                            : 'var(--light-primary)',
                                 }}
                             >
                                 {item.icon}
@@ -117,19 +164,21 @@ export default function () {
                 <Card
                     className="flex-1 backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl pt-5"
                     style={{
-                        background: "rgba(255, 255, 255, 0.21)",
-                        backdropFilter: "blur(3.5px)",
-                        WebkitBackdropFilter: "blur(3.5px)",
-                        borderRadius: "16px",
-                        border: "1px solid rgba(255, 255, 255, 0.75)",
-                        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+                        background: 'rgba(255, 255, 255, 0.21)',
+                        backdropFilter: 'blur(3.5px)',
+                        WebkitBackdropFilter: 'blur(3.5px)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255, 255, 255, 0.75)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     <div className="mt-2">
-                        {renderTab()}
+                        <Suspense fallback={<Loading />}>
+                            {renderTab()}
+                        </Suspense>
                     </div>
                 </Card>
             </Flex>
         </Flex>
-    );
+    )
 }

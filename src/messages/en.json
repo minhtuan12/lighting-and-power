@@ -31,14 +31,17 @@
         "phone": "Phone Number",
         "username": "Username",
         "password": "Password",
+        "oldPassword": "Current Password",
+        "newPassword": "New Password",
         "confirmPassword": "Confirm Password",
-        "loginSuccess": "Login successful",
+        "loginSuccess": "Hello, {name}",
         "registerSuccess": "Registration successful",
         "invalidCredentials": "Invalid email/phone or password",
         "emailOrPhone": "Email/Phone Number",
         "city": "Province/City",
         "ward": "Ward/Commune",
-        "detailAddress": "Detailed Address"
+        "detailAddress": "Detailed Address",
+        "unauthorized": "Unauthorized"
     },
     "product": {
         "authentic": "Authentic",
@@ -84,16 +87,20 @@
         "required": "Please enter {field}",
         "invalid": "Invalid {field}",
         "min": "{field} must be at least {min} characters",
-        "uppercasePassword": "Password phải có ít nhất 1 chữ hoa",
+        "uppercasePassword": "Password must contain at least 1 uppercase letter",
         "lowercasePassword": "Password must contain at least 1 lowercase letter",
         "oneDigitPassword": "Password must contain at least 1 digit",
         "specialCharacterPassword": "Password must contain at least 1 special character",
-        "passwordNotMatch": "Passwords do not match"
+        "passwordNotMatch": "Passwords do not match",
+        "incorrectOldPassword": "Current password is incorrect"
     },
     "profile": {
         "memberSince": "Member since {date}",
         "orders": "My Orders",
         "info": "Account Details",
-        "setAddressDefault": "Set as Default Address"
+        "setAddressDefault": "Set as Default Address",
+        "changePasswordSuccess": "Changed Password Successfully",
+        "changePasswordFailed": "Failed to change password",
+        "password": "Change Password"
     }
 }

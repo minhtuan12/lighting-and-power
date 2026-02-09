@@ -1,3 +1,5 @@
+import { showMessage } from "@/hooks/use-message"
+import { uploadImage } from "@/hooks/use-upload"
 import type { Node as PMNode } from "@tiptap/pm/model"
 import type { Transaction } from "@tiptap/pm/state"
 import {
@@ -366,7 +368,7 @@ export function selectionWithinConvertibleTypes(
 export const handleImageUpload = async (
     file: File,
     onProgress?: (event: { progress: number }) => void,
-    abortSignal?: AbortSignal,
+    abortSignal?: AbortSignal
 ): Promise<string> => {
     // Validate file
     if (!file) {
@@ -374,22 +376,9 @@ export const handleImageUpload = async (
     }
 
     if (file.size > MAX_FILE_SIZE) {
-        throw new Error(
-            `File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`,
-        )
+        showMessage.warning(`Ảnh không vượt quá ${MAX_FILE_SIZE / (1024 * 1024)}MB`)
     }
-
-    // For demo/testing: Simulate upload progress. In production, replace the following code
-    // with your own upload implementation.
-    for (let progress = 0; progress <= 100; progress += 10) {
-        if (abortSignal?.aborted) {
-            throw new Error("Upload cancelled")
-        }
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        onProgress?.({ progress })
-    }
-
-    return "/images/tiptap-ui-placeholder-image.jpg"
+    return await uploadImage(file);
 }
 
 type ProtocolOptions = {

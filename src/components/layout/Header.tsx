@@ -13,14 +13,17 @@ import UserMenu from "./UserMenu"
 
 type MenuItem = Required<MenuProps>["items"][number]
 
-function convertCategories(categories: ICategory[]): MenuItem[] {
-    return categories.map((cat: ICategory) => ({
-        key: cat._id,
-        label: cat.name,
-        ...(cat?.children && cat.children.length > 0
-            ? { children: convertCategories(cat?.children || []) }
-            : {}),
-    }))
+function convertCategories(categories: ICategory[], parentUrl: string = routes.sanPham.url): MenuItem[] {
+    return categories.map((cat: ICategory) => {
+        const currentUrl = parentUrl + `/${cat.slug}`;
+        return {
+            key: cat._id,
+            label: <Link href={currentUrl}>{cat.name}</Link>,
+            ...(cat?.children && cat.children.length > 0
+                ? { children: convertCategories(cat.children, currentUrl) }
+                : {}),
+        }
+    })
 }
 
 export default async function Header({
@@ -130,7 +133,8 @@ export default async function Header({
                     <Menu
                         items={items}
                         mode="horizontal"
-                        className="flex-1 [&_li:first-child]:!pl-0 !bg-[#000F8F] [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]"
+                        rootClassName="w-70"
+                        className="flex-1 [&_li:first-child]:!pl-0 !bg-transparent [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]"
                     />
                     <Flex gap={35}>
                         {!success && (

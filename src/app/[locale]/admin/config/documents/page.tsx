@@ -20,6 +20,9 @@ import { getDocumentTypes } from "@/lib/utils"
 import { breadcrumbAtom, filterDocumentAtom } from "@/stores"
 import { IDocument, IDocumentType } from "@/types/document"
 import { LoadingOutlined } from "@ant-design/icons"
+import { generateJSON } from "@tiptap/core"
+import { Image } from "@tiptap/extension-image"
+import StarterKit from "@tiptap/starter-kit"
 import {
     Button,
     Card,
@@ -47,6 +50,8 @@ export const Documents = () => {
     const [contentType, setContentType] = useState<"text" | "file">("text")
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([])
+    const [loadingUploadImage, setLoadingUploadImage] = useState(false);
+    const [content, setContent] = useState('')
 
     const [filter, setFilter] = useAtom(filterDocumentAtom)
     const setBreadcrumb = useSetAtom(breadcrumbAtom)
@@ -104,7 +109,7 @@ export const Documents = () => {
 
             if (contentType === "text") {
                 // Text content
-                documentData.content = values.content
+                documentData.content = content
             } else {
                 // File upload
                 if (!selectedFile && !editingDocument) {
@@ -478,21 +483,15 @@ export const Documents = () => {
                     </div>
 
                     {contentType === "text" ? (
-                        <Form.Item
-                            label="Nội dung"
-                            name="content"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập nội dung",
-                                },
-                            ]}
-                        >
+                        <>
+                            <div className="font-semibold">Nội dung <span className="text-red-400">*</span></div>
                             <SimpleEditor
-                                value={editingDocument?.content}
+                                value={generateJSON(content ?? '', [StarterKit, Image])}
                                 placeholder="Nhập nội dung tài liệu"
+                                setUploading={setLoadingUploadImage}
+                                onChange={(value: any) => setContent(value)}
                             />
-                        </Form.Item>
+                        </>
                     ) : (
                         <Form.Item label="Tải file">
                             <Upload
@@ -530,7 +529,7 @@ export const Documents = () => {
                             <Button
                                 type="primary"
                                 htmlType="submit"
-                                loading={isSubmitting}
+                                loading={isSubmitting || loadingUploadImage}
                             >
                                 {editingDocument ? "Cập nhật" : "Tạo mới"}
                             </Button>

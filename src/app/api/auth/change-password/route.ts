@@ -1,17 +1,21 @@
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
+import { messages } from "@/messages/server"
 import { NextRequest, NextResponse } from "next/server"
 import { AuthService } from "../../(services)/auth.service"
-import { getRequestUser } from "@/lib/context"
 
 async function changePassword(request: NextRequest) {
+    const lang = getRequestUser(request)?.locale ?? "vi"
+    const iMessage = messages[lang as keyof typeof messages]
+    const iMessageAuth = iMessage.auth
     try {
         const user = getRequestUser(request)
 
         if (!user?.userId) {
             return NextResponse.json(
-                { success: false, message: "User ID not found" },
+                { success: false, message: iMessageAuth.unauthorized },
                 { status: 401 },
             )
         }
@@ -23,7 +27,7 @@ async function changePassword(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Old password and new password are required",
+                    message: iMessageAuth.passwordRequired,
                 },
                 { status: 400 },
             )
@@ -56,7 +60,7 @@ async function changePassword(request: NextRequest) {
 
         if (error.message === "Current password is incorrect") {
             return NextResponse.json(
-                { success: false, message: error.message },
+                { success: false, message: iMessageAuth.incorrectOldPassword },
                 { status: 400 },
             )
         }
@@ -67,7 +71,7 @@ async function changePassword(request: NextRequest) {
             error.message.includes("was used recently")
         ) {
             return NextResponse.json(
-                { success: false, message: error.message },
+                { success: false, message: iMessageAuth.usedRecently },
                 { status: 400 },
             )
         }

@@ -81,6 +81,7 @@ export function useLogin() {
 
             // Invalidate để refetch nếu cần
             queryClient.invalidateQueries({ queryKey: AUTH_KEYS.me })
+            return data;
         },
         onError: (error: Error) => {
             console.error("Login failed:", error.message)
@@ -224,6 +225,15 @@ const profileAPI = {
             body: JSON.stringify(data),
         })
     },
+    changePassword: async (data: {
+        oldPassword: string
+        newPassword: string
+    }) => {
+        return fetchAPI("/auth/change-password", {
+            method: "POST",
+            body: JSON.stringify(data),
+        })
+    },
 }
 
 // ============= useUpdateProfile Hook =============
@@ -262,5 +272,43 @@ export function useUpdateProfile() {
         isError: updateProfileMutation.isError,
         error: updateProfileMutation.error,
         data: updateProfileMutation.data,
+    }
+}
+
+// ============= useChangePassword Hook =============
+export function useChangePassword() {
+    const queryClient = useQueryClient()
+    const t = useTranslations()
+    const router = useRouter()
+    const { logoutAsync } = useLogout()
+
+    const changePasswordMutation = useMutation({
+        mutationFn: profileAPI.changePassword,
+        onSuccess: async (response) => {
+            if (response.success) {
+                showMessage.success(t('form.changePasswordSuccess') || 'Đổi mật khẩu thành công')
+                await logoutAsync();
+                queryClient.clear()
+                router.refresh()
+                router.push(routes.dangNhap.url)
+            } else {
+                showMessage.error(response.message || t('form.changePasswordFailed') || 'Đổi mật khẩu thất bại')
+            }
+        },
+        onError: (error: any) => {
+            console.error("Change password failed:", error)
+            const errorMessage = error?.message || t('form.changePasswordFailed') || 'Đổi mật khẩu thất bại'
+            showMessage.error(errorMessage)
+        },
+    })
+
+    return {
+        changePassword: changePasswordMutation.mutate,
+        changePasswordAsync: changePasswordMutation.mutateAsync,
+        isLoading: changePasswordMutation.isPending,
+        isSuccess: changePasswordMutation.isSuccess,
+        isError: changePasswordMutation.isError,
+        error: changePasswordMutation.error,
+        data: changePasswordMutation.data,
     }
 }

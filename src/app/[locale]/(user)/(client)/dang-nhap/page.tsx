@@ -1,34 +1,42 @@
 "use client"
 
 import { routes } from "@/constants/routes"
-import { useAuth } from "@/hooks/use-me"
+import { useLogin } from "@/hooks/use-me"
 import { showMessage } from "@/hooks/use-message"
 import { EUserRole } from "@/types/user"
 import { Button, Card, Form, Input } from "antd"
 import { LogIn } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
 export default function () {
     const t = useTranslations()
     const v = useTranslations("validation")
-    const { loginAsync, isLoginLoading } = useAuth()
+    const { loginAsync, isLoading: isLoginLoading, } = useLogin()
     const [form] = Form.useForm()
+    const searchParams = useSearchParams()
 
     const handleSubmit = useCallback(async (values: any) => {
         try {
-            await loginAsync({
+            const data = await loginAsync({
                 emailOrPhone: values.emailOrPhone,
                 password: values.password,
                 role: EUserRole.user,
             })
 
-            showMessage.success(t("auth.loginSuccess"))
-            window.location.href = routes.trangChu.url
+            showMessage.success(t("auth.loginSuccess", { name: data?.data?.fullName ?? '' }))
+            const redirectUrl = searchParams.get('redirect')
+
+            if (redirectUrl) {
+                window.location.href = redirectUrl
+            } else {
+                window.location.href = routes.trangChu.url
+            }
         } catch (error: any) {
             showMessage.error(error?.message || t("auth.loginFailed"))
         }
-    }, [])
+    }, [loginAsync, searchParams, t])
 
     return (
         <div className="w-full mt-10 flex items-center justify-center relative top-1/2">

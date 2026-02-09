@@ -1,13 +1,14 @@
 "use client"
 
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { Editor, EditorContent, EditorContext, useEditor } from "@tiptap/react"
 import { useEffect, useRef, useState } from "react"
 
 // --- Tiptap Core Extensions ---
+import MathExtension from "@aarkue/tiptap-math-extension"
 import { Highlight } from "@tiptap/extension-highlight"
+import Link from "@tiptap/extension-link"
 import { TaskItem, TaskList } from "@tiptap/extension-list"
-import { Subscript } from "@tiptap/extension-subscript"
-import { Superscript } from "@tiptap/extension-superscript"
+import { migrateMathStrings } from '@tiptap/extension-mathematics'
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
 import { Selection } from "@tiptap/extensions"
@@ -28,6 +29,7 @@ import "@/components/tiptap-node/heading-node/heading-node.scss"
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension"
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
+import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
 
@@ -40,6 +42,7 @@ import {
     ColorHighlightPopoverContent,
 } from "@/components/tiptap-ui/color-highlight-popover"
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
+import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
 import {
     LinkButton,
     LinkContent,
@@ -63,9 +66,59 @@ import { useWindowSize } from "@/hooks/use-window-size"
 // --- Components ---
 
 // --- Lib ---
+import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+import 'katex/dist/katex.min.css'
+
+async function handleImageUploadWithState(file: File, setUploading: any) {
+    try {
+        setUploading(true);
+        return await handleImageUpload(file);
+    } finally {
+        setUploading(false);
+    }
+}
+
+const MathButton = ({
+    type,
+    icon,
+    editor,
+}: {
+    type: "inline" | "block"
+    icon?: React.ReactNode,
+    editor: Editor | null
+}) => {
+    const handleClick = () => {
+        if (!editor) return
+
+        const latex = prompt(
+            type === "inline"
+                ? 'Enter inline math expression (LaTeX):'
+                : 'Enter block math expression (LaTeX):',
+            type === "inline" ? 'E = mc^2' : '\\int_{a}^{b} f(x) dx'
+        )
+
+        if (latex) {
+            if (type === "inline") {
+                editor.chain().focus().insertInlineMath({ latex }).run()
+            } else {
+                editor.chain().focus().insertBlockMath({ latex }).run()
+            }
+        }
+    }
+
+    return (
+        <Button
+            data-style="ghost"
+            onClick={handleClick}
+            title={type === "inline" ? "Insert Inline Math" : "Insert Block Math"}
+        >
+            {icon || (type === "inline" ? "∫" : "∬")}
+        </Button>
+    )
+}
 
 const MainToolbarContent = ({
     onHighlighterClick,
@@ -118,8 +171,7 @@ const MainToolbarContent = ({
             <ToolbarSeparator />
 
             <ToolbarGroup>
-                <MarkButton type="superscript" />
-                <MarkButton type="subscript" />
+                <ImageUploadButton />
             </ToolbarGroup>
 
             <ToolbarSeparator />
@@ -164,18 +216,20 @@ const MobileToolbarContent = ({
 )
 
 interface IProps {
-    value?: string
+    value?: string | Record<string, string>
     onChange?: (value: string) => void
     placeholder?: string
+    setUploading?: (loading: boolean) => void
 }
 
-export function SimpleEditor({ value, onChange, placeholder }: IProps) {
+export function SimpleEditor({ value, onChange, placeholder, setUploading, }: IProps) {
     const isMobile = useIsBreakpoint()
     const { height } = useWindowSize()
     const [mobileView, setMobileView] = useState<
         "main" | "highlighter" | "link"
     >("main")
     const toolbarRef = useRef<HTMLDivElement>(null)
+    const isInitialMount = useRef(true)
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -191,10 +245,18 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
         extensions: [
             StarterKit.configure({
                 horizontalRule: false,
-                link: {
-                    openOnClick: false,
-                    enableClickSelection: true,
-                },
+            }),
+            Link.configure({
+                openOnClick: false,
+                autolink: true,
+                linkOnPaste: true,
+            }),
+            ImageUploadNode.configure({
+                accept: "image/*",
+                maxSize: MAX_FILE_SIZE,
+                limit: 3,
+                upload: (file) => handleImageUploadWithState(file, setUploading),
+                onError: (error) => console.error("Upload failed:", error),
             }),
             HorizontalRule,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -202,11 +264,13 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
             TaskItem.configure({ nested: true }),
             Highlight.configure({ multicolor: true }),
             Typography,
-            Superscript,
-            Subscript,
             Selection,
+            MathExtension.configure({ evaluation: true })
         ],
         content: value,
+        onCreate: ({ editor: currentEditor }) => {
+            migrateMathStrings(currentEditor)
+        },
         onUpdate: ({ editor }) => onChange && onChange(editor.getHTML()),
     })
 
@@ -214,6 +278,13 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
         editor,
         overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
     })
+
+    useEffect(() => {
+        if (editor && value !== undefined && isInitialMount.current) {
+            editor.commands.setContent(value)
+            isInitialMount.current = false
+        }
+    }, [editor])
 
     useEffect(() => {
         if (!isMobile && mobileView !== "main") {
@@ -229,8 +300,8 @@ export function SimpleEditor({ value, onChange, placeholder }: IProps) {
                     style={{
                         ...(isMobile
                             ? {
-                                  bottom: `calc(100% - ${height - rect.y}px)`,
-                              }
+                                bottom: `calc(100% - ${height - rect.y}px)`,
+                            }
                             : {}),
                     }}
                 >

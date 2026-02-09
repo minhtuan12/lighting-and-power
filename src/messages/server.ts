@@ -12,6 +12,11 @@ export const messages = {
             phoneExists: "Số điện thoại đã tồn tại",
             mailExists: "Email đã tồn tại",
             usernameExists: "Tên tài khoản đã tồn tại",
+            unauthorized: "Lỗi xác thực",
+            passwordRequired: 'Thiếu mật khẩu',
+            incorrectOldPassword: "Mật khẩu hiện tại không đúng",
+            cannotSameOldPassword: "Mật khẩu mới không được trùng mật khẩu hiện tại",
+            usedRecently: "Mật khẩu này đã dùng gần đây, vui lòng đổi mật khẩu khác"
         },
     },
     en: {
@@ -27,6 +32,11 @@ export const messages = {
             phoneExists: "Phone number already exists",
             mailExists: "Email already exists",
             usernameExists: "Username already exists",
+            unauthorized: "Unauthorized",
+            passwordRequired: 'Password is missing',
+            incorrectOldPassword: "Current password is incorrect",
+            cannotSameOldPassword: "New password cannot be the same as current password",
+            usedRecently: "This password was used recently. Please choose a different password."
         },
     },
 }

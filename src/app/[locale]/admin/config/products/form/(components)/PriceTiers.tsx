@@ -40,15 +40,15 @@ const PriceTiers = memo(
             () => [
                 ...(priceTiers.length === 0
                     ? [
-                          {
-                              title: "",
-                              width: 50,
-                              align: "center" as const,
-                              render: () => (
-                                  <i className="text-gray-500">Ví dụ</i>
-                              ),
-                          },
-                      ]
+                        {
+                            title: "",
+                            width: 50,
+                            align: "center" as const,
+                            render: () => (
+                                <i className="text-gray-500">Ví dụ</i>
+                            ),
+                        },
+                    ]
                     : []),
                 {
                     title: "Số lượng tối thiểu",
@@ -78,24 +78,24 @@ const PriceTiers = memo(
                 },
                 ...(priceTiers.length > 0
                     ? [
-                          {
-                              title: "",
-                              width: 50,
-                              align: "center" as const,
-                              render: (
-                                  _: unknown,
-                                  __: unknown,
-                                  idx: number,
-                              ) => (
-                                  <Button
-                                      size="small"
-                                      danger
-                                      icon={<X size={14} />}
-                                      onClick={() => onDeleteTier(idx)}
-                                  />
-                              ),
-                          },
-                      ]
+                        {
+                            title: "",
+                            width: 50,
+                            align: "center" as const,
+                            render: (
+                                _: unknown,
+                                __: unknown,
+                                idx: number,
+                            ) => (
+                                <Button
+                                    size="small"
+                                    danger
+                                    icon={<X size={14} />}
+                                    onClick={() => onDeleteTier(idx)}
+                                />
+                            ),
+                        },
+                    ]
                     : []),
             ],
             [priceTiers.length, onDeleteTier],
@@ -106,9 +106,9 @@ const PriceTiers = memo(
                 priceTiers.length > 0
                     ? priceTiers
                     : [
-                          { minQuantity: 1, price: 10000 },
-                          { minQuantity: 10, price: 80000 },
-                      ],
+                        { minQuantity: 1, price: 10000 },
+                        { minQuantity: 10, price: 80000 },
+                    ],
             [priceTiers],
         )
 
@@ -148,9 +148,9 @@ const PriceTiers = memo(
                                     formatter={(value) =>
                                         value
                                             ? `${value}`.replace(
-                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                  ",",
-                                              )
+                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                ",",
+                                            )
                                             : ""
                                     }
                                     parser={(value) =>
@@ -177,7 +177,7 @@ const PriceTiers = memo(
                     <Col span={10}>
                         <Table
                             size="small"
-                            rowKey={(_, idx) => idx?.toString() ?? "0"}
+                            rowKey={(record) => `${record.minQuantity}-${record.price}`}
                             columns={columns as any}
                             dataSource={tableData}
                             pagination={false}

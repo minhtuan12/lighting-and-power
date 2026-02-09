@@ -40,15 +40,15 @@ const Specifications = memo(
             () => [
                 ...(specifications.length === 0
                     ? [
-                          {
-                              title: "",
-                              width: 50,
-                              align: "center" as const,
-                              render: () => (
-                                  <i className="text-gray-500">Ví dụ</i>
-                              ),
-                          },
-                      ]
+                        {
+                            title: "",
+                            width: 50,
+                            align: "center" as const,
+                            render: () => (
+                                <i className="text-gray-500">Ví dụ</i>
+                            ),
+                        },
+                    ]
                     : []),
                 {
                     title: "Thông số",
@@ -74,24 +74,24 @@ const Specifications = memo(
                 },
                 ...(specifications.length > 0
                     ? [
-                          {
-                              title: "",
-                              width: 50,
-                              align: "center" as const,
-                              render: (
-                                  _: unknown,
-                                  __: unknown,
-                                  idx: number,
-                              ) => (
-                                  <Button
-                                      size="small"
-                                      danger
-                                      icon={<X size={14} />}
-                                      onClick={() => onDeleteTier(idx)}
-                                  />
-                              ),
-                          },
-                      ]
+                        {
+                            title: "",
+                            width: 50,
+                            align: "center" as const,
+                            render: (
+                                _: unknown,
+                                __: unknown,
+                                idx: number,
+                            ) => (
+                                <Button
+                                    size="small"
+                                    danger
+                                    icon={<X size={14} />}
+                                    onClick={() => onDeleteTier(idx)}
+                                />
+                            ),
+                        },
+                    ]
                     : []),
             ],
             [specifications.length, onDeleteTier],
@@ -102,15 +102,15 @@ const Specifications = memo(
                 specifications.length > 0
                     ? specifications
                     : [
-                          {
-                              name: "Độ rộng data bus",
-                              value: "32-Bit",
-                          },
-                          {
-                              name: "Họ IC",
-                              value: "ARM Cortex M3",
-                          },
-                      ],
+                        {
+                            name: "Độ rộng data bus",
+                            value: "32-Bit",
+                        },
+                        {
+                            name: "Họ IC",
+                            value: "ARM Cortex M3",
+                        },
+                    ],
             [specifications],
         )
 
@@ -155,7 +155,7 @@ const Specifications = memo(
                     <Col span={12}>
                         <Table
                             size="small"
-                            rowKey={(_, idx) => idx?.toString() ?? "0"}
+                            rowKey={(record) => `${record.name}-${record.value}`}
                             columns={columns as any}
                             dataSource={tableData}
                             pagination={false}

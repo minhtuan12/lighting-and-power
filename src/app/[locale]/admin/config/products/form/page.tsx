@@ -17,6 +17,9 @@ import { convertNestedCategories } from "@/lib/utils"
 import { breadcrumbAtom } from "@/stores"
 import { ICategory } from "@/types/category"
 import { EProductStatus, IProduct } from "@/types/product"
+import { generateJSON } from "@tiptap/core"
+import Image from "@tiptap/extension-image"
+import StarterKit from "@tiptap/starter-kit"
 import {
     Button,
     Card,
@@ -30,6 +33,7 @@ import {
     Upload,
 } from "antd"
 import { useSetAtom } from "jotai"
+import "katex/dist/katex.min.css"
 import { Plus, X } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -50,6 +54,7 @@ const ProductForm = () => {
     const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<
         string[]
     >([])
+    const [description, setDescription] = useState('');
     const setBreadcrumb = useSetAtom(breadcrumbAtom)
 
     const {
@@ -178,7 +183,7 @@ const ProductForm = () => {
             const formData: Partial<IProduct> = {
                 name: values.name,
                 sku: values.sku,
-                description: values.description,
+                description,
                 shortDescription: values.shortDescription,
                 categoryId: values.categoryId || null,
                 manufacturer: values.manufacturer,
@@ -276,7 +281,6 @@ const ProductForm = () => {
             form.setFieldsValue({
                 name: product.name,
                 sku: product.sku,
-                description: product.description,
                 shortDescription: product.shortDescription,
                 categoryId: product.categoryId,
                 manufacturer: product.manufacturer,
@@ -299,6 +303,10 @@ const ProductForm = () => {
                 tags: product.tags || [],
             })
 
+            if (product.description) {
+                setDescription(product.description);
+            }
+
             if (product.images && product.images.length > 0) {
                 setImageFilesPreview(product.images)
                 // Don't set imageFiles for existing images
@@ -316,7 +324,7 @@ const ProductForm = () => {
     return (
         <Card
             variant="borderless"
-            className="max-w-full rounded-xl shadow-sm max-h-full"
+            className="max-w-full rounded-xl shadow-sm max-h-fit"
             loading={isLoading}
         >
             <Form
@@ -515,19 +523,13 @@ const ProductForm = () => {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item
-                        label={
-                            <span className="font-semibold text-base">
-                                Mô tả chi tiết
-                            </span>
-                        }
-                        name="description"
-                    >
-                        <SimpleEditor
-                            value={productData?.data?.description}
-                            placeholder="Nhập mô tả chi tiết sản phẩm"
-                        />
-                    </Form.Item>
+                    <div className="font-semibold">Mô tả chi tiết</div>
+                    <SimpleEditor
+                        value={generateJSON(description, [StarterKit, Image])}
+                        placeholder="Nhập mô tả chi tiết sản phẩm"
+                        setUploading={setIsSubmitting}
+                        onChange={(value: any) => setDescription(value)}
+                    />
                 </div>
 
                 {/* Giá theo số lượng */}
@@ -800,7 +802,7 @@ const ProductForm = () => {
                     </Button>
                 </div>
             </Form>
-        </Card>
+        </Card >
     )
 }
 

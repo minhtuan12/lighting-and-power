@@ -7,7 +7,7 @@ import { getCurrentUser } from './fetch-data/auth'
 import { routing } from './i18n/routing'
 import { EUserRole } from './types/user'
 
-const protectedRoutes = [routes.gioHang.url, routes.taiLieuDienTu.url]
+const protectedRoutes = [routes.gioHang.url, routes.taiLieuDienTu.url, routes.trangCaNhan.url]
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url]
 
