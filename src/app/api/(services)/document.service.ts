@@ -1,32 +1,39 @@
-import { PAGE_LIMIT } from "@/constants/common"
-import Document from "@/models/document"
-import { IDocument } from "@/types/document"
+import { PAGE_LIMIT } from '@/constants/common'
+import { SlugGenerator } from '@/lib/slug'
+import Document from '@/models/document'
+import { IDocument } from '@/types/document'
 
 export class DocumentService {
     // ================= CREATE =================
-    static async create(data: Omit<IDocument, "_id">): Promise<IDocument> {
+    static async create(data: Omit<IDocument, '_id'>): Promise<IDocument> {
         try {
             if (!data.title) {
-                throw new Error("Title is required")
+                throw new Error('Title is required')
             }
 
             if (!data.contentType) {
-                throw new Error("Content type is required")
+                throw new Error('Content type is required')
             }
 
-            if (data.contentType === "text" && !data.content) {
-                throw new Error("Content is required for text type")
+            if (data.contentType === 'text' && !data.content) {
+                throw new Error('Content is required for text type')
             }
 
-            if (data.contentType === "file" && !data.fileUrl) {
-                throw new Error("File URL is required for file type")
+            if (data.contentType === 'file' && !data.fileUrl) {
+                throw new Error('File URL is required for file type')
             }
 
-            const document = await Document.create(data)
+            const document = await Document.create({
+                ...data,
+                slug: await SlugGenerator.generateUniqueSlug(
+                    data.title,
+                    Document,
+                ),
+            })
             return document.toObject()
         } catch (error: any) {
-            console.error("Create document error:", error)
-            throw new Error(error.message || "Failed to create document")
+            console.error('Create document error:', error)
+            throw new Error(error.message || 'Failed to create document')
         }
     }
 
@@ -57,8 +64,8 @@ export class DocumentService {
 
             if (filters?.search) {
                 query.$or = [
-                    { title: { $regex: filters.search, $options: "i" } },
-                    { description: { $regex: filters.search, $options: "i" } },
+                    { title: { $regex: filters.search, $options: 'i' } },
+                    { description: { $regex: filters.search, $options: 'i' } },
                 ]
             }
 
@@ -75,8 +82,8 @@ export class DocumentService {
                 pages: Math.ceil(total / PAGE_LIMIT),
             }
         } catch (error: any) {
-            console.error("Get all documents error:", error)
-            throw new Error(error.message || "Failed to get documents")
+            console.error('Get all documents error:', error)
+            throw new Error(error.message || 'Failed to get documents')
         }
     }
 
@@ -84,12 +91,12 @@ export class DocumentService {
         try {
             const document = await Document.findById(id).lean()
             if (!document) {
-                throw new Error("Document not found")
+                throw new Error('Document not found')
             }
             return document
         } catch (error: any) {
-            console.error("Get document error:", error)
-            throw new Error(error.message || "Failed to get document")
+            console.error('Get document error:', error)
+            throw new Error(error.message || 'Failed to get document')
         }
     }
 
@@ -104,8 +111,8 @@ export class DocumentService {
 
             return documents
         } catch (error: any) {
-            console.error("Get documents by product error:", error)
-            throw new Error(error.message || "Failed to get documents")
+            console.error('Get documents by product error:', error)
+            throw new Error(error.message || 'Failed to get documents')
         }
     }
 
@@ -116,23 +123,31 @@ export class DocumentService {
     ): Promise<IDocument> {
         try {
             if (!data.title || !data.contentType) {
-                throw new Error("Title and content type are required")
+                throw new Error('Title and content type are required')
             }
 
             const document = await Document.findByIdAndUpdate(
                 id,
-                { ...data, updatedAt: new Date() },
+                {
+                    ...data,
+                    slug: await SlugGenerator.generateUniqueSlug(
+                        data.title,
+                        Document,
+                        { excludeId: id },
+                    ),
+                    updatedAt: new Date(),
+                },
                 { new: true, runValidators: true },
             ).lean()
 
             if (!document) {
-                throw new Error("Document not found")
+                throw new Error('Document not found')
             }
 
             return document
         } catch (error: any) {
-            console.error("Update document error:", error)
-            throw new Error(error.message || "Failed to update document")
+            console.error('Update document error:', error)
+            throw new Error(error.message || 'Failed to update document')
         }
     }
 
@@ -143,13 +158,13 @@ export class DocumentService {
         try {
             const document = await Document.findByIdAndDelete(id)
             if (!document) {
-                throw new Error("Document not found")
+                throw new Error('Document not found')
             }
 
-            return { success: true, message: "Document deleted successfully" }
+            return { success: true, message: 'Document deleted successfully' }
         } catch (error: any) {
-            console.error("Delete document error:", error)
-            throw new Error(error.message || "Failed to delete document")
+            console.error('Delete document error:', error)
+            throw new Error(error.message || 'Failed to delete document')
         }
     }
 
@@ -160,8 +175,8 @@ export class DocumentService {
             const result = await Document.deleteMany({ _id: { $in: ids } })
             return { success: true, deletedCount: result.deletedCount }
         } catch (error: any) {
-            console.error("Delete many documents error:", error)
-            throw new Error(error.message || "Failed to delete documents")
+            console.error('Delete many documents error:', error)
+            throw new Error(error.message || 'Failed to delete documents')
         }
     }
 
@@ -174,8 +189,8 @@ export class DocumentService {
                 await Document.findByIdAndUpdate(doc._id, { order: doc.order })
             }
         } catch (error: any) {
-            console.error("Update order error:", error)
-            throw new Error(error.message || "Failed to update order")
+            console.error('Update order error:', error)
+            throw new Error(error.message || 'Failed to update order')
         }
     }
 
@@ -191,13 +206,13 @@ export class DocumentService {
             ).lean()
 
             if (!document) {
-                throw new Error("Document not found")
+                throw new Error('Document not found')
             }
 
             return document
         } catch (error: any) {
-            console.error("Add product to document error:", error)
-            throw new Error(error.message || "Failed to add product")
+            console.error('Add product to document error:', error)
+            throw new Error(error.message || 'Failed to add product')
         }
     }
 
@@ -213,13 +228,13 @@ export class DocumentService {
             ).lean()
 
             if (!document) {
-                throw new Error("Document not found")
+                throw new Error('Document not found')
             }
 
             return document
         } catch (error: any) {
-            console.error("Remove product from document error:", error)
-            throw new Error(error.message || "Failed to remove product")
+            console.error('Remove product from document error:', error)
+            throw new Error(error.message || 'Failed to remove product')
         }
     }
 }

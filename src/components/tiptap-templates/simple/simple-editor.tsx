@@ -1,6 +1,6 @@
 "use client"
 
-import { Editor, EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 import { useEffect, useRef, useState } from "react"
 
 // --- Tiptap Core Extensions ---
@@ -8,7 +8,6 @@ import MathExtension from "@aarkue/tiptap-math-extension"
 import { Highlight } from "@tiptap/extension-highlight"
 import Link from "@tiptap/extension-link"
 import { TaskItem, TaskList } from "@tiptap/extension-list"
-import { migrateMathStrings } from '@tiptap/extension-mathematics'
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
 import { Selection } from "@tiptap/extensions"
@@ -79,45 +78,6 @@ async function handleImageUploadWithState(file: File, setUploading: any) {
     } finally {
         setUploading(false);
     }
-}
-
-const MathButton = ({
-    type,
-    icon,
-    editor,
-}: {
-    type: "inline" | "block"
-    icon?: React.ReactNode,
-    editor: Editor | null
-}) => {
-    const handleClick = () => {
-        if (!editor) return
-
-        const latex = prompt(
-            type === "inline"
-                ? 'Enter inline math expression (LaTeX):'
-                : 'Enter block math expression (LaTeX):',
-            type === "inline" ? 'E = mc^2' : '\\int_{a}^{b} f(x) dx'
-        )
-
-        if (latex) {
-            if (type === "inline") {
-                editor.chain().focus().insertInlineMath({ latex }).run()
-            } else {
-                editor.chain().focus().insertBlockMath({ latex }).run()
-            }
-        }
-    }
-
-    return (
-        <Button
-            data-style="ghost"
-            onClick={handleClick}
-            title={type === "inline" ? "Insert Inline Math" : "Insert Block Math"}
-        >
-            {icon || (type === "inline" ? "∫" : "∬")}
-        </Button>
-    )
 }
 
 const MainToolbarContent = ({
@@ -268,9 +228,6 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, }: IP
             MathExtension.configure({ evaluation: true })
         ],
         content: value,
-        onCreate: ({ editor: currentEditor }) => {
-            migrateMathStrings(currentEditor)
-        },
         onUpdate: ({ editor }) => onChange && onChange(editor.getHTML()),
     })
 

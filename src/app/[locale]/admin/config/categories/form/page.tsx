@@ -106,7 +106,7 @@ const CategoryForm = () => {
             const formData: Partial<ICategory> = {
                 name: values.name,
                 image:
-                    uploadedImageUrl ?? categoryData?.data?.image ?? imageFile,
+                    uploadedImageUrl || categoryData?.data?.image || imageFile,
                 description: values.description,
                 parentId: Array.isArray(values.parentId)
                     ? values.parentId?.[values.parentId?.length - 1] || null

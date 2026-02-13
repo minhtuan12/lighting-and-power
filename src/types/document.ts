@@ -2,8 +2,8 @@ export interface IDocument {
     _id?: string
     title: string
     description?: string
-    type: "introduction" | "knowledge" | "guide" | "manual" | "other"
-    contentType: "file" | "text" // file upload hoặc text content
+    type: string
+    contentType: ContentType // file upload hoặc text content
     content?: string // Text content nếu contentType = 'text'
     fileUrl?: string // URL của file nếu contentType = 'file'
     fileName?: string // Tên file gốc
@@ -13,6 +13,8 @@ export interface IDocument {
     updatedAt?: Date
     createdBy?: string // User ID
     isPublished?: boolean
+    thumbnail?: string | null
+    slug: string
 }
 
 export interface IDocumentType {

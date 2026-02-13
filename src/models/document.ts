@@ -14,6 +14,9 @@ const DocumentSchema = new Schema(
             trim: true,
             maxlength: [200, "Title cannot exceed 200 characters"],
         },
+        slug: {
+            type: String,
+        },
         description: {
             type: String,
             trim: true,
@@ -64,6 +67,10 @@ const DocumentSchema = new Schema(
             type: Number,
             default: 0,
         },
+        thumbnail: {
+            type: String,
+            default: null
+        }
     },
     {
         timestamps: true,
