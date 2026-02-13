@@ -21,11 +21,11 @@ export default async function Footer({
 }) {
     const t = await getTranslations("common")
     return (
-        <footer className="bg-[#363636] text-gray-100 w-full">
-            <div className="max-w-[1140px] mx-auto px-4 py-12">
+        <footer className="bg-[#00052B] text-gray-100 w-full">
+            <div className="max-w-[1140px] mx-auto px-4 py-12 max-xl:!px-10">
                 {/* Main Content */}
-                <Row gutter={64}>
-                    <Col span={10} className="flex flex-col justify-between">
+                <Row gutter={64} className="max-lg:justify-between">
+                    <Col span={24} md={12} lg={10} className="flex flex-col justify-between">
                         <Flex vertical>
                             <div className="flex items-center gap-2 mb-6">
                                 <Icon src="/images/logo.png" size={300} />
@@ -35,15 +35,15 @@ export default async function Footer({
                                 <h3 className="font-semibold text-white mb-1.5 text-[20px]">
                                     {config.companyName.toUpperCase()}
                                 </h3>
-                                <div className="space-y-2 text-sm text-white font-normal text-[13px]">
+                                <div className="space-y-2 text-sm text-white font-normal text-[14px] mt-3">
                                     <p>
                                         {t("address")}: {config.address}
                                     </p>
-                                    <div className="flex items-center text-white">
-                                        {t("email")}:&nbsp;
+                                    <div className="flex text-white">
+                                        Email:&nbsp;
                                         <a
                                             href={`mailto:${config.email}`}
-                                            className="hover:text-orange-500 transition-colors"
+                                            className="hover:text-orange-500 transition-colors break-all !underline"
                                         >
                                             {config.email}
                                         </a>
@@ -93,7 +93,7 @@ export default async function Footer({
                         </Flex>
                     </Col>
 
-                    <Col span={7}>
+                    <Col span={0} md={12} lg={7}>
                         {/* Categories Columns */}
                         <ul className="space-y-2">
                             {categories.slice(0, 10).map((item) => (
@@ -115,27 +115,29 @@ export default async function Footer({
                         </ul>
                     </Col>
 
-                    <Col span={7}>
-                        {/* Categories Columns */}
-                        <ul className="space-y-2">
-                            {categories.slice(11, 20).map((item) => (
-                                <li key={item._id}>
-                                    <Link
-                                        href={`${routes.sanPham.url}/${item.slug}`}
-                                        className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
-                                    >
-                                        <Icon
-                                            src="/images/right-arrow.png"
-                                            size={8}
-                                        />
-                                        <span className="line-clamp-1 text-ellipsis">
-                                            {item.name}
-                                        </span>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </Col>
+                    {categories.slice(11, 20).length > 0 &&
+                        <Col span={7} className="max-md:hidden">
+                            {/* Categories Columns */}
+                            <ul className="space-y-2">
+                                {categories.slice(11, 20).map((item) => (
+                                    <li key={item._id}>
+                                        <Link
+                                            href={`${routes.sanPham.url}/${item.slug}`}
+                                            className="text-gray-400 hover:text-orange-500 text-sm transition-colors flex items-center gap-2"
+                                        >
+                                            <Icon
+                                                src="/images/right-arrow.png"
+                                                size={8}
+                                            />
+                                            <span className="line-clamp-1 text-ellipsis">
+                                                {item.name}
+                                            </span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </Col>
+                    }
                 </Row>
 
                 {/* Divider */}

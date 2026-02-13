@@ -31,7 +31,7 @@ export default function () {
     }
 
     return (
-        <div className="w-[450px] mx-auto">
+        <div className="w-[450px] mx-auto max-lg:mt-30 max-lg:px-6 max-lg:w-full max-lg:mb-20">
             <Card
                 className="w-full backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
                 style={{
