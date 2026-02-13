@@ -39,7 +39,7 @@ export default function () {
     }, [loginAsync, searchParams, t])
 
     return (
-        <div className="w-full mt-10 flex items-center justify-center relative top-1/2">
+        <div className="w-full mt-10 flex items-center justify-center relative top-1/2 max-lg:mt-40 max-lg:px-6">
             <Card
                 className="w-[450px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
                 style={{
