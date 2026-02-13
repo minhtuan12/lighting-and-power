@@ -185,7 +185,7 @@ html {
     max-width: calc(100vw - var(--scrollbar-width));
 
     @media screen and (max-width: 1024px) {
-        max-width: 100vw;
+        max-width: 100vw !important;
     }
 }
 
