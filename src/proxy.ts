@@ -7,7 +7,15 @@ import { getCurrentUser } from './fetch-data/auth'
 import { routing } from './i18n/routing'
 import { EUserRole } from './types/user'
 
-const protectedRoutes = [routes.gioHang.url, routes.taiLieuDienTu.url, routes.trangCaNhan.url]
+const protectedRoutes = [
+    routes.gioHang.url,
+    // routes.taiLieuDienTu.url,
+    routes.trangCaNhan.url,
+
+    '/cart',
+    // '/documents',
+    '/profile',
+]
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url]
 
@@ -83,7 +91,7 @@ export default async function proxy(request: NextRequest) {
         pathnameLocale,
         pathnameWithoutLocale,
     )
-    const authResponse = authMiddleware(request)
+    const authResponse = await authMiddleware(request)
 
     // If auth middleware returns a response (redirect), use it
     if (authResponse) {
@@ -95,5 +103,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/(vi|en|zh)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
+    matcher: ['/', '/(vi|en)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
 }
