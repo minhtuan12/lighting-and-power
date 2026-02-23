@@ -2,10 +2,11 @@ import { PAGE_LIMIT } from '@/constants/common'
 import { SlugGenerator } from '@/lib/slug'
 import Document from '@/models/document'
 import { IDocument } from '@/types/document'
+import { isValidObjectId } from 'mongoose'
 
 export class DocumentService {
     // ================= CREATE =================
-    static async create(data: Omit<IDocument, '_id'>): Promise<IDocument> {
+    static async create(data: Omit<Partial<IDocument>, '_id'>): Promise<IDocument> {
         try {
             if (!data.title) {
                 throw new Error('Title is required')
@@ -87,10 +88,15 @@ export class DocumentService {
         }
     }
 
-    static async getById(id: string): Promise<IDocument> {
+    static async getByIdOrSlug(idOrSlug: string): Promise<IDocument> {
         try {
-            const document = await Document.findById(id).lean()
-            if (!document) {
+            let document = null;
+            if (isValidObjectId(idOrSlug)) {
+                document = await Document.findById(idOrSlug).lean()
+            } else {
+                document = await Document.findOne({ slug: idOrSlug }).lean()
+            }
+            if (!document || !document.isPublished) {
                 throw new Error('Document not found')
             }
             return document

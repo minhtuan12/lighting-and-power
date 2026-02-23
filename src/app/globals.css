@@ -221,7 +221,6 @@ button[aria-label='Download'] {
 }
 
 .prose {
-    font-family: var(--font-lato), sans-serif;
     max-width: unset !important;
     width: 100% !important;
     color: unset !important;
@@ -237,7 +236,6 @@ button[aria-label='Download'] {
 .prose img {
     margin: auto;
     width: 100% !important;
-    height: auto !important;
     border-radius: 6px;
 }
 

@@ -10,6 +10,11 @@ interface IDcoumentResponse {
     }
 }
 
+interface IDcoumentDetailResponse {
+    success: boolean
+    data: IDocument | null
+}
+
 export async function getDocuments(): Promise<IDcoumentResponse> {
     try {
         const res = await fetch(
@@ -39,6 +44,34 @@ export async function getDocuments(): Promise<IDcoumentResponse> {
                 total: 0,
                 totalPages: 0,
             },
+        }
+    }
+}
+
+export async function getDocumentDetail(slug: string): Promise<IDcoumentDetailResponse> {
+    try {
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL!}/api/documents/${slug}`,
+            {
+                next: {
+                    revalidate: 3600 * 3, // Cache for 3 hour
+                    tags: ["documents", `document:${slug}`],
+                },
+            },
+        )
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch documents")
+        }
+
+        return res.json()
+    } catch (error) {
+        console.error("Error fetching documents:", error)
+
+        // Fallback data
+        return {
+            success: true,
+            data: null,
         }
     }
 }

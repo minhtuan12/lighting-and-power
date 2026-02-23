@@ -69,7 +69,7 @@ const documentAPI = {
         formData.append("file", file)
         formData.append("folder", folder)
 
-        return fetchAPI("/api/upload/document", {
+        return fetchAPI("/admin/upload/file", {
             method: "POST",
             body: formData,
         })
