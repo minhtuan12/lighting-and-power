@@ -1,21 +1,24 @@
-import { routes } from "@/constants/routes"
-import { getCurrentUser } from "@/fetch-data/auth"
-import { ICategory } from "@/types/category"
-import { IConfig } from "@/types/config"
-import { Button, Col, Flex, Input, Menu, MenuProps, Row } from "antd"
-import { ChevronDown } from "lucide-react"
-import { getTranslations } from "next-intl/server"
-import Link from "next/link"
-import Cart from "../Cart"
-import { Icon } from "../Icon"
-import LanguageCurrencySwitcher from "../LanguageCurrencySwitcher"
-import UserMenu from "./UserMenu"
+import { routes } from '@/constants/routes'
+import { getCurrentUser } from '@/fetch-data/auth'
+import { ICategory } from '@/types/category'
+import { IConfig } from '@/types/config'
+import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd'
+import { ChevronDown } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
+import Link from 'next/link'
+import Cart from '../Cart'
+import { Icon } from '../Icon'
+import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher'
+import UserMenu from './UserMenu'
 
-type MenuItem = Required<MenuProps>["items"][number]
+type MenuItem = Required<MenuProps>['items'][number]
 
-function convertCategories(categories: ICategory[], parentUrl: string = routes.sanPham.url): MenuItem[] {
+function convertCategories(
+    categories: ICategory[],
+    parentUrl: string = routes.sanPham.url,
+): MenuItem[] {
     return categories.map((cat: ICategory) => {
-        const currentUrl = parentUrl + `/${cat.slug}`;
+        const currentUrl = parentUrl + `/${cat.slug}`
         return {
             key: cat._id,
             label: <Link href={currentUrl}>{cat.name}</Link>,
@@ -33,7 +36,7 @@ export default async function Header({
     config: IConfig
     categories: ICategory[]
 }) {
-    const t = await getTranslations("common")
+    const t = await getTranslations('common')
     const { success, data } = await getCurrentUser()
     const items: MenuItem[] = [
         {
@@ -83,21 +86,24 @@ export default async function Header({
             <Flex
                 justify="space-between"
                 align="end"
-                className="!bg-white !text-gray-100 !h-[120px] !gap-34 !py-4 !mx-auto max-w-[1140px]"
+                className="!bg-white !text-gray-100 !h-[120px] !gap-34 !py-4 !mx-auto xl:max-w-[1140px] lg:!w-full lg:!px-6 xl:!px-0 max-lg:!hidden"
             >
-                <Row className="w-full" align={"bottom"}>
+                <Row
+                    className="w-full"
+                    align={'bottom'}
+                >
                     <Col
                         span={8}
-                        style={{ display: "flex", justifyContent: "left" }}
+                        style={{ display: 'flex', justifyContent: 'left' }}
                     >
                         <Input
-                            placeholder={t("search")}
-                            className="!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[25px] !border-[#B4B4B4]"
+                            placeholder={t('search')}
+                            className="!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[35px] !border-[#B4B4B4]"
                         />
                     </Col>
                     <Col
                         span={8}
-                        style={{ display: "flex", justifyContent: "center" }}
+                        style={{ display: 'flex', justifyContent: 'center' }}
                     >
                         <Icon
                             src="/images/logo-vertical.png"
@@ -107,9 +113,12 @@ export default async function Header({
                     </Col>
                     <Col
                         span={8}
-                        style={{ display: "flex", justifyContent: "right" }}
+                        style={{ display: 'flex', justifyContent: 'right' }}
                     >
-                        <Flex gap={30} className="items-end">
+                        <Flex
+                            gap={30}
+                            className="items-end"
+                        >
                             <Flex
                                 gap={7}
                                 align="center"
@@ -123,7 +132,7 @@ export default async function Header({
                     </Col>
                 </Row>
             </Flex>
-            <div className="bg-[#000F8F] w-full h-[54px]">
+            <div className="bg-[var(--primary)] lg:px-6 w-full h-[54px] max-lg:hidden">
                 <Flex
                     className="max-w-[1140px] !mx-auto !text-white !text-base [&>ul::before]:!hidden [&>ul]:!gap-8 h-full"
                     align="center"
@@ -161,6 +170,24 @@ export default async function Header({
                     </Flex>
                 </Flex>
             </div>
+            <Row className="h-[60px] px-10 max-md:!px-6 bg-[var(--primary)] lg:!hidden">
+                <Col span={2} className='!flex !items-center !justify-start'>
+                    <Icon
+                        src="/images/logo-only.png"
+                        alt="Header Logo Only"
+                        size={40}
+                    />
+                </Col>
+                <Col span={20} className='!flex !items-center !justify-center'>
+                    <Input
+                        placeholder={t('search')}
+                        className="!bg-[#E3E3E3] !rounded-[10px] !w-2/3 !h-[35px] !border-[#B4B4B4]"
+                    />
+                </Col>
+                <Col span={2} className='!flex !items-center !justify-end'>
+                    <UserMenu user={data} />
+                </Col>
+            </Row>
         </header>
     )
 }

@@ -54,7 +54,7 @@ export default function Info() {
                 uploadedImageUrl = await uploadImagesToCloudinary(imageFile)
             }
             updateProfileAsync({
-                avatar: (uploadedImageUrl ?? user?.avatar) || undefined,
+                avatar: (uploadedImageUrl || user?.avatar) || undefined,
                 username: values.username ?? undefined,
                 address: {
                     provinceCode: values.city,

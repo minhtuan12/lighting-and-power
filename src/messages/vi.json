@@ -17,7 +17,9 @@
         "apply": "Áp dụng",
         "profile": "Trang cá nhân",
         "logout": "Đăng xuất",
-        "shipAddress": "Địa chỉ nhận hàng"
+        "shipAddress": "Địa chỉ nhận hàng",
+        "category": "Danh mục",
+        "NA": "Chưa có"
     },
     "form": {
         "enter": "Nhập {field}",
@@ -45,6 +47,7 @@
         "unauthorized": "Lỗi xác thực"
     },
     "product": {
+        "featuredProducts": "Sản phẩm nổi bật",
         "authentic": "Chính hãng",
         "addToCart": "Thêm vào giỏ hàng",
         "buyNow": "Mua ngay",

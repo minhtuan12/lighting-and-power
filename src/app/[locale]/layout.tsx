@@ -38,7 +38,7 @@ export default async function RootLayout({
 
     const messages = await getMessages()
     return (
-        <html lang={locale} suppressHydrationWarning>
+        <html lang={locale} suppressHydrationWarning className="page">
             <head>
                 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
                 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />

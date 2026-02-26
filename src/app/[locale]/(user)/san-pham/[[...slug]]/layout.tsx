@@ -4,16 +4,32 @@ import { routes } from "@/constants/routes"
 import {
     capitalizeFirstLetterEachWord,
     CategoryChainResult,
-    getCategoryChain,
+    getCategoryChain
 } from "@/lib/utils"
 import { Breadcrumb, Flex } from "antd"
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb"
 import type { Metadata } from "next"
+import { getLocale, getTranslations } from "next-intl/server"
 import React, { Suspense } from "react"
 
-export const metadata: Metadata = {
-    title: "Sản phẩm",
-    description: "Sản phẩm của Lighting and Power",
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ slug?: string[] }>
+}): Promise<Metadata> {
+    const t = await getTranslations();
+    const locale = await getLocale();
+    const { slug: slugs } = await params
+    const { categories, isLastChild } = await getCategoryChain(slugs || [])
+
+    const title = isLastChild && categories.length > 0
+        ? categories[categories.length - 1].name
+        : t('common.product')
+
+    return {
+        title,
+        description: locale === 'vi' ? "Sản phẩm của Lighting and Power" : "Lighting and Power's Products",
+    }
 }
 
 function buildBreadcrumbFromChain(
@@ -21,7 +37,7 @@ function buildBreadcrumbFromChain(
 ) {
     const currentBreadcrumb: ItemType[] = [
         { title: <Icon src="/images/home.png" size={20} />, href: "/" },
-        { title: "Sản phẩm", href: routes.sanPham.url },
+        { title: routes.sanPham.title, href: routes.sanPham.url },
     ]
     let currentPath = routes.sanPham.url
 
@@ -57,7 +73,7 @@ export default async function ProductLayout({
                 </div>
             }
         >
-            <Flex gap={10} vertical className="custom-breadcrumb">
+            <Flex gap={10} vertical className="custom-breadcrumb max-xl:!px-6 max-lg:!mt-20 !mb-20">
                 <Breadcrumb items={breadcrumb} separator=">" />
                 {isLastChild && (
                     <Flex className="!mb-2">
@@ -68,7 +84,7 @@ export default async function ProductLayout({
                         </h4>
                     </Flex>
                 )}
-                <Flex gap={16} justify="space-between">
+                <Flex gap={16} justify="space-between" className="max-lg:!flex-col">
                     {sidebar}
                     {content}
                 </Flex>

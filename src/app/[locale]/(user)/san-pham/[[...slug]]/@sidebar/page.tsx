@@ -8,53 +8,54 @@ import { ICategory } from "@/types/category"
 import { SearchParams } from "@/types/general"
 import { IProduct } from "@/types/product"
 import { Card, Flex } from "antd"
+import { getTranslations } from "next-intl/server"
 import Link from "next/link"
 
-function CategorySidebar({
+async function CategorySidebar({
     slugs,
     categories,
 }: {
     slugs: string[]
     categories: ICategory[]
 }) {
+    const t = await getTranslations();
     return (
-        <Card title="Danh mục" className="w-full card-custom">
-            <Flex vertical className="py-2">
+        <Card title={t('common.category')} className="w-full card-custom">
+            <Flex className="!py-2 lg:!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin">
                 {categories.map((c, index) => {
-                    const link =
-                        routes.sanPham.url + `/${[...slugs, c.slug].join("/")}`
-                    return (
-                        <Link
-                            href={link}
-                            key={index}
-                            className={`
-                    !text-[13px] !text-black !py-3 !px-4 !w-full
-                    ${index === categories.length - 1 ? "" : "!border-b-[#CCCCCC] !border-b"}
-                    hover:!bg-[#c0e8fe] last:hover:!rounded-b-[8px]
-                `}
-                        >
-                            {c.name}
-                        </Link>
-                    )
+                    const link = routes.sanPham.url + `/${[...slugs, c.slug].join("/")}`
+                    return <Link
+                        href={link}
+                        key={index}
+                        className={`
+                            !text-[13px] !text-black !py-3 !px-4 !w-full
+                            ${index === categories.length - 1 ? "" : "!border-b-[#CCCCCC] !border-b"}
+                            hover:!bg-[#c0e8fe] last:hover:!rounded-b-[8px]
+                            max-lg:!text-[14px] max-lg:!line-clamp-1 max-lg:!min-w-30 max-lg:!text-center max-lg:!px-5 max-lg:!py-2 max-lg:!rounded-full max-lg:!border-[var(--primary)] max-lg:border-1
+                        `}
+                    >
+                        {c.name}
+                    </Link>
                 })}
             </Flex>
         </Card>
     )
 }
 
-function TopProductsSidebar({ products }: { products: IProduct[] }) {
+async function TopProductsSidebar({ products }: { products: IProduct[] }) {
+    const t = await getTranslations();
     return (
         <Flex vertical className="py-2 w-full" gap={13}>
             <h4 className="text-white text-[15px] bg-[var(--primary)] py-[11px] px-[15px] font-bold w-full h-10">
-                Sản phẩm nổi bật
+                {t('product.featuredProducts')}
             </h4>
-            <div className="max-h-[400px] overflow-y-auto gap-3 flex flex-col">
+            <div className="lg:max-h-[400px] lg:overflow-y-auto gap-3 flex lg:flex-col max-lg:max-h-[200px]">
                 {products.length < 0 ? (
                     products.map((p) => (
                         <Flex
                             gap={14}
                             align="center"
-                            className="max-w-full"
+                            className="lg:max-w-full w-[400px]"
                             key={p._id}
                         >
                             <DefaultImage
@@ -68,7 +69,7 @@ function TopProductsSidebar({ products }: { products: IProduct[] }) {
                         </Flex>
                     ))
                 ) : (
-                    <i className="text-center text-gray-400">Chưa có</i>
+                    <i className="text-center text-gray-400">{t('common.NA')}</i>
                 )}
             </div>
         </Flex>
@@ -92,7 +93,7 @@ export default async function ({ params, searchParams }: SidebarProps) {
     ])
 
     return (
-        <Flex gap={30} className={`w-[260px]`} vertical>
+        <Flex gap={30} className={`w-full lg:w-[260px]`} vertical>
             {isLastChild ? (
                 <Filters searchParams={(await searchParams) as any} />
             ) : (

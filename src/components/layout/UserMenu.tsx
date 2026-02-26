@@ -1,63 +1,256 @@
-"use client"
+'use client'
 
-import JotaiProvider from "@/app/[locale]/(providers)/jotai-provider"
-import QueryProvider from "@/app/[locale]/(providers)/query-provider"
-import { routes } from "@/constants/routes"
-import { useLogout } from "@/hooks/use-me"
-import { IUser } from "@/types/user"
-import { UserOutlined } from "@ant-design/icons"
-import { Avatar, Dropdown, Flex } from "antd"
-import { MenuProps } from "antd/lib"
-import { ChevronDown, LogOut, User } from "lucide-react"
-import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { Suspense } from "react"
-import Loading from "../Loading"
+import JotaiProvider from '@/app/[locale]/(providers)/jotai-provider'
+import QueryProvider from '@/app/[locale]/(providers)/query-provider'
+import { routes } from '@/constants/routes'
+import { useLogout } from '@/hooks/use-me'
+import { useIsMobile, useIsTablet } from '@/hooks/use-media-query'
+import { IUser } from '@/types/user'
+import { UserOutlined } from '@ant-design/icons'
+import { Avatar, Button, Col, Drawer, Dropdown, Flex, Row, Space } from 'antd'
+import {
+    BookText,
+    ChevronDown,
+    Container,
+    Home,
+    LogIn,
+    LogOut,
+    Mail,
+    TextAlignJustify,
+    User,
+    UserPlus,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import Loading from '../Loading'
 
-function UserMenuContent({ user }: { user: IUser }) {
-    const t = useTranslations();
+interface IProps {
+    user?: IUser
+}
+
+function UserMenuContent({ user }: IProps) {
+    const [open, setOpen] = useState(false)
+    const t = useTranslations()
     const { logoutAsync } = useLogout()
-    const items: MenuProps["items"] = [
+    const isMobile = useIsMobile()
+    const isTablet = useIsTablet()
+    const styles = {
+        iconSize: isMobile || isTablet ? 20 : 16,
+        fontSize: isMobile || isTablet ? 'text-[16px]' : '',
+    }
+    const pathname = usePathname()
+    const items = [
         {
-            key: "profile",
-            label: <Link href={routes.trangCaNhan.url} className="flex gap-1 !text-black">
-                <User size={16} />
-                {t('common.profile')}
-            </Link>,
-        },
-        {
-            key: "logout",
+            key: routes.trangChu.url,
             label: (
-                <Flex
-                    gap={5}
-                    align="center"
-                    className="!cursor-pointer"
-                    onClick={() => logoutAsync()}
+                <Link
+                    href={routes.trangChu.url}
+                    className={`gap-1 !text-black ${styles.fontSize}`}
                 >
-                    <LogOut size={16} />
-                    {t('common.logout')}
-                </Flex>
+                    <Space className="pl-4 w-full py-3">
+                        <Home size={styles.iconSize} />
+                        {t('common.home')}
+                    </Space>
+                </Link>
             ),
         },
+        ...(user
+            ? [
+                {
+                    key: routes.trangCaNhan.url,
+                    label: (
+                        <Link
+                            href={routes.trangCaNhan.url}
+                            className={`gap-1 !text-black ${styles.fontSize}`}
+                        >
+                            <Space className="pl-4 w-full py-3">
+                                <User size={styles.iconSize} />
+                                {t('common.profile')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: 'logout',
+                    label: (
+                        <Flex
+                            gap={5}
+                            align="center"
+                            className={`!cursor-pointer ${styles.fontSize} !w-full`}
+                            onClick={() => logoutAsync()}
+                        >
+                            <Space className="pl-4 w-full py-3">
+                                <LogOut size={styles.iconSize} />
+                                {t('common.logout')}
+                            </Space>
+                        </Flex>
+                    ),
+                },
+            ]
+            : [
+                {
+                    key: routes.sanPham.url,
+                    label: (
+                        <Link
+                            href={routes.sanPham.url}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full -mt-4`}
+                        >
+                            <Space className="border-gray-200 w-full py-5 justify-center">
+                                <Container size={styles.iconSize} />
+                                {t('common.product')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.taiLieuDienTu.url,
+                    label: (
+                        <Link
+                            href={routes.taiLieuDienTu.url}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
+                        >
+                            <Space className="border-gray-200 w-full py-5 justify-center">
+                                <BookText size={styles.iconSize} />
+                                {t('common.document')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.lienHe.url,
+                    label: (
+                        <Link
+                            href={routes.lienHe.url}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full mb-8`}
+                        >
+                            <Space className="border-gray-200 w-full py-5 justify-center">
+                                <Mail size={styles.iconSize} />
+                                {t('common.contact')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.dangKy.url,
+                    label: (
+                        <Link
+                            href={routes.dangKy.url}
+                            className={`flex gap-1 ${styles.fontSize} !w-full`}
+                        >
+                            <Button
+                                className="w-full !bg-[var(--light-primary)]"
+                                size="large"
+                            >
+                                <UserPlus
+                                    size={16}
+                                    className="-mt-0.5"
+                                />
+                                {t('common.register')}
+                            </Button>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.dangNhap.url,
+                    label: (
+                        <Link
+                            href={routes.dangNhap.url}
+                            className={`flex gap-1 ${styles.fontSize} !w-full`}
+                        >
+                            <Button
+                                type="primary"
+                                className="w-full"
+                                size="large"
+                            >
+                                <LogIn
+                                    size={16}
+                                    className="-mt-0.5"
+                                />
+                                {t('common.login')}
+                            </Button>
+                        </Link>
+                    ),
+                },
+            ]),
     ]
+
+    useEffect(() => {
+        setOpen(false)
+    }, [pathname])
 
     return (
         <Suspense fallback={<Loading size="small" />}>
-            <Dropdown menu={{ items }} trigger={["click"]}>
-                <Flex align="center" gap={2} className="cursor-pointer">
-                    <Avatar
-                        size="large"
-                        src={user?.avatar}
-                        icon={<UserOutlined />}
+            {isMobile || isTablet ? (
+                <>
+                    <TextAlignJustify
+                        color="white"
+                        onClick={() => setOpen(true)}
                     />
-                    <ChevronDown size={18} />
-                </Flex>
-            </Dropdown>
+                    <Drawer
+                        title={
+                            user ? (
+                                <div className='w-full line-clamp-1 pl-2'>
+                                    {t('auth.loginSuccess', {
+                                        name: user.fullName,
+                                    })}
+                                </div>
+                            ) : (
+                                ''
+                            )
+                        }
+                        className='custom-drawer'
+                        placement={'right'}
+                        size={500}
+                        onClose={() => setOpen(false)}
+                        open={open}
+                    >
+                        <Row
+                            gutter={8}
+                            className="!-mt-2"
+                        >
+                            {items.map((i) => (
+                                <Col
+                                    span={
+                                        i.key === 'login' ||
+                                            i.key === 'register'
+                                            ? 12
+                                            : 24
+                                    }
+                                    key={i.key}
+                                    className={`${pathname.includes(i.key) ? 'bg-[var(--light-primary)]' : ''} rounded-lg`}
+                                >
+                                    {i.label}
+                                </Col>
+                            ))}
+                        </Row>
+                    </Drawer>
+                </>
+            ) : (
+                <Dropdown
+                    menu={{ items }}
+                    trigger={['click']}
+                >
+                    <Flex
+                        align="center"
+                        gap={2}
+                        className="cursor-pointer"
+                    >
+                        <Avatar
+                            size="large"
+                            src={user?.avatar}
+                            icon={<UserOutlined />}
+                        />
+                        <ChevronDown size={18} />
+                    </Flex>
+                </Dropdown>
+            )}
         </Suspense>
     )
 }
 
-export default function UserMenu({ user }: { user: IUser }) {
+export default function UserMenu({ user }: IProps) {
     return (
         <JotaiProvider>
             <QueryProvider>

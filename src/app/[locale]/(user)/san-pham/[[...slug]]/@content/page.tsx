@@ -14,7 +14,6 @@ import { Flex } from "antd"
 import Link from "next/link"
 
 interface IProductContent {
-    slugs: string[]
     data: IProduct[]
 }
 
@@ -34,7 +33,7 @@ function CategoriesContent({ categories, slugs }: ICategoryContent) {
                 return (
                     <Link
                         href={link}
-                        className="hover:shadow-md flex flex-col !w-[190px] gap-3 border border-[#D6D6D6] rounded-[10px] !px-3 !pt-3 !pb-5 h-[218px]"
+                        className="hover:shadow-md flex flex-col !w-full gap-3 border border-[#D6D6D6] rounded-[10px] !px-3 !pt-3 !pb-5 h-[218px]"
                         key={c._id}
                     >
                         <DefaultImage
@@ -51,7 +50,7 @@ function CategoriesContent({ categories, slugs }: ICategoryContent) {
     )
 }
 
-async function ProductsContent({ slugs, data }: IProductContent) {
+async function ProductsContent({ data }: IProductContent) {
     return (
         <>
             {data.map((p) => (
@@ -60,6 +59,7 @@ async function ProductsContent({ slugs, data }: IProductContent) {
                     enableAddToCart
                     key={p._id}
                     className="!w-full"
+                    wrapClassName="!w-full"
                 />
             ))}
         </>
@@ -106,10 +106,10 @@ export default async function ({ params, searchParams }: SlugPageProps) {
 
     // ========= Product List or Category List ==========
     return (
-        <Flex vertical gap={24} className="flex-1">
-            <div className="grid grid-cols-[repeat(auto-fill,200px)] gap-3 justify-end h-fit">
+        <Flex vertical gap={24} className="flex-1 max-lg:!mt-3">
+            <div className={`grid ${isLastChild ? 'max-[465px]:grid-cols-[repeat(auto-fill,100%)] grid-cols-[repeat(auto-fill,200px)]' : 'max-[465px]:grid-cols-[repeat(auto-fill,100%)] grid-cols-[repeat(auto-fill,190px)]'} gap-3 justify-end max-lg:justify-start h-fit`}>
                 {isLastChild ? (
-                    <ProductsContent slugs={slugs} data={productsData} />
+                    <ProductsContent data={productsData} />
                 ) : (
                     <CategoriesContent categories={categories} slugs={slugs} />
                 )}

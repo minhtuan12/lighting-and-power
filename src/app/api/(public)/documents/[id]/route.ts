@@ -16,7 +16,7 @@ async function getDocumentById(
             )
         }
 
-        const document = await DocumentService.getById(params.id)
+        const document = await DocumentService.getByIdOrSlug(params.id)
 
         return NextResponse.json({
             success: true,

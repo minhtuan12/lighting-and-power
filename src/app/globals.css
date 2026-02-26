@@ -177,9 +177,16 @@
 
 html {
     font-family: Inter;
-    width: calc(100vw - var(--scrollbar-width));
     min-height: 100vh;
     box-sizing: border-box;
+}
+
+.page {
+    max-width: calc(100vw - var(--scrollbar-width));
+
+    @media screen and (max-width: 1024px) {
+        max-width: 100vw !important;
+    }
 }
 
 body {
@@ -214,7 +221,6 @@ button[aria-label='Download'] {
 }
 
 .prose {
-    font-family: var(--font-lato), sans-serif;
     max-width: unset !important;
     width: 100% !important;
     color: unset !important;
@@ -230,7 +236,6 @@ button[aria-label='Download'] {
 .prose img {
     margin: auto;
     width: 100% !important;
-    height: auto !important;
     border-radius: 6px;
 }
 
@@ -396,5 +401,35 @@ button[aria-label='Download'] {
 
     td {
         font-weight: 400;
+    }
+}
+
+.custom-grid {
+    .ant-col {
+        &:first-child {
+            padding-left: 0 !important;
+        }
+        &:last-child {
+            padding-right: 0 !important;
+        }
+
+        @media screen and (max-width: 768px) {
+            &:nth-child(even) {
+                padding-right: 0 !important;
+            }
+            &:nth-child(odd) {
+                padding-left: 0 !important;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            padding: 0 !important;
+        }
+    }
+}
+
+.custom-drawer {
+    .ant-drawer-header-title {
+        flex-direction: row-reverse;
     }
 }

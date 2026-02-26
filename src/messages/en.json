@@ -17,7 +17,9 @@
         "apply": "Apply",
         "profile": "Profile",
         "logout": "Log out",
-        "shipAddress": "Shipping Address"
+        "shipAddress": "Shipping Address",
+        "category": "Categories",
+        "NA": "N/A"
     },
     "form": {
         "enter": "Enter {field}",
@@ -45,6 +47,7 @@
         "unauthorized": "Unauthorized"
     },
     "product": {
+        "featuredProducts": "Featured Products",
         "authentic": "Authentic",
         "addToCart": "Add to Cart",
         "buyNow": "Buy Now",

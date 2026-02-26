@@ -1,5 +1,6 @@
 "use client"
 
+import { useIsMobile } from "@/hooks/use-media-query"
 import { useEffect, useRef, useState } from "react"
 import { Icon } from "./Icon"
 
@@ -30,6 +31,7 @@ export default function Carousel<T extends CarouselItem = any>({
 }: CategoryCarouselProps<T>) {
     const scrollRef = useRef<HTMLElement>(null)
     const [needsScroll, setNeedsScroll] = useState(false)
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         // Check nếu content width > container width thì cần scroll
@@ -51,7 +53,7 @@ export default function Carousel<T extends CarouselItem = any>({
     }
 
     return (
-        <section aria-label="Items" className="mx-auto w-full">
+        <section aria-label="Items" className="mx-auto xl:w-full lg:w-[calc(100%-350px)] w-[calc(100%-150px)]">
             <div style={{ position: "relative" }}>
                 {/* Left Arrow */}
                 {needsScroll && (
@@ -66,7 +68,11 @@ export default function Carousel<T extends CarouselItem = any>({
                 {/* items Container */}
                 <nav
                     ref={scrollRef}
-                    className={`grid grid-flow-col auto-cols-[215px] gap-4 overflow-x-auto py-[10px] relative w-full ${needsScroll ? "justify-start" : "justify-center"} ${className}`}
+                    className={`snap-mandatory grid grid-flow-col auto-cols-[100%] md:auto-cols-[calc(33.3%-16px)] lg:auto-cols-[215px] gap-4 overflow-x-auto py-[10px] relative w-full 
+                        ${needsScroll ? "justify-start" : "justify-center"} 
+                        ${isMobile ? 'snap-x ' : ''}
+                        ${className}
+                    `}
                     style={{
                         scrollbarWidth: "none",
                         msOverflowStyle: "none",
