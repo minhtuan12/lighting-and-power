@@ -195,7 +195,7 @@ const ProductForm = () => {
                 unit: values.unit,
                 minOrderQuantity: values.minOrderQuantity,
                 images: [
-                    ...productData?.data?.images?.filter((i: string) =>
+                    ...(productData?.data?.images ?? []).filter((i: string) =>
                         imageFilesPreview.includes(i),
                     ),
                     ...uploadedImageUrls,
