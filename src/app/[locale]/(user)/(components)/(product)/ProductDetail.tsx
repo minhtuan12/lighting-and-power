@@ -1,5 +1,6 @@
 import BadgeRibbon from "@/components/BadgeRibbon"
 import DefaultImage from "@/components/DefaultImage"
+import RichTextContent from "@/components/RichTextContent"
 import { getProductDetail } from "@/fetch-data/products"
 import { IProduct } from "@/types/product"
 import { Col, Flex, Row, Table } from "antd"
@@ -23,11 +24,11 @@ export default async function ProductDetail({
 
     const details = [
         {
-            label: t("filter.manufacturer"),
+            label: t("filter.fields.manufacturers"),
             key: "manufacturer",
         },
         {
-            label: t("filter.origins"),
+            label: t("filter.fields.origins"),
             key: "origin",
         },
         {
@@ -54,7 +55,7 @@ export default async function ProductDetail({
 
     const specColumns = [
         {
-            title: t("specifications"),
+            title: t("filter.fields.specifications"),
             dataIndex: "name",
             key: "name",
             width: 180,
@@ -100,7 +101,7 @@ export default async function ProductDetail({
 
                 <Col span={16}>
                     <Flex vertical gap={20}>
-                        <h3 className="text-[27px] text-black">
+                        <h3 className="text-[24px] font-semibold text-black">
                             {product.name}
                         </h3>
                         <Flex vertical gap={8}>
@@ -110,7 +111,7 @@ export default async function ProductDetail({
                                 if (fields.length > 1) {
                                     const parent =
                                         product[
-                                            fields[0] as keyof typeof product
+                                        fields[0] as keyof typeof product
                                         ]
                                     if (
                                         parent &&
@@ -144,7 +145,7 @@ export default async function ProductDetail({
                                 <Flex
                                     vertical
                                     justify="space-between"
-                                    className="bg-[#D1FFD3] !w-full !h-19 !p-[12px_28px] !text-center !text-base !font-bold !text-[#005E06]"
+                                    className="bg-[#D1FFD3] !w-full !h-19 !p-[12px_28px] !text-center !text-md !font-bold !text-[#005E06]"
                                 >
                                     <div>
                                         {t("remaining")}: {product.stock}{" "}
@@ -187,13 +188,13 @@ export default async function ProductDetail({
                                         >
                                             <Col
                                                 span={12}
-                                                className="text-center !text-[12px]"
+                                                className="text-center !text-md"
                                             >
                                                 {t("quantity")} ({product.unit})
                                             </Col>
                                             <Col
                                                 span={12}
-                                                className="text-center !text-[12px]"
+                                                className="text-center !text-md"
                                             >
                                                 {t("priceEach")} (VNĐ)
                                             </Col>
@@ -207,13 +208,13 @@ export default async function ProductDetail({
                                                 >
                                                     <Col
                                                         span={12}
-                                                        className="text-center !text-[12px]"
+                                                        className="text-center !text-md"
                                                     >
                                                         {tier.minQuantity}+
                                                     </Col>
                                                     <Col
                                                         span={12}
-                                                        className="text-center !text-[12px]"
+                                                        className="text-center !text-md"
                                                     >
                                                         {tier.price.toLocaleString(
                                                             "vi-VN",
@@ -230,21 +231,17 @@ export default async function ProductDetail({
             </Row>
 
             {product.description && (
-                <Row>
-                    <h3 className="text-[23px]">{t("filter.description")}</h3>
-                    <div
-                        dangerouslySetInnerHTML={{
-                            __html: product.description,
-                        }}
-                    />
-                </Row>
+                <Flex vertical gap={5}>
+                    <h3 className="text-[20px] font-semibold">{t("description")}</h3>
+                    <RichTextContent html={product.description} />
+                </Flex>
             )}
 
             {product.specifications && product.specifications.length > 0 && (
-                <Row className="w-full">
+                <Row className="w-full mt-8">
                     <Col className="space-y-3 detail-product-table w-full">
-                        <h3 className="text-[23px]">
-                            {t("filter.specifications")}
+                        <h3 className="text-[20px] font-semibold">
+                            {t("filter.fields.specifications")}
                         </h3>
                         <Table
                             rowKey={"name"}
@@ -252,6 +249,7 @@ export default async function ProductDetail({
                             columns={specColumns}
                             dataSource={product.specifications}
                             className="!w-full"
+                            pagination={false}
                         />
                     </Col>
                 </Row>

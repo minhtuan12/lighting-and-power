@@ -1,12 +1,14 @@
 "use client"
 
-import { Icon } from "@/components/Icon"
 import { routes } from "@/constants/routes"
 import { IProduct } from "@/types/product"
 import { Card, Flex } from "antd"
 import { useTranslations } from "next-intl"
 import Image from "next/image"
 import Link from "next/link"
+import JotaiProvider from "../../(providers)/jotai-provider"
+import QueryProvider from "../../(providers)/query-provider"
+import RemainingStock from "./(product)/RemainingStock"
 import AddToCart from "./AddToCart"
 
 interface IProps {
@@ -62,15 +64,7 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                                 <span>/{item.unit}</span>
                             </Flex>
                         )}
-                        {item.stock && (
-                            <Flex align="center" gap={5} className="text-[12px]">
-                                <Icon src="/images/green-tick.png" size={17} />
-                                <p>
-                                    {t("remaining")}:{" "}
-                                    {item.stock?.toLocaleString("vi-VN")}
-                                </p>
-                            </Flex>
-                        )}
+                        {item.stock && <RemainingStock stock={item.stock} />}
                         {enableAddToCart && (
                             <AddToCart
                                 product={item}
@@ -91,18 +85,19 @@ export default function ProductItem({
     wrapClassName = "",
     enableAddToCart = false,
 }: IProps) {
-    return enableAddToCart ? (
+    const content = enableAddToCart ? <ItemContent item={item} className={className} enableAddToCart /> : <Link
+        href={`${routes.sanPham.url}/${item.slug}`}
+        style={{
+            textDecoration: "none",
+        }}
+        aria-label={`Browse ${item.name}`}
+        className={`h-auto flex ${wrapClassName}`}
+    >
         <ItemContent item={item} className={className} enableAddToCart />
-    ) : (
-        <Link
-            href={`${routes.sanPham.url}/${item.slug}`}
-            style={{
-                textDecoration: "none",
-            }}
-            aria-label={`Browse ${item.name}`}
-            className={`h-auto flex ${wrapClassName}`}
-        >
-            <ItemContent item={item} className={className} enableAddToCart />
-        </Link>
-    )
+    </Link>
+    return <JotaiProvider>
+        <QueryProvider>
+            {content}
+        </QueryProvider>
+    </JotaiProvider>
 }

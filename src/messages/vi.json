@@ -17,6 +17,7 @@
         "apply": "Áp dụng",
         "profile": "Trang cá nhân",
         "logout": "Đăng xuất",
+        "shipAddress": "Địa chỉ nhận hàng",
         "category": "Danh mục",
         "NA": "Chưa có"
     },
@@ -106,5 +107,17 @@
         "changePasswordSuccess": "Đổi mật khẩu thành công",
         "changePasswordFailed": "Đổi mật khẩu thất bại",
         "password": "Đổi mật khẩu"
+    },
+    "cart": {
+        "searchProd": "Tìm sản phẩm",
+        "quantity": "Số lượng",
+        "orderSummary": "Đơn hàng",
+        "subtotal": "Tổng",
+        "total": "Tổng tiền",
+        "checkout": "Tiếp tục",
+        "selectAll": "Chọn tất cả ({count})",
+        "selected": "Đã chọn ({count})",
+        "clearAll": "Xóa tất cả",
+        "empty": "Trống"
     }
 }

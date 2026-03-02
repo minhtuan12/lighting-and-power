@@ -376,6 +376,7 @@ button[aria-label='Download'] {
 .scrollbar-thin::-webkit-scrollbar {
     height: 4px;
     padding-top: 2px;
+    width: 5px !important;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
@@ -386,6 +387,7 @@ button[aria-label='Download'] {
 .scrollbar-thin::-webkit-scrollbar-track {
     background: #cecdcd;
     border-radius: 12px;
+    width: 5px !important;
 }
 
 .detail-product-table {

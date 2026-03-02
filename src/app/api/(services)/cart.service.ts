@@ -169,9 +169,8 @@ export class CartService {
         if (!cart) {
             throw new Error("Cart not found")
         }
-
         const itemIndex = cart.items.findIndex(
-            (i: ICartItem) => i._id?.toString() === itemId,
+            (i: ICartItem) => i.productId?.toString() === itemId,
         )
         if (itemIndex === -1) {
             throw new Error("Item not found in cart")
@@ -225,6 +224,7 @@ export class CartService {
 
             validatedItems.push({
                 ...item,
+                priceTiers: product.priceTiers,
                 inStock,
                 availableStock,
                 price: currentPrice,
