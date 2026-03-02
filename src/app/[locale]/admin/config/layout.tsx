@@ -8,7 +8,7 @@ import { breadcrumbAtom } from "@/stores/ui"
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons"
 import { Breadcrumb, Button, Layout, Menu, theme } from "antd"
 import { useAtomValue } from "jotai"
-import { AlignStartVertical, Book, Settings, Store, User } from "lucide-react"
+import { AlignStartVertical, Book, FileQuestion, Settings, Store, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -39,6 +39,12 @@ const menu = [
         label: <Link href={routes.document.url}>{routes.document.title}</Link>,
         url: routes.document.url,
         key: routes.document.url,
+    },
+    {
+        icon: <FileQuestion size={20} />,
+        label: <Link href={routes.contact.url}>{routes.contact.title}</Link>,
+        url: routes.contact.url,
+        key: routes.contact.url,
     },
     {
         icon: <Settings size={20} />,
