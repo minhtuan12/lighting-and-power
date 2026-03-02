@@ -2,6 +2,7 @@
     "common": {
         "home": "Trang chủ",
         "product": "Sản phẩm",
+        "contact-us": "Liên hệ",
         "contact": "Liên hệ",
         "login": "Đăng nhập",
         "register": "Đăng ký",
@@ -26,7 +27,10 @@
         "ctaSave": "Lưu thay đổi",
         "select": "Chọn {field}",
         "updateFailed": "Cập nhật thất bại",
-        "updateSuccess": "Cập nhật thành công"
+        "updateSuccess": "Cập nhật thành công",
+        "send": "Gửi",
+        "sendContactSuccess": "Lời nhắn của bạn đã được gửi. Chúng tôi sẽ phản hồi bạn sớm thôi",
+        "sendFailed": "Gửi thất bại"
     },
     "auth": {
         "fullName": "Họ và tên",
@@ -119,5 +123,10 @@
         "selected": "Đã chọn ({count})",
         "clearAll": "Xóa tất cả",
         "empty": "Trống"
+    },
+    "contactUs": {
+        "contact": "Liên hệ",
+        "subject": "Chủ đề",
+        "content": "Nội dung"
     }
 }
