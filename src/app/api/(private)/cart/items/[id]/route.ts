@@ -1,5 +1,6 @@
 import { CartService } from "@/app/api/(services)/cart.service"
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { NextRequest, NextResponse } from "next/server"
@@ -9,7 +10,8 @@ async function updateCartItem(
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
-        const userId = request.headers.get("x-user-id") ?? ""
+        const authUser = getRequestUser(request)
+        const userId = authUser?.userId as string
         const params = await context?.params
 
         if (!params?.id) {
@@ -67,7 +69,8 @@ async function removeCartItem(
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
-        const userId = request.headers.get("x-user-id") ?? ""
+        const authUser = getRequestUser(request)
+        const userId = authUser?.userId as string
         const params = await context?.params
 
         if (!params?.id) {

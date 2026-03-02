@@ -106,5 +106,17 @@
         "changePasswordSuccess": "Changed Password Successfully",
         "changePasswordFailed": "Failed to change password",
         "password": "Change Password"
+    },
+    "cart": {
+        "searchProd": "Search Product",
+        "quantity": "Quantity",
+        "orderSummary": "Order Summary",
+        "subtotal": "Sub Total",
+        "total": "Total",
+        "checkout": "Process to Checkout",
+        "selectAll": "Select All ({count})",
+        "clearAll": "Clear All",
+        "selected": "Selected Items ({count})",
+        "empty": "Empty"
     }
 }

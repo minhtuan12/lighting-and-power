@@ -78,7 +78,7 @@ export function useCart() {
 
     return {
         // Data
-        cart: data,
+        cart: data?.data,
         isLoading,
         error,
         refetch,

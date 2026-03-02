@@ -21,7 +21,7 @@ async function CategorySidebar({
     const t = await getTranslations();
     return (
         <Card title={t('common.category')} className="w-full card-custom">
-            <Flex className="!py-2 lg:!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin">
+            <Flex className="lg:!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin">
                 {categories.map((c, index) => {
                     const link = routes.sanPham.url + `/${[...slugs, c.slug].join("/")}`
                     return <Link

@@ -19,6 +19,20 @@ const protectedRoutes = [
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url]
 
+// ─── CORS headers applied to every API response ───────────────────────────────
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
+function withCors(response: NextResponse): NextResponse {
+    Object.entries(CORS_HEADERS).forEach(([key, value]) => {
+        response.headers.set(key, value)
+    })
+    return response
+}
+
 const intlMiddleware = createIntlMiddleware(routing)
 
 function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
@@ -71,6 +85,13 @@ function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
 export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
 
+    if (pathname.startsWith('/api')) {
+        if (request.method === 'OPTIONS') {
+            return new NextResponse(null, { status: 200, headers: CORS_HEADERS })
+        }
+        return withCors(NextResponse.next())
+    }
+
     // Run i18n middleware first
     const intlResponse = intlMiddleware(request)
 
@@ -103,5 +124,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/(vi|en)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
+    matcher: ['/', '/(vi|en)/:path*', '/api/:path*', '/((?!_next|_vercel|.*\\..*).*)'],
 }

@@ -1,3 +1,5 @@
+import { IPriceTier } from "./product"
+
 export interface ICartItem {
     _id?: string
     productId: string
@@ -8,6 +10,10 @@ export interface ICartItem {
     productName: string
     productSlug: string
     productImage?: string
+
+    availableStock?: number
+    inStock?: boolean
+    priceTiers?: IPriceTier[]
 }
 
 export interface ICart {
