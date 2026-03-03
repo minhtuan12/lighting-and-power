@@ -85,7 +85,7 @@ export default async function ({ params, searchParams }: SlugPageProps) {
         } else {
             // Product List
             const { products, page, total, totalPages } = (
-                await getProducts(query)
+                await getProducts({ ...query, categorySlug: lastSlug })
             ).data
             pagination = {
                 total,

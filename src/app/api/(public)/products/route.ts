@@ -2,6 +2,7 @@ import { withMiddleware } from "@/lib/api-handler"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { EProductStatus } from "@/types/product"
 import { NextRequest, NextResponse } from "next/server"
+import { CategoryService } from "../../(services)/category.service"
 import { ProductService } from "../../(services)/product.service"
 
 // ===================== GET /api/products (Public List) =====================
@@ -10,6 +11,7 @@ async function getPublicProducts(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const page = parseInt(searchParams.get("page") || "1")
         const categoryId = searchParams.get("categoryId")
+        const categorySlug = searchParams.get("categorySlug")
         const search = searchParams.get("search")
         const tags = searchParams.get("tags")?.split(",")
         const sortBy =
@@ -31,6 +33,10 @@ async function getPublicProducts(request: NextRequest) {
 
         // =========== normal filters ===========
         if (categoryId) filters.categoryId = categoryId
+        if (categorySlug) {
+            const cat = await CategoryService.getBySlug(categorySlug);
+            filters.categoryId = String(cat._id)
+        }
         if (search) filters.search = search
         if (tags && tags.length > 0 && tags[0]) filters.tags = tags
 
