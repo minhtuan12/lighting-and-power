@@ -435,3 +435,11 @@ button[aria-label='Download'] {
         flex-direction: row-reverse;
     }
 }
+
+.rich-content-image {
+    img {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

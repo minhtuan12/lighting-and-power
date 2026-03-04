@@ -40,7 +40,7 @@ export default function RichTextContent({ html, className }: Props) {
     return (
         <div
             ref={ref}
-            className={className}
+            className={`${className} rich-content-image`}
             dangerouslySetInnerHTML={{ __html: html }}
         />
     )

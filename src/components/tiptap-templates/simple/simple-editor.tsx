@@ -69,6 +69,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+import Image from "@tiptap/extension-image"
 import 'katex/dist/katex.min.css'
 
 async function handleImageUploadWithState(file: File, setUploading: any) {
@@ -211,6 +212,7 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, }: IP
                 autolink: true,
                 linkOnPaste: true,
             }),
+            Image,
             ImageUploadNode.configure({
                 accept: "image/*",
                 maxSize: MAX_FILE_SIZE,
