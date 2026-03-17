@@ -6,6 +6,17 @@ import { EProductStatus, IProductFilterOptions } from "@/types/product"
 import { PipelineStage } from "mongoose"
 
 export class ProductService {
+    private static applyOwnerScope(
+        query: Record<string, any>,
+        ownerAccountId?: string | null,
+    ) {
+        if (ownerAccountId !== undefined) {
+            query.ownerAccountId = ownerAccountId
+        }
+
+        return query
+    }
+
     // ================= CREATE =================
 
     static async create(data: {
@@ -35,6 +46,7 @@ export class ProductService {
         isFeatured?: boolean
         tags?: string[]
         relatedProducts?: string[]
+        ownerAccountId?: string | null
     }) {
         // Validate required fields
         if (!data.name) {
@@ -48,7 +60,9 @@ export class ProductService {
         }
 
         // Verify category exists
-        const category = await Category.findById(data.categoryId)
+        const category = await Category.findOne(
+            this.applyOwnerScope({ _id: data.categoryId }, data.ownerAccountId),
+        )
         if (!category) {
             throw new Error("Category not found")
         }
@@ -60,6 +74,9 @@ export class ProductService {
         if (data.relatedProducts && data.relatedProducts.length > 0) {
             const relatedCount = await Product.countDocuments({
                 _id: { $in: data.relatedProducts },
+                ...(data.ownerAccountId !== undefined
+                    ? { ownerAccountId: data.ownerAccountId }
+                    : {}),
             })
             if (relatedCount !== data.relatedProducts.length) {
                 throw new Error("Some related products do not exist")
@@ -69,6 +86,7 @@ export class ProductService {
         const product = await Product.create({
             ...data,
             slug,
+            ownerAccountId: data.ownerAccountId ?? null,
         })
 
         return product.populate("category")
@@ -78,6 +96,13 @@ export class ProductService {
 
     static async getAll(filters?: Record<string, any>) {
         const query: any = {}
+
+        if (
+            filters &&
+            Object.prototype.hasOwnProperty.call(filters, "ownerAccountId")
+        ) {
+            query.ownerAccountId = filters.ownerAccountId
+        }
 
         if (filters?.categoryId) {
             query.categoryId = filters.categoryId
@@ -272,8 +297,13 @@ export class ProductService {
         return { products, totalPages, total, page }
     }
 
-    static async getById(id: string) {
-        const product = await Product.findById(id)
+    static async getById(
+        id: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const product = await Product.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
             .populate("category")
             .populate("relatedProducts")
         if (!product) {
@@ -282,8 +312,13 @@ export class ProductService {
         return product
     }
 
-    static async getBySlug(slug: string) {
-        const product = await Product.findOne({ slug })
+    static async getBySlug(
+        slug: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const product = await Product.findOne(
+            this.applyOwnerScope({ slug }, options?.ownerAccountId),
+        )
             .populate("category")
             .populate("relatedProducts")
         if (!product) {
@@ -292,10 +327,18 @@ export class ProductService {
         return product
     }
 
-    static async getBySku(sku: string) {
-        const product = await Product.findOne({
-            sku: sku.toUpperCase(),
-        }).populate("category")
+    static async getBySku(
+        sku: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const product = await Product.findOne(
+            this.applyOwnerScope(
+                {
+                    sku: sku.toUpperCase(),
+                },
+                options?.ownerAccountId,
+            ),
+        ).populate("category")
         if (!product) {
             throw new Error("Product not found")
         }
@@ -342,8 +385,11 @@ export class ProductService {
     static async update(
         id: string,
         data: Partial<Parameters<typeof this.create>[0]>,
+        options?: { ownerAccountId?: string | null },
     ) {
-        const product = await Product.findById(id)
+        const product = await Product.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
         if (!product) {
             throw new Error("Product not found")
         }
@@ -363,7 +409,12 @@ export class ProductService {
             data.categoryId &&
             data.categoryId !== product.categoryId.toString()
         ) {
-            const category = await Category.findById(data.categoryId)
+            const category = await Category.findOne(
+                this.applyOwnerScope(
+                    { _id: data.categoryId },
+                    options?.ownerAccountId ?? product.ownerAccountId?.toString(),
+                ),
+            )
             if (!category) {
                 throw new Error("Category not found")
             }
@@ -373,6 +424,9 @@ export class ProductService {
         if (data.relatedProducts && data.relatedProducts.length > 0) {
             const relatedCount = await Product.countDocuments({
                 _id: { $in: data.relatedProducts },
+                ...(options?.ownerAccountId !== undefined
+                    ? { ownerAccountId: options.ownerAccountId }
+                    : {}),
             })
             if (relatedCount !== data.relatedProducts.length) {
                 throw new Error("Some related products do not exist")
@@ -381,6 +435,10 @@ export class ProductService {
 
         // Update fields
         Object.keys(data).forEach((key) => {
+            if (key === "ownerAccountId") {
+                return
+            }
+
             if (data[key as keyof typeof data] !== undefined) {
                 ;(product as any)[key] = data[key as keyof typeof data]
             }
@@ -425,29 +483,44 @@ export class ProductService {
 
     // ================= DELETE =================
 
-    static async delete(id: string) {
-        const product = await Product.findById(id)
+    static async delete(
+        id: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const product = await Product.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
         if (!product) {
             throw new Error("Product not found")
         }
 
-        await Product.findByIdAndDelete(id)
+        await Product.findOneAndDelete(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
 
         // Remove from relatedProducts of other products
         await Product.updateMany(
-            { relatedProducts: id },
+            this.applyOwnerScope({ relatedProducts: id }, options?.ownerAccountId),
             { $pull: { relatedProducts: id } },
         )
 
         return { success: true, message: "Product deleted successfully" }
     }
 
-    static async deleteMany(ids: string[]) {
-        const result = await Product.deleteMany({ _id: { $in: ids } })
+    static async deleteMany(
+        ids: string[],
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const result = await Product.deleteMany(
+            this.applyOwnerScope({ _id: { $in: ids } }, options?.ownerAccountId),
+        )
 
         // Remove from relatedProducts
         await Product.updateMany(
-            { relatedProducts: { $in: ids } },
+            this.applyOwnerScope(
+                { relatedProducts: { $in: ids } },
+                options?.ownerAccountId,
+            ),
             { $pull: { relatedProducts: { $in: ids } } },
         )
 
@@ -460,9 +533,13 @@ export class ProductService {
 
     // ================= BULK OPERATIONS =================
 
-    static async bulkUpdateStatus(ids: string[], status: string) {
+    static async bulkUpdateStatus(
+        ids: string[],
+        status: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
         const result = await Product.updateMany(
-            { _id: { $in: ids } },
+            this.applyOwnerScope({ _id: { $in: ids } }, options?.ownerAccountId),
             { status },
         )
 
@@ -473,9 +550,13 @@ export class ProductService {
         }
     }
 
-    static async bulkUpdateFeatured(ids: string[], isFeatured: boolean) {
+    static async bulkUpdateFeatured(
+        ids: string[],
+        isFeatured: boolean,
+        options?: { ownerAccountId?: string | null },
+    ) {
         const result = await Product.updateMany(
-            { _id: { $in: ids } },
+            this.applyOwnerScope({ _id: { $in: ids } }, options?.ownerAccountId),
             { isFeatured },
         )
 
@@ -486,9 +567,13 @@ export class ProductService {
         }
     }
 
-    static async bulkAddTags(ids: string[], tags: string[]) {
+    static async bulkAddTags(
+        ids: string[],
+        tags: string[],
+        options?: { ownerAccountId?: string | null },
+    ) {
         const result = await Product.updateMany(
-            { _id: { $in: ids } },
+            this.applyOwnerScope({ _id: { $in: ids } }, options?.ownerAccountId),
             { $addToSet: { tags: { $each: tags } } },
         )
 
@@ -501,8 +586,54 @@ export class ProductService {
 
     // ================= ANALYTICS =================
 
-    static async getStats() {
+    static async getStats(options?: { ownerAccountId?: string | null }) {
+        const pipeline: PipelineStage[] = []
+        if (options?.ownerAccountId !== undefined) {
+            pipeline.push({
+                $match: {
+                    ownerAccountId: options.ownerAccountId as any,
+                },
+            })
+        }
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                totalProducts: { $sum: 1 },
+                totalStock: { $sum: "$stock" },
+                avgPrice: { $avg: "$price" },
+                avgRating: { $avg: "$rating" },
+                totalSold: { $sum: "$soldCount" },
+                totalViews: { $sum: "$viewCount" },
+                activeProducts: {
+                    $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
+                },
+                outOfStock: {
+                    $sum: {
+                        $cond: [{ $eq: ["$status", "out_of_stock"] }, 1, 0],
+                    },
+                },
+            },
+        })
+
+        const stats = await Product.aggregate(pipeline)
+
+        return stats[0] || {}
+    }
+
+    static async getCategoryStats(
+        categoryId: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const matchQuery: Record<string, any> = {
+            categoryId: { $oid: categoryId },
+        }
+        if (options?.ownerAccountId !== undefined) {
+            matchQuery.ownerAccountId = options.ownerAccountId
+        }
+
         const stats = await Product.aggregate([
+            { $match: matchQuery },
             {
                 $group: {
                     _id: null,
@@ -511,15 +642,6 @@ export class ProductService {
                     avgPrice: { $avg: "$price" },
                     avgRating: { $avg: "$rating" },
                     totalSold: { $sum: "$soldCount" },
-                    totalViews: { $sum: "$viewCount" },
-                    activeProducts: {
-                        $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
-                    },
-                    outOfStock: {
-                        $sum: {
-                            $cond: [{ $eq: ["$status", "out_of_stock"] }, 1, 0],
-                        },
-                    },
                 },
             },
         ])
@@ -527,38 +649,27 @@ export class ProductService {
         return stats[0] || {}
     }
 
-    static async getCategoryStats(categoryId: string) {
-        const stats = await Product.aggregate([
-            { $match: { categoryId: { $oid: categoryId } } },
-            {
-                $group: {
-                    _id: null,
-                    totalProducts: { $sum: 1 },
-                    totalStock: { $sum: "$stock" },
-                    avgPrice: { $avg: "$price" },
-                    avgRating: { $avg: "$rating" },
-                    totalSold: { $sum: "$soldCount" },
-                },
-            },
-        ])
-
-        return stats[0] || {}
-    }
-
-    static async getFilterOptions(): Promise<IProductFilterOptions> {
+    static async getFilterOptions(
+        options?: { ownerAccountId?: string | null },
+    ): Promise<IProductFilterOptions> {
         try {
+            const statusQuery: Record<string, any> = {
+                status: {
+                    $nin: [
+                        EProductStatus.discontinued,
+                        EProductStatus.draft,
+                        EProductStatus.outOfStock,
+                    ],
+                },
+            }
+            if (options?.ownerAccountId !== undefined) {
+                statusQuery.ownerAccountId = options.ownerAccountId
+            }
+
             const pipeline = [
                 {
                     // Chỉ lấy sản phẩm ACTIVE
-                    $match: {
-                        status: {
-                            $nin: [
-                                EProductStatus.discontinued,
-                                EProductStatus.draft,
-                                EProductStatus.outOfStock,
-                            ],
-                        },
-                    },
+                    $match: statusQuery,
                 },
                 {
                     $facet: {
@@ -820,6 +931,9 @@ export class ProductService {
             const categoryIds = result.categories.map((c: any) => c._id)
             const categories = await Category.find({
                 _id: { $in: categoryIds },
+                ...(options?.ownerAccountId !== undefined
+                    ? { ownerAccountId: options.ownerAccountId }
+                    : {}),
             })
                 .select("_id name slug")
                 .lean()

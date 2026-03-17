@@ -18,7 +18,9 @@ async function bulkDeleteProducts(request: NextRequest) {
             )
         }
 
-        const result = await ProductService.deleteMany(ids)
+        const result = await ProductService.deleteMany(ids, {
+            ownerAccountId: null,
+        })
 
         revalidateTag("products", { expire: 0 })
 

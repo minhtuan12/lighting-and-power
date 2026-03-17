@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/Icon'
 import { useCart } from '@/hooks/user/use-cart'
+import { useAuth } from '@/hooks/use-me'
 import { addToCartAtom } from '@/stores'
 import { IProduct } from '@/types/product'
 import { Button, Col, Flex, InputNumber, Row } from 'antd'
@@ -28,13 +29,18 @@ function AddToCartContent({
 }: IProps) {
     const t = useTranslations('product')
     const [quantity, setQuantity] = useState(minQuantity ?? 1)
+    const { user } = useAuth()
     const isSmallSize = size === 'small'
     const outOfStock = useMemo(() => !product.stock, [product?.stock])
+    const isOwnProduct = useMemo(
+        () => !!user?._id && user._id === product.ownerAccountId,
+        [user?._id, product.ownerAccountId],
+    )
     const addToCart = useSetAtom(addToCartAtom)
     const { addToCartAsync } = useCart()
 
     function handleChangeQuantity(type: string) {
-        if (!outOfStock) {
+        if (!outOfStock && !isOwnProduct) {
             setQuantity((prev) =>
                 type === 'minus'
                     ? prev - 1 < (minQuantity ?? 1)
@@ -48,6 +54,10 @@ function AddToCartContent({
     }
 
     function handleAddToCart() {
+        if (isOwnProduct) {
+            return
+        }
+
         addToCart({
             productId: product._id,
             price: product.price,
@@ -98,7 +108,7 @@ function AddToCartContent({
             </Row>
             {!noCtaBtn && (
                 <Button
-                    disabled={outOfStock}
+                    disabled={outOfStock || isOwnProduct}
                     onClick={handleAddToCart}
                     className={`w-full rounded-[5px] flex items-center gap-3 !bg-[var(--primary)] hover:!bg-blue-800 ${isSmallSize ? '!h-[30px]' : '!h-[34px]'}`}
                     type="primary"

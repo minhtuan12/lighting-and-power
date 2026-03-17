@@ -43,6 +43,9 @@ export class CartService {
         if (product.status !== EProductStatus.active) {
             throw new Error("Product is not available")
         }
+        if (product.ownerAccountId?.toString() === userId) {
+            throw new Error("Cannot buy your own product")
+        }
 
         // Get price and stock info
         let price = product.price
@@ -200,6 +203,7 @@ export class CartService {
 
     static async validateCartStock(cart: ICart) {
         const validatedItems = []
+        const cartOwnerId = (cart as any)?.userId?.toString?.()
 
         for (const item of cart.items) {
             const product = await Product.findById(item.productId)
@@ -211,6 +215,19 @@ export class CartService {
                     inStock: false,
                     availableStock: 0,
                     error: "Product is no longer available",
+                })
+                continue
+            }
+
+            if (
+                cartOwnerId &&
+                product.ownerAccountId?.toString() === cartOwnerId
+            ) {
+                validatedItems.push({
+                    ...item,
+                    inStock: false,
+                    availableStock: 0,
+                    error: "You cannot buy your own product",
                 })
                 continue
             }
@@ -257,6 +274,10 @@ export class CartService {
 
             if (!product || product.status !== EProductStatus.active) {
                 // Skip unavailable products
+                continue
+            }
+
+            if (product.ownerAccountId?.toString() === userId) {
                 continue
             }
 

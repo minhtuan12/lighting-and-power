@@ -16,6 +16,7 @@ import {
     LogIn,
     LogOut,
     Mail,
+    Store,
     TextAlignJustify,
     User,
     UserPlus,
@@ -68,6 +69,20 @@ function UserMenuContent({ user }: IProps) {
                             <Space className="pl-4 w-full py-3">
                                 <User size={styles.iconSize} />
                                 {t('common.profile')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.booth.url,
+                    label: (
+                        <Link
+                            href={routes.booth.url}
+                            className={`gap-1 !text-black ${styles.fontSize}`}
+                        >
+                            <Space className="pl-4 w-full py-3">
+                                <Store size={styles.iconSize} />
+                                {t('common.manageBooth')}
                             </Space>
                         </Link>
                     ),

@@ -4,8 +4,9 @@ import Loading from '@/components/Loading'
 import { routes } from '@/constants/routes'
 import { useAuth } from '@/hooks/use-me'
 import { Avatar, Breadcrumb, Card, Flex, Row, Typography } from 'antd'
-import { Lock, Package, UserRound } from 'lucide-react'
+import { Lock, Package, Store, UserRound } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -17,6 +18,7 @@ const LazyOrdersTab = lazy(() => import('./(tabs)/orders'))
 export default function () {
     const t = useTranslations()
     const { user } = useAuth()
+    const router = useRouter()
 
     const [activeTab, setActiveTab] = useState('info')
 
@@ -53,6 +55,15 @@ export default function () {
                     <Package
                         size={25}
                         color={getColor('orders')}
+                    />
+                ),
+            },
+            {
+                key: 'booth',
+                icon: (
+                    <Store
+                        size={25}
+                        color={'#707070'}
                     />
                 ),
             },
@@ -144,11 +155,16 @@ export default function () {
                         {menu.map((item) => (
                             <Row
                                 key={item.key}
-                                onClick={() => setActiveTab(item.key)}
+                                onClick={() =>
+                                    item.key === 'booth'
+                                        ? router.push(routes.booth.url)
+                                        : setActiveTab(item.key)
+                                }
                                 className="gap-4 h-13 px-4 py-3 cursor-pointer rounded-md items-center hover:!bg-[var(--light-primary)]"
                                 style={{
                                     background:
-                                        activeTab !== item.key
+                                        activeTab !== item.key ||
+                                            item.key === 'booth'
                                             ? '#f9fafb'
                                             : 'var(--light-primary)',
                                 }}

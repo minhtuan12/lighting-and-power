@@ -9,6 +9,11 @@ const CategorySchema = new Schema<ICategory>(
             trim: true,
             maxlength: [100, "Category name cannot exceed 100 characters"],
         },
+        ownerAccountId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
         slug: {
             type: String,
             required: true,
@@ -64,6 +69,7 @@ const CategorySchema = new Schema<ICategory>(
 
 // Index for better query performance
 CategorySchema.index({ parentId: 1 })
+CategorySchema.index({ ownerAccountId: 1 })
 CategorySchema.index({ level: 1 })
 CategorySchema.index({ isActive: 1 })
 CategorySchema.index({ order: 1 })

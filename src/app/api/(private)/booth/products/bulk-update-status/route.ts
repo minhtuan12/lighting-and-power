@@ -1,13 +1,22 @@
 import { ProductService } from "@/app/api/(services)/product.service"
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { EUserRole } from "@/types/user"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
-async function bulkUpdateStatus(request: NextRequest) {
+async function bulkUpdateBoothStatus(request: NextRequest) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const body = await request.json()
         const { ids, status } = body
 
@@ -26,7 +35,7 @@ async function bulkUpdateStatus(request: NextRequest) {
         }
 
         const result = await ProductService.bulkUpdateStatus(ids, status, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
         revalidateTag("products", { expire: 0 })
 
@@ -35,7 +44,7 @@ async function bulkUpdateStatus(request: NextRequest) {
             data: result,
         })
     } catch (error: any) {
-        console.error("Bulk update status error:", error)
+        console.error("Bulk update booth status error:", error)
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
             { status: 500 },
@@ -44,8 +53,8 @@ async function bulkUpdateStatus(request: NextRequest) {
 }
 
 export const PUT = withMiddleware(
-    bulkUpdateStatus,
+    bulkUpdateBoothStatus,
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin),
+    requireRole(EUserRole.user),
 )

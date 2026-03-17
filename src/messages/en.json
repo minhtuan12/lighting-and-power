@@ -17,6 +17,7 @@
         "currency": "Currency",
         "apply": "Apply",
         "profile": "Profile",
+        "manageBooth": "Manage Booth",
         "logout": "Log out",
         "shipAddress": "Shipping Address",
         "category": "Categories",
@@ -109,7 +110,8 @@
         "setAddressDefault": "Set as Default Address",
         "changePasswordSuccess": "Changed Password Successfully",
         "changePasswordFailed": "Failed to change password",
-        "password": "Change Password"
+        "password": "Change Password",
+        "booth": "Manage Booth"
     },
     "cart": {
         "searchProd": "Search Product",

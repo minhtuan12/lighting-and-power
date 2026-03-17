@@ -80,4 +80,19 @@ export const routes = {
         url: "/trang-ca-nhan",
         key: "profile",
     },
+    booth: {
+        title: "Quản lý cửa hàng",
+        url: "/quan-ly-cua-hang",
+        key: "booth",
+    },
+    boothCategory: {
+        title: "Quản lý danh mục",
+        url: "/quan-ly-cua-hang/danh-muc",
+        key: "booth-category",
+    },
+    boothProduct: {
+        title: "Quản lý sản phẩm",
+        url: "/quan-ly-cua-hang/san-pham",
+        key: "booth-product",
+    },
 }

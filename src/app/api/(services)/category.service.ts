@@ -14,6 +14,17 @@ interface PaginationResult {
 }
 
 export class CategoryService {
+    private static applyOwnerScope(
+        query: Record<string, any>,
+        ownerAccountId?: string | null,
+    ) {
+        if (ownerAccountId !== undefined) {
+            query.ownerAccountId = ownerAccountId
+        }
+
+        return query
+    }
+
     // ================= CREATE =================
 
     static async create(data: {
@@ -25,10 +36,13 @@ export class CategoryService {
         metaTitle?: string
         metaDescription?: string
         metaKeywords?: string
+        ownerAccountId?: string | null
     }) {
         // Check if slug already exists
         if (data.slug) {
-            const existingSlug = await Category.findOne({ slug: data.slug })
+            const existingSlug = await Category.findOne(
+                this.applyOwnerScope({ slug: data.slug }, data.ownerAccountId),
+            )
             if (existingSlug) {
                 throw new Error("Slug already exists")
             }
@@ -39,7 +53,9 @@ export class CategoryService {
 
         // Calculate level based on parent
         if (parentId) {
-            const parent = await Category.findById(parentId)
+            const parent = await Category.findOne(
+                this.applyOwnerScope({ _id: parentId }, data.ownerAccountId),
+            )
             if (!parent) {
                 throw new Error("Parent category not found")
             }
@@ -54,6 +70,7 @@ export class CategoryService {
             parentId,
             level,
             isActive: data.isActive !== undefined ? data.isActive : true,
+            ownerAccountId: data.ownerAccountId ?? null,
         })
 
         return category
@@ -67,10 +84,14 @@ export class CategoryService {
             level?: number
             isActive?: boolean
             search?: string
+            ownerAccountId?: string | null
         },
         options?: { page?: number },
     ): Promise<PaginationResult> {
-        const query: any = {}
+        const query: any = this.applyOwnerScope(
+            {},
+            filters?.ownerAccountId,
+        )
 
         if (filters?.parentId !== undefined) {
             query.parentId = filters.parentId === null ? null : filters.parentId
@@ -105,6 +126,9 @@ export class CategoryService {
             categories.map(async (category) => {
                 const childrenCount = await Category.countDocuments({
                     parentId: category._id,
+                    ...(filters?.ownerAccountId !== undefined
+                        ? { ownerAccountId: filters.ownerAccountId }
+                        : {}),
                 })
 
                 return {
@@ -130,8 +154,12 @@ export class CategoryService {
     static async getTree(
         isActiveOnly: boolean = true,
         { parentSlug }: Record<string, any>,
+        options?: { ownerAccountId?: string | null },
     ) {
-        const query: any = {}
+        const query: any = this.applyOwnerScope(
+            {},
+            options?.ownerAccountId,
+        )
         if (isActiveOnly) {
             query.isActive = true
         }
@@ -141,6 +169,9 @@ export class CategoryService {
             const parent = await Category.findOne({
                 slug: parentSlug,
                 ...(isActiveOnly ? { isActive: true } : {}),
+                ...(options?.ownerAccountId !== undefined
+                    ? { ownerAccountId: options.ownerAccountId }
+                    : {}),
             }).lean()
             if (parent) {
                 parentId = parent._id
@@ -155,6 +186,9 @@ export class CategoryService {
             allCategories.map(async (category) => {
                 const childrenCount = await Category.countDocuments({
                     parentId: category._id,
+                    ...(options?.ownerAccountId !== undefined
+                        ? { ownerAccountId: options.ownerAccountId }
+                        : {}),
                 })
 
                 return {
@@ -180,16 +214,26 @@ export class CategoryService {
         return buildTree(parentId ? String(parentId) : null)
     }
 
-    static async getById(id: string) {
-        const category = await Category.findById(id).lean()
+    static async getById(
+        id: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const category = await Category.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        ).lean()
         if (!category) {
             throw new Error("Category not found")
         }
         return category
     }
 
-    static async getBySlug(slug: string) {
-        const category = await Category.findOne({ slug }).lean()
+    static async getBySlug(
+        slug: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const category = await Category.findOne(
+            this.applyOwnerScope({ slug }, options?.ownerAccountId),
+        ).lean()
         if (!category) {
             throw new Error("Category not found")
         }
@@ -198,16 +242,24 @@ export class CategoryService {
             childrenCount: await Category.countDocuments({
                 parentId: category._id,
                 isActive: true,
+                ...(options?.ownerAccountId !== undefined
+                    ? { ownerAccountId: options.ownerAccountId }
+                    : {}),
             }),
         }
     }
 
-    static async getBreadcrumb(categoryId: string) {
+    static async getBreadcrumb(
+        categoryId: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
         const breadcrumb: any[] = []
         let currentId = categoryId
 
         while (currentId) {
-            const category = await Category.findById(currentId).lean()
+            const category = await Category.findOne(
+                this.applyOwnerScope({ _id: currentId }, options?.ownerAccountId),
+            ).lean()
             if (!category) break
 
             breadcrumb.unshift({
@@ -237,18 +289,26 @@ export class CategoryService {
             metaDescription?: string
             metaKeywords?: string
         },
+        options?: { ownerAccountId?: string | null },
     ) {
-        const category = await Category.findById(id)
+        const category = await Category.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
         if (!category) {
             throw new Error("Category not found")
         }
 
         // Check if new slug already exists
         if (data.slug && data.slug !== category.slug) {
-            const existingSlug = await Category.findOne({
-                slug: data.slug,
-                _id: { $ne: id },
-            })
+            const existingSlug = await Category.findOne(
+                this.applyOwnerScope(
+                    {
+                        slug: data.slug,
+                        _id: { $ne: id },
+                    },
+                    options?.ownerAccountId,
+                ),
+            )
             if (existingSlug) {
                 throw new Error("Slug already exists")
             }
@@ -266,14 +326,23 @@ export class CategoryService {
 
             // Check if new parent is a descendant
             if (data.parentId) {
-                const isDescendant = await this.isDescendant(id, data.parentId)
+                const isDescendant = await this.isDescendant(
+                    id,
+                    data.parentId,
+                    options,
+                )
                 if (isDescendant) {
                     throw new Error(
                         "Cannot move category to its own descendant",
                     )
                 }
 
-                const parent = await Category.findById(data.parentId)
+                const parent = await Category.findOne(
+                    this.applyOwnerScope(
+                        { _id: data.parentId },
+                        options?.ownerAccountId,
+                    ),
+                )
                 if (!parent) {
                     throw new Error("Parent category not found")
                 }
@@ -289,7 +358,7 @@ export class CategoryService {
             category.parentId = data.parentId as any
 
             // Update all children levels
-            await this.updateChildrenLevels(id, category.level)
+            await this.updateChildrenLevels(id, category.level, options)
         }
 
         // Update other fields
@@ -303,7 +372,10 @@ export class CategoryService {
 
             // Update all its children status to false if it is not active
             if (!data.isActive) {
-                await Category.updateMany({ parentId: id }, { isActive: false })
+                await Category.updateMany(
+                    this.applyOwnerScope({ parentId: id }, options?.ownerAccountId),
+                    { isActive: false },
+                )
             }
         }
         if (data.metaTitle !== undefined) category.metaTitle = data.metaTitle
@@ -319,14 +391,21 @@ export class CategoryService {
 
     // ================= DELETE =================
 
-    static async delete(id: string) {
-        const category = await Category.findById(id)
+    static async delete(
+        id: string,
+        options?: { ownerAccountId?: string | null },
+    ) {
+        const category = await Category.findOne(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
         if (!category) {
             throw new Error("Category not found")
         }
 
         // Check if has children
-        const childrenCount = await Category.countDocuments({ parentId: id })
+        const childrenCount = await Category.countDocuments(
+            this.applyOwnerScope({ parentId: id }, options?.ownerAccountId),
+        )
         if (childrenCount > 0) {
             throw new Error(
                 "Cannot delete category with subcategories. Delete subcategories first.",
@@ -339,7 +418,9 @@ export class CategoryService {
         //     throw new Error('Cannot delete category with products. Remove products first.');
         // }
 
-        await Category.findByIdAndDelete(id)
+        await Category.findOneAndDelete(
+            this.applyOwnerScope({ _id: id }, options?.ownerAccountId),
+        )
 
         return { success: true, message: "Category deleted successfully" }
     }
@@ -349,11 +430,14 @@ export class CategoryService {
     private static async isDescendant(
         ancestorId: string,
         descendantId: string,
+        options?: { ownerAccountId?: string | null },
     ): Promise<boolean> {
         let currentId = descendantId
 
         while (currentId) {
-            const category = await Category.findById(currentId)
+            const category = await Category.findOne(
+                this.applyOwnerScope({ _id: currentId }, options?.ownerAccountId),
+            )
             if (!category) break
             if (category.parentId?.toString() === ancestorId) return true
             currentId = category.parentId?.toString() || ""
@@ -365,15 +449,22 @@ export class CategoryService {
     private static async updateChildrenLevels(
         parentId: string,
         parentLevel: number,
+        options?: { ownerAccountId?: string | null },
     ) {
-        const children = await Category.find({ parentId })
+        const children = await Category.find(
+            this.applyOwnerScope({ parentId }, options?.ownerAccountId),
+        )
 
         for (const child of children) {
             child.level = parentLevel + 1
             await child.save()
 
             // Recursively update grandchildren
-            await this.updateChildrenLevels(child._id.toString(), child.level)
+            await this.updateChildrenLevels(
+                child._id.toString(),
+                child.level,
+                options,
+            )
         }
     }
 }

@@ -17,6 +17,7 @@
         "currency": "Tiền tệ",
         "apply": "Áp dụng",
         "profile": "Trang cá nhân",
+        "manageBooth": "Quản lý cửa hàng",
         "logout": "Đăng xuất",
         "shipAddress": "Địa chỉ nhận hàng",
         "category": "Danh mục",
@@ -110,7 +111,8 @@
         "setAddressDefault": "Đặt làm địa chỉ mặc định",
         "changePasswordSuccess": "Đổi mật khẩu thành công",
         "changePasswordFailed": "Đổi mật khẩu thất bại",
-        "password": "Đổi mật khẩu"
+        "password": "Đổi mật khẩu",
+        "booth": "Quản lý cửa hàng"
     },
     "cart": {
         "searchProd": "Tìm sản phẩm",

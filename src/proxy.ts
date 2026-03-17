@@ -11,10 +11,12 @@ const protectedRoutes = [
     routes.gioHang.url,
     // routes.taiLieuDienTu.url,
     routes.trangCaNhan.url,
+    routes.booth.url,
 
     '/cart',
     // '/documents',
     '/profile',
+    '/my-booth',
 ]
 
 const authRoutes = [routes.dangKy.url, routes.dangNhap.url]

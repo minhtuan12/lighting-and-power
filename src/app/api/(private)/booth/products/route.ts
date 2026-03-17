@@ -1,14 +1,22 @@
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { EUserRole } from "@/types/user"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
-import { ProductService } from "../../(services)/product.service"
+import { ProductService } from "../../../(services)/product.service"
 
-// ===================== GET /api/admin/products =====================
-async function getProducts(request: NextRequest) {
+async function getBoothProducts(request: NextRequest) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const { searchParams } = new URL(request.url)
         const page = parseInt(searchParams.get("page") || "1")
         const categoryId = searchParams.get("categoryId")
@@ -28,7 +36,10 @@ async function getProducts(request: NextRequest) {
         const sortOrder =
             (searchParams.get("sortOrder") as "asc" | "desc") || "desc"
 
-        const filters: any = { page }
+        const filters: any = {
+            page,
+            ownerAccountId: user.userId,
+        }
 
         if (categoryId) filters.categoryId = categoryId
         if (status && status !== "all") filters.status = status
@@ -40,17 +51,14 @@ async function getProducts(request: NextRequest) {
         if (sortBy) filters.sortBy = sortBy
         filters.sortOrder = sortOrder
 
-        const data = await ProductService.getAll({
-            ...filters,
-            ownerAccountId: null,
-        })
+        const data = await ProductService.getAll(filters)
 
         return NextResponse.json({
             success: true,
             data,
         })
     } catch (error: any) {
-        console.error("Get products error:", error)
+        console.error("Get booth products error:", error)
         return NextResponse.json(
             { success: false, message: error.message || "An error occurred" },
             { status: 500 },
@@ -58,9 +66,16 @@ async function getProducts(request: NextRequest) {
     }
 }
 
-// ===================== POST /api/admin/products =====================
-async function createProduct(request: NextRequest) {
+async function createBoothProduct(request: NextRequest) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const body = await request.json()
         const {
             name,
@@ -118,7 +133,7 @@ async function createProduct(request: NextRequest) {
             isFeatured,
             tags,
             relatedProducts,
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         revalidateTag("products", { expire: 0 })
@@ -132,7 +147,7 @@ async function createProduct(request: NextRequest) {
             { status: 201 },
         )
     } catch (error: any) {
-        console.error("Create product error:", error)
+        console.error("Create booth product error:", error)
 
         if (error.message.includes("Category not found")) {
             return NextResponse.json(
@@ -165,30 +180,11 @@ async function createProduct(request: NextRequest) {
     }
 }
 
-// ===================== GET /api/admin/products/stats =====================
-async function getStats(request: NextRequest) {
-    try {
-        const stats = await ProductService.getStats({ ownerAccountId: null })
-
-        return NextResponse.json({
-            success: true,
-            data: stats,
-        })
-    } catch (error: any) {
-        console.error("Get stats error:", error)
-        return NextResponse.json(
-            { success: false, message: error.message || "An error occurred" },
-            { status: 500 },
-        )
-    }
-}
-
-// ===================== Middleware Setup =====================
-const adminMiddleware = [
+const boothMiddleware = [
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin),
+    requireRole(EUserRole.user),
 ]
 
-export const GET = withMiddleware(getProducts, ...adminMiddleware)
-export const POST = withMiddleware(createProduct, ...adminMiddleware)
+export const GET = withMiddleware(getBoothProducts, ...boothMiddleware)
+export const POST = withMiddleware(createBoothProduct, ...boothMiddleware)

@@ -78,7 +78,8 @@ async function addToCart(request: NextRequest) {
             error.message.includes("not found") ||
             error.message.includes("not available") ||
             error.message.includes("available in stock") ||
-            error.message.includes("Minimum order")
+            error.message.includes("Minimum order") ||
+            error.message.includes("own product")
         ) {
             return NextResponse.json(
                 { success: false, message: error.message },

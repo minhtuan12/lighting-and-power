@@ -64,7 +64,8 @@ async function createOrder(request: NextRequest) {
 
         if (
             error.message.includes("Cart is empty") ||
-            error.message.includes("out of stock")
+            error.message.includes("out of stock") ||
+            error.message.includes("own product")
         ) {
             return NextResponse.json(
                 { success: false, message: error.message },

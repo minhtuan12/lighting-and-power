@@ -1,4 +1,5 @@
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { SlugGenerator } from "@/lib/slug"
@@ -6,13 +7,21 @@ import Category from "@/models/category"
 import { EUserRole } from "@/types/user"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
-import { CategoryService } from "../../../(services)/category.service"
+import { CategoryService } from "../../../../(services)/category.service"
 
-async function getCategory(
+async function getBoothCategory(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -22,7 +31,7 @@ async function getCategory(
         }
 
         const category = await CategoryService.getById(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         return NextResponse.json({
@@ -30,7 +39,7 @@ async function getCategory(
             data: category,
         })
     } catch (error: any) {
-        console.error("Get category error:", error)
+        console.error("Get booth category error:", error)
 
         if (error.message === "Category not found") {
             return NextResponse.json(
@@ -46,11 +55,19 @@ async function getCategory(
     }
 }
 
-async function updateCategory(
+async function updateBoothCategory(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -75,9 +92,17 @@ async function updateCategory(
             params.id,
             {
                 name,
-                slug: await SlugGenerator.generateUniqueSlug(name, Category, {
-                    excludeId: params.id,
-                }),
+                ...(name
+                    ? {
+                          slug: await SlugGenerator.generateUniqueSlug(
+                              name,
+                              Category,
+                              {
+                                  excludeId: params.id,
+                              },
+                          ),
+                      }
+                    : {}),
                 image,
                 description,
                 parentId,
@@ -87,7 +112,7 @@ async function updateCategory(
                 metaKeywords,
             },
             {
-                ownerAccountId: null,
+                ownerAccountId: user.userId,
             },
         )
 
@@ -99,7 +124,7 @@ async function updateCategory(
             data: category,
         })
     } catch (error: any) {
-        console.error("Update category error:", error)
+        console.error("Update booth category error:", error)
 
         if (error.message === "Category not found") {
             return NextResponse.json(
@@ -127,11 +152,19 @@ async function updateCategory(
     }
 }
 
-async function deleteCategory(
+async function deleteBoothCategory(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -141,7 +174,7 @@ async function deleteCategory(
         }
 
         const result = await CategoryService.delete(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         revalidateTag("categories", { expire: 0 })
@@ -151,7 +184,7 @@ async function deleteCategory(
             message: result.message,
         })
     } catch (error: any) {
-        console.error("Delete category error:", error)
+        console.error("Delete booth category error:", error)
 
         if (error.message === "Category not found") {
             return NextResponse.json(
@@ -174,23 +207,12 @@ async function deleteCategory(
     }
 }
 
-export const GET = withMiddleware(
-    getCategory,
+const boothMiddleware = [
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin),
-)
+    requireRole(EUserRole.user),
+]
 
-export const PATCH = withMiddleware(
-    updateCategory,
-    connectDbMiddleware,
-    verifyToken,
-    requireRole(EUserRole.admin),
-)
-
-export const DELETE = withMiddleware(
-    deleteCategory,
-    connectDbMiddleware,
-    verifyToken,
-    requireRole(EUserRole.admin),
-)
+export const GET = withMiddleware(getBoothCategory, ...boothMiddleware)
+export const PATCH = withMiddleware(updateBoothCategory, ...boothMiddleware)
+export const DELETE = withMiddleware(deleteBoothCategory, ...boothMiddleware)

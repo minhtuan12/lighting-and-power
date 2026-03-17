@@ -40,6 +40,10 @@ export class OrderService {
                 throw new Error(`${item.productName} đã hết hàng`)
             }
 
+            if (product.ownerAccountId?.toString() === userId) {
+                throw new Error("Cannot buy your own product")
+            }
+
             const itemSubtotal = item.price * item.quantity
             subtotal += itemSubtotal
 

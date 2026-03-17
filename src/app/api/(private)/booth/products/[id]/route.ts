@@ -1,22 +1,26 @@
 import { withMiddleware } from "@/lib/api-handler"
+import { getRequestUser } from "@/lib/context"
 import { requireRole, verifyToken } from "@/lib/middleware"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { cloudinaryService } from "@/service/cloudinary"
 import { EUserRole } from "@/types/user"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
-import { ProductService } from "../../../(services)/product.service"
+import { ProductService } from "../../../../(services)/product.service"
 
-type RouteParams = {
-    params: { id: string }
-}
-
-// ===================== GET /api/admin/products/[id] =====================
-async function getProductById(
+async function getBoothProductById(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -26,7 +30,7 @@ async function getProductById(
         }
 
         const product = await ProductService.getById(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         return NextResponse.json({
@@ -34,7 +38,7 @@ async function getProductById(
             data: product,
         })
     } catch (error: any) {
-        console.error("Get product error:", error)
+        console.error("Get booth product error:", error)
 
         if (error.message === "Product not found") {
             return NextResponse.json(
@@ -50,12 +54,19 @@ async function getProductById(
     }
 }
 
-// ===================== PUT /api/admin/products/[id] =====================
-async function updateProduct(
+async function updateBoothProduct(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -66,29 +77,22 @@ async function updateProduct(
 
         const body = await request.json()
 
-        // Get existing product to handle old images
         const existingProduct = await ProductService.getById(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
-        // Handle image cleanup for removed images
         if (body.images && Array.isArray(body.images)) {
             const oldImages = existingProduct.images || []
             const newImages = body.images || []
-
-            // Find removed images
             const removedImages = oldImages.filter(
                 (oldImg: string) => !newImages.includes(oldImg),
             )
 
-            // Delete removed images from Cloudinary
             for (const imageUrl of removedImages) {
                 try {
-                    // Extract public_id from URL (format: https://res.cloudinary.com/cloud_name/image/upload/v123/folder/public_id.ext)
                     const urlParts = imageUrl.split("/")
                     const publicId = urlParts[urlParts.length - 1].split(".")[0]
                     const folder = urlParts[urlParts.length - 2]
-
                     await cloudinaryService.deleteFile(`${folder}/${publicId}`)
                 } catch (error) {
                     console.warn("Failed to delete old image:", imageUrl, error)
@@ -97,7 +101,7 @@ async function updateProduct(
         }
 
         const product = await ProductService.update(params.id, body, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         revalidateTag(`product:${params.id}`, { expire: 0 })
@@ -109,7 +113,7 @@ async function updateProduct(
             data: product,
         })
     } catch (error: any) {
-        console.error("Update product error:", error)
+        console.error("Update booth product error:", error)
 
         if (error.message === "Product not found") {
             return NextResponse.json(
@@ -139,12 +143,19 @@ async function updateProduct(
     }
 }
 
-// ===================== DELETE /api/admin/products/[id] =====================
-async function deleteProduct(
+async function deleteBoothProduct(
     request: NextRequest,
     context?: { params: Promise<{ id: string }> },
 ) {
     try {
+        const user = getRequestUser(request)
+        if (!user?.userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID not found" },
+                { status: 401 },
+            )
+        }
+
         const params = await context?.params
         if (!params?.id) {
             return NextResponse.json(
@@ -154,7 +165,7 @@ async function deleteProduct(
         }
 
         const product = await ProductService.getById(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
         if (product.images && Array.isArray(product.images)) {
             for (const imageUrl of product.images) {
@@ -162,7 +173,6 @@ async function deleteProduct(
                     const urlParts = imageUrl.split("/")
                     const publicId = urlParts[urlParts.length - 1].split(".")[0]
                     const folder = urlParts[urlParts.length - 2]
-
                     await cloudinaryService.deleteFile(`${folder}/${publicId}`)
                 } catch (error) {
                     console.warn(
@@ -175,7 +185,7 @@ async function deleteProduct(
         }
 
         const result = await ProductService.delete(params.id, {
-            ownerAccountId: null,
+            ownerAccountId: user.userId,
         })
 
         revalidateTag("products", { expire: 0 })
@@ -185,7 +195,7 @@ async function deleteProduct(
             message: result.message,
         })
     } catch (error: any) {
-        console.error("Delete product error:", error)
+        console.error("Delete booth product error:", error)
 
         if (error.message === "Product not found") {
             return NextResponse.json(
@@ -201,13 +211,12 @@ async function deleteProduct(
     }
 }
 
-// ===================== Middleware Setup =====================
-const adminMiddleware = [
+const boothMiddleware = [
     connectDbMiddleware,
     verifyToken,
-    requireRole(EUserRole.admin),
+    requireRole(EUserRole.user),
 ]
 
-export const GET = withMiddleware(getProductById, ...adminMiddleware)
-export const PUT = withMiddleware(updateProduct, ...adminMiddleware)
-export const DELETE = withMiddleware(deleteProduct, ...adminMiddleware)
+export const GET = withMiddleware(getBoothProductById, ...boothMiddleware)
+export const PUT = withMiddleware(updateBoothProduct, ...boothMiddleware)
+export const DELETE = withMiddleware(deleteBoothProduct, ...boothMiddleware)

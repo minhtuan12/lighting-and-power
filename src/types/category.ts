@@ -1,5 +1,6 @@
 export interface ICategory {
     _id: string
+    ownerAccountId?: string | null
     name: string
     slug: string
     image: string

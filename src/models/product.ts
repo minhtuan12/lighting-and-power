@@ -39,6 +39,11 @@ const ProductSchema = new Schema(
             trim: true,
             maxlength: [200, "Product name cannot exceed 200 characters"],
         },
+        ownerAccountId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
         slug: {
             type: String,
             unique: true,
@@ -207,6 +212,7 @@ const ProductSchema = new Schema(
 
 // Indexes
 ProductSchema.index({ categoryId: 1 })
+ProductSchema.index({ ownerAccountId: 1 })
 ProductSchema.index({ status: 1 })
 ProductSchema.index({ isFeatured: 1 })
 ProductSchema.index({ name: "text", shortDescription: "text" })
@@ -217,6 +223,7 @@ ProductSchema.index({ createdAt: -1 })
 
 // Compound indexes
 ProductSchema.index({ categoryId: 1, status: 1 })
+ProductSchema.index({ ownerAccountId: 1, categoryId: 1, status: 1 })
 ProductSchema.index({ status: 1, isFeatured: -1, soldCount: -1 })
 
 // Virtual for category info

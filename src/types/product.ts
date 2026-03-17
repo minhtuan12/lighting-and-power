@@ -22,6 +22,7 @@ export interface IProductSpecification {
 
 export interface IProduct {
     _id: string
+    ownerAccountId?: string | null
     name: string
     slug: string
     sku: string // Mã sản phẩm

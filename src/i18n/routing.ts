@@ -35,6 +35,18 @@ export const routing = defineRouting({
             en: "/profile",
             vi: "/trang-ca-nhan",
         },
+        [routes.booth.url]: {
+            en: "/my-booth",
+            vi: "/quan-ly-cua-hang",
+        },
+        [routes.boothCategory.url]: {
+            en: "/my-booth/categories",
+            vi: "/quan-ly-cua-hang/danh-muc",
+        },
+        [routes.boothProduct.url]: {
+            en: "/my-booth/products",
+            vi: "/quan-ly-cua-hang/san-pham",
+        },
         [routes.taiLieuDienTu.url]: {
             en: "/documents",
             vi: "/tai-lieu-dien-tu",
