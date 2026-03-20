@@ -124,6 +124,69 @@
         "clearAll": "Xóa tất cả",
         "empty": "Trống"
     },
+    "orders": {
+        "tabs": {
+            "all": "Tất cả đơn",
+            "reception": "Tiếp nhận",
+            "shipper": "Giao shipper",
+            "delivering": "Giao hàng",
+            "cancel": "Đã hủy"
+        },
+        "table": {
+            "orderNumber": "Mã đơn",
+            "createdAt": "Ngày tạo",
+            "items": "Sản phẩm",
+            "total": "Tổng",
+            "payment": "Thanh toán",
+            "status": "Trạng thái",
+            "actions": "Thao tác"
+        },
+        "filters": {
+            "payment": "Trạng thái thanh toán"
+        },
+        "actions": {
+            "view": "Xem",
+            "cancel": "Hủy"
+        },
+        "search": "Tìm theo mã đơn hoặc sản phẩm",
+        "status": {
+            "pending": "Chờ xác nhận",
+            "confirmed": "Đã xác nhận",
+            "processing": "Đang xử lý",
+            "shipping": "Đang giao",
+            "delivered": "Đã giao",
+            "cancelled": "Đã hủy",
+            "refunded": "Đã hoàn tiền"
+        },
+        "paymentStatus": {
+            "pending": "Chờ thanh toán",
+            "paid": "Đã thanh toán",
+            "failed": "Thất bại",
+            "refunded": "Hoàn tiền"
+        },
+        "detail": {
+            "title": "Chi tiết đơn hàng",
+            "customer": "Thông tin khách",
+            "shipping": "Địa chỉ giao hàng",
+            "note": "Ghi chú",
+            "cancelReason": "Lý do hủy",
+            "itemsTitle": "Sản phẩm",
+            "quantity": "SL",
+            "price": "Giá",
+            "subtotal": "Thành tiền"
+        },
+        "summary": {
+            "items": "{count} sản phẩm"
+        },
+        "empty": "Chưa có đơn hàng",
+        "cancelModal": {
+            "title": "Hủy đơn hàng",
+            "placeholder": "Vui lòng nhập lý do hủy",
+            "confirm": "Xác nhận",
+            "success": "Đã hủy đơn hàng",
+            "failed": "Hủy đơn thất bại"
+        }
+    },
     "contactUs": {
         "contact": "Liên hệ",
         "subject": "Chủ đề",

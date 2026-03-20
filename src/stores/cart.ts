@@ -4,6 +4,10 @@ import { atomWithStorage } from "jotai/utils"
 
 // Persist cart in localStorage
 export const cartItemsAtom = atomWithStorage<ICartItem[]>("cart", [])
+export const checkedOutItemsAtom = atomWithStorage<ICartItem[]>(
+    "checkout_items",
+    [],
+)
 
 // Cart count
 export const cartCountAtom = atom((get) => {

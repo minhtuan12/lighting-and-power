@@ -67,7 +67,6 @@ const OrderSchema = new Schema(
         },
         shippingAddress: {
             province: { type: String, required: true },
-            district: { type: String, required: true },
             ward: { type: String, required: true },
             address: { type: String, required: true },
         },

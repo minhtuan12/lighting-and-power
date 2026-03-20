@@ -18,10 +18,30 @@ async function createOrder(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { customerInfo, shippingAddress, paymentMethod, note } = body
+        const {
+            customerInfo,
+            shippingAddress,
+            paymentMethod,
+            note,
+            selectedProductIds,
+        } = body
+
+        const normalizedCustomerInfo = {
+            name: String(customerInfo?.name ?? "").trim(),
+            phone: String(customerInfo?.phone ?? "").trim(),
+            email: customerInfo?.email
+                ? String(customerInfo.email).trim()
+                : undefined,
+        }
+
+        const normalizedShippingAddress = {
+            province: String(shippingAddress?.province ?? "").trim(),
+            ward: String(shippingAddress?.ward ?? "").trim(),
+            address: String(shippingAddress?.address ?? "").trim(),
+        }
 
         // Validate required fields
-        if (!customerInfo?.name || !customerInfo?.phone) {
+        if (!normalizedCustomerInfo.name || !normalizedCustomerInfo.phone) {
             return NextResponse.json(
                 { success: false, message: "Customer info is required" },
                 { status: 400 },
@@ -29,10 +49,9 @@ async function createOrder(request: NextRequest) {
         }
 
         if (
-            !shippingAddress?.province ||
-            !shippingAddress?.district ||
-            !shippingAddress?.ward ||
-            !shippingAddress?.address
+            !normalizedShippingAddress.province ||
+            !normalizedShippingAddress.ward ||
+            !normalizedShippingAddress.address
         ) {
             return NextResponse.json(
                 { success: false, message: "Shipping address is required" },
@@ -47,11 +66,23 @@ async function createOrder(request: NextRequest) {
             )
         }
 
+        if (
+            selectedProductIds &&
+            (!Array.isArray(selectedProductIds) ||
+                selectedProductIds.length === 0)
+        ) {
+            return NextResponse.json(
+                { success: false, message: "Selected items are required" },
+                { status: 400 },
+            )
+        }
+
         const order = await OrderService.createOrder(user.userId, {
-            customerInfo,
-            shippingAddress,
+            customerInfo: normalizedCustomerInfo,
+            shippingAddress: normalizedShippingAddress,
             paymentMethod,
             note,
+            selectedProductIds,
         })
 
         return NextResponse.json({

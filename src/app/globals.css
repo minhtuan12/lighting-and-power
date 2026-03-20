@@ -443,3 +443,27 @@ button[aria-label='Download'] {
         transform: translateX(-50%);
     }
 }
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: var(--primary) !important;
+    font-weight: 500;
+}
+
+.ant-tabs-tab:hover {
+    color: var(--primary) !important;
+}
+
+.ant-tabs-ink-bar {
+    background: var(--primary) !important;
+}
+
+.custom-menu-admin {
+    .ant-menu-item {
+        margin-block: 10px !important;
+
+        &:hover,
+        &:active {
+            background-color: #242e8a !important;
+        }
+    }
+}

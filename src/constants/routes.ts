@@ -14,6 +14,11 @@ export const routes = {
         url: "/admin/config/products",
         key: "product",
     },
+    order: {
+        title: "Quản lý đơn hàng",
+        url: "/admin/config/orders",
+        key: "orders",
+    },
     account: {
         title: "Quản lý tài khoản",
         url: "/admin/config/accounts",

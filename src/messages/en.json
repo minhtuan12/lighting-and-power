@@ -123,6 +123,69 @@
         "selected": "Selected Items ({count})",
         "empty": "Empty"
     },
+    "orders": {
+        "tabs": {
+            "all": "All Orders",
+            "reception": "Reception",
+            "shipper": "Shipper",
+            "delivering": "Delivering",
+            "cancel": "Cancelled"
+        },
+        "table": {
+            "orderNumber": "Order No.",
+            "createdAt": "Created",
+            "items": "Items",
+            "total": "Total",
+            "payment": "Payment",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "filters": {
+            "payment": "Payment Status"
+        },
+        "actions": {
+            "view": "View",
+            "cancel": "Cancel"
+        },
+        "search": "Search order number or product",
+        "status": {
+            "pending": "Pending",
+            "confirmed": "Confirmed",
+            "processing": "Processing",
+            "shipping": "Shipping",
+            "delivered": "Delivered",
+            "cancelled": "Cancelled",
+            "refunded": "Refunded"
+        },
+        "paymentStatus": {
+            "pending": "Pending",
+            "paid": "Paid",
+            "failed": "Failed",
+            "refunded": "Refunded"
+        },
+        "detail": {
+            "title": "Order Detail",
+            "customer": "Customer Info",
+            "shipping": "Shipping Address",
+            "note": "Note",
+            "cancelReason": "Cancel Reason",
+            "itemsTitle": "Items",
+            "quantity": "Qty",
+            "price": "Price",
+            "subtotal": "Subtotal"
+        },
+        "summary": {
+            "items": "{count} items"
+        },
+        "empty": "No orders found",
+        "cancelModal": {
+            "title": "Cancel Order",
+            "placeholder": "Please enter a cancellation reason",
+            "confirm": "Confirm",
+            "success": "Order cancelled",
+            "failed": "Cancel failed"
+        }
+    },
     "contactUs": {
         "contact": "Contact Us",
         "subject": "Subject",

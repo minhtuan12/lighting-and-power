@@ -8,7 +8,7 @@ import Loading from '@/components/Loading'
 import useDebounce from '@/hooks/use-debounce'
 import { useCart } from '@/hooks/user/use-cart'
 import { useClientProducts } from '@/hooks/user/use-client-product'
-import { addToCartAtom } from '@/stores'
+import { addToCartAtom, checkedOutItemsAtom } from '@/stores'
 import { ICartItem } from '@/types/cart'
 import { IProduct } from '@/types/product'
 import {
@@ -27,12 +27,14 @@ import { useSetAtom } from 'jotai'
 import { Trash } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import RemainingStock from '../../(components)/(product)/RemainingStock'
 
 const { Text } = Typography
 
 const formatPrice = (p: number) => p.toLocaleString('vi-VN') + ' đ'
+const CHECKOUT_FLOW_KEY = "lp_checkout_flow"
 
 /** Returns the effective unit price for a given quantity based on price tiers */
 const getEffectivePrice = (
@@ -111,6 +113,7 @@ export default function () {
         isLoading: loadingCart,
     } = useCart()
     const t = useTranslations()
+    const router = useRouter()
 
     const [items, setItems] = useState<(ICartItem & { checked: boolean })[]>(
         cart?.items || [],
@@ -123,6 +126,7 @@ export default function () {
     const [selectedQty, setSelectedQty] = useState(null)
 
     const addToCart = useSetAtom(addToCartAtom)
+    const setCheckedOutItems = useSetAtom(checkedOutItemsAtom)
     const { isLoading: loadingSearchProducts, products } = useClientProducts(
         {
             search: debounceSearchText,
@@ -131,10 +135,18 @@ export default function () {
     )
 
     const checkedItems = items.filter((i) => i.checked)
+    const checkedItemsForCheckout = useMemo(
+        () => checkedItems.map(({ checked, ...rest }) => rest),
+        [checkedItems],
+    )
     const allChecked =
         items.length > 0 &&
         items.filter((i) => i.inStock).every((i) => i.checked)
     const someChecked = items.some((i) => i.checked) && !allChecked
+
+    useEffect(() => {
+        setCheckedOutItems(checkedItemsForCheckout)
+    }, [checkedItemsForCheckout, setCheckedOutItems])
 
     // Subtotal uses effective tiered price for each checked item
     const subtotal = checkedItems.reduce((sum, item) => {
@@ -158,14 +170,21 @@ export default function () {
             ),
         )
 
-    const updateQty = (productId: string, delta: number) =>
+    const updateQty = (item: ICartItem, delta: number) => {
+        const nextQty = Math.max(1, item.quantity + delta)
+
         setItems((prev) =>
             prev.map((i) =>
-                i.productId === productId
-                    ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+                i.productId === item.productId
+                    ? { ...i, quantity: nextQty }
                     : i,
             ),
         )
+
+        if (item._id) {
+            updateItem({ itemId: item._id, data: { quantity: nextQty } })
+        }
+    }
 
     const handleRemoveItem = (productId: string) =>
         setItems((prev) => prev.filter((i) => i.productId !== productId))
@@ -206,7 +225,15 @@ export default function () {
     }, [selectedProduct, selectedQty, addToCart])
 
     useEffect(() => {
-        setItems(cart?.items || [])
+        setItems((prev) => {
+            const previousChecked = new Map(
+                prev.map((item) => [item.productId, item.checked]),
+            )
+            return (cart?.items || []).map((item: ICartItem) => ({
+                ...item,
+                checked: previousChecked.get(item.productId) ?? false,
+            }))
+        })
     }, [cart])
 
     return (
@@ -524,7 +551,7 @@ export default function () {
                                                                             className="!rounded-r-none !px-2"
                                                                             onClick={() =>
                                                                                 updateQty(
-                                                                                    item.productId,
+                                                                                    item,
                                                                                     -1,
                                                                                 )
                                                                             }
@@ -541,7 +568,7 @@ export default function () {
                                                                             className="!rounded-l-none !px-2"
                                                                             onClick={() =>
                                                                                 updateQty(
-                                                                                    item.productId,
+                                                                                    item,
                                                                                     1,
                                                                                 )
                                                                             }
@@ -691,6 +718,16 @@ export default function () {
                                     block
                                     disabled={checkedItems.length === 0}
                                     className="mt-2 !h-[44px] !text-white"
+                                    onClick={() => {
+                                        setCheckedOutItems(
+                                            checkedItemsForCheckout,
+                                        )
+                                        sessionStorage.setItem(
+                                            CHECKOUT_FLOW_KEY,
+                                            Date.now().toString(),
+                                        )
+                                        router.push('/dat-hang')
+                                    }}
                                 >
                                     {t('cart.checkout')}
                                 </Button>

@@ -1,43 +1,109 @@
-import DefaultImage from "@/components/DefaultImage";
-import Loading from "@/components/Loading";
-import { routes } from "@/constants/routes";
-import { getDocuments } from "@/fetch-data/documents";
-import { Col, Flex, Row } from "antd";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { Suspense } from "react";
+import DocumentBrowser from "@/app/[locale]/(user)/(client)/tai-lieu-dien-tu/DocumentBrowser"
+import { routes } from "@/constants/routes"
+import { fetchDocumentCategories } from "@/fetch-data/documents"
+import { routing } from "@/i18n/routing"
+import type { Metadata } from "next"
+import { getLocale, getTranslations } from "next-intl/server"
 
-export default async function Document() {
+export const revalidate = 3600
+
+export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations()
-    const { data } = await getDocuments()
+    const locale = await getLocale()
+    const localizedPath = routing.pathnames[
+        routes.taiLieuDienTu.url as keyof typeof routing.pathnames
+    ] as { en?: string; vi?: string } | string | undefined
+    const canonical =
+        typeof localizedPath === "string"
+            ? localizedPath
+            : localizedPath?.[locale as "en" | "vi"] ??
+              routes.taiLieuDienTu.url
 
-    return (
-        <Suspense
-            fallback={
-                <div className="pt-[174px]">
-                    <Loading />
-                </div>
-            }
-        >
-            <Flex
-                vertical
-                className="!mt-6 !mb-20"
-                gap={40}
-            >
-                <h3 className="text-center text-lg text-white font-semibold w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
-                    {t('common.document').toUpperCase()}
-                </h3>
-                <Row gutter={[30, 30]}>
-                    {data.documents.map((d) => (
-                        <Col key={d._id} span={6} className="h-fit">
-                            <Link href={`${routes.taiLieuDienTu.url}/${d.slug}`}>
-                                <DefaultImage src={d.thumbnail || '/images/logo-vertical.png'} className="w-full h-[160px]" />
-                                <h5 className="font-semibold text-[15px] text-black line-clamp-3 mt-2 px-0.5">{d.title}</h5>
-                            </Link>
-                        </Col>
-                    ))}
-                </Row>
-            </Flex>
-        </Suspense>
+    const title = t("common.document")
+    const description =
+        locale === "vi"
+            ? "Tài liệu kỹ thuật theo thiết bị: định nghĩa, cấu tạo, hướng dẫn và tài liệu liên quan."
+            : "Technical documents by device: definitions, structures, guides, and related references."
+    let categories: { name?: string }[] = []
+    try {
+        categories = await fetchDocumentCategories()
+    } catch {
+        categories = []
+    }
+    const categoryKeywords = categories
+        .map((category) => category.name?.trim())
+        .filter(Boolean) as string[]
+    const baseKeywords =
+        locale === "vi"
+            ? [
+                  "tài liệu kỹ thuật",
+                  "tài liệu điện tử",
+                  "hướng dẫn",
+                  "cấu tạo",
+                  "định nghĩa",
+                  "thông số kỹ thuật",
+              ]
+            : [
+                  "technical documents",
+                  "device documentation",
+                  "user guide",
+                  "structure",
+                  "definition",
+                  "technical specifications",
+              ]
+    const keywords = Array.from(
+        new Set([title, ...baseKeywords, ...categoryKeywords]),
     )
+
+    return {
+        title,
+        description,
+        keywords,
+        robots: {
+            index: true,
+            follow: true,
+        },
+        alternates: {
+            canonical,
+            languages:
+                typeof localizedPath === "string"
+                    ? {
+                          en: localizedPath,
+                          vi: localizedPath,
+                      }
+                    : {
+                          en: localizedPath?.en ?? "/documents",
+                          vi:
+                              localizedPath?.vi ??
+                              routes.taiLieuDienTu.url,
+                      },
+        },
+        openGraph: {
+            title,
+            description,
+            url: canonical,
+            type: "website",
+            siteName: "Lighting & Power",
+            locale: locale === "vi" ? "vi_VN" : "en_US",
+            images: [
+                {
+                    url: "/images/logo-vertical.png",
+                    width: 800,
+                    height: 600,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: ["/images/logo-vertical.png"],
+        },
+    }
+}
+
+export default async function DocumentPage() {
+    const categories = await fetchDocumentCategories()
+    return <DocumentBrowser categories={categories} />
 }

@@ -1,4 +1,5 @@
 import { IDocument } from "@/types/document"
+import { IDocumentCategory } from "@/types/document-category"
 
 interface IDcoumentResponse {
     success: boolean
@@ -74,4 +75,19 @@ export async function getDocumentDetail(slug: string): Promise<IDcoumentDetailRe
             data: null,
         }
     }
+}
+
+export async function fetchDocumentCategories(): Promise<IDocumentCategory[]> {
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL!}/api/document-categories`,
+        {
+            next: {
+                revalidate: 3600 * 3, // Cache for 3 hour
+                tags: ["document-category"],
+            },
+        },
+    )
+    if (!res.ok) return []
+    const json = await res.json()
+    return json.data || []
 }

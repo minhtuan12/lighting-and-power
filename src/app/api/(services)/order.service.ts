@@ -15,12 +15,12 @@ export class OrderService {
             }
             shippingAddress: {
                 province: string
-                district: string
                 ward: string
                 address: string
             }
             paymentMethod: string
             note?: string
+            selectedProductIds?: string[]
         },
     ) {
         // Lấy giỏ hàng
@@ -29,11 +29,25 @@ export class OrderService {
             throw new Error("Giỏ hàng trống")
         }
 
+        const selectedSet =
+            data.selectedProductIds && data.selectedProductIds.length > 0
+                ? new Set(data.selectedProductIds.map((id) => String(id)))
+                : null
+        const cartItems = selectedSet
+            ? cart.items.filter((item: any) =>
+                  selectedSet.has(String(item.productId)),
+              )
+            : cart.items
+
+        if (cartItems.length === 0) {
+            throw new Error("Không có sản phẩm được chọn")
+        }
+
         // Validate và tính toán
         const orderItems = []
         let subtotal = 0
 
-        for (const item of cart.items) {
+        for (const item of cartItems) {
             const product = await Product.findById(item.productId)
 
             if (!product || product.stock < item.quantity) {
@@ -94,7 +108,11 @@ export class OrderService {
         }
 
         // Xóa giỏ hàng
-        cart.items = []
+        cart.items = selectedSet
+            ? cart.items.filter(
+                  (item: any) => !selectedSet.has(String(item.productId)),
+              )
+            : []
         await cart.save()
 
         return order
@@ -214,5 +232,97 @@ export class OrderService {
         }
 
         return products
+    }
+
+    // Admin: Láº¥y táº¥t cáº£ Ä‘Æ¡n hÃ ng
+    static async getAllOrders(options?: {
+        page?: number
+        limit?: number
+        status?: EOrderStatus
+        paymentStatus?: EPaymentStatus
+        search?: string
+    }) {
+        const page = options?.page || 1
+        const limit = options?.limit || 20
+        const skip = (page - 1) * limit
+
+        const filter: any = {}
+
+        if (options?.status) {
+            filter.status = options.status
+        }
+
+        if (options?.paymentStatus) {
+            filter.paymentStatus = options.paymentStatus
+        }
+
+        if (options?.search) {
+            const keyword = options.search.trim()
+            filter.$or = [
+                { orderNumber: { $regex: keyword, $options: "i" } },
+                { "customerInfo.name": { $regex: keyword, $options: "i" } },
+                { "customerInfo.phone": { $regex: keyword, $options: "i" } },
+            ]
+        }
+
+        const [orders, total] = await Promise.all([
+            Order.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Order.countDocuments(filter),
+        ])
+
+        return {
+            orders,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        }
+    }
+
+    // Admin: Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng
+    static async updateOrderStatus(
+        orderId: string,
+        status: EOrderStatus,
+        cancelReason?: string,
+    ) {
+        const order = await Order.findById(orderId)
+
+        if (!order) {
+            throw new Error("ÄÆ¡n hÃ ng khÃ´ng tá»“n táº¡i")
+        }
+
+        if (!Object.values(EOrderStatus).includes(status)) {
+            throw new Error("Tráº¡ng thÃ¡i khÃ´ng há»£p lá»‡")
+        }
+
+        const previousStatus = order.status
+        order.status = status
+
+        if (status === EOrderStatus.delivered) {
+            order.deliveredAt = new Date()
+        }
+
+        if (status === EOrderStatus.cancelled) {
+            order.cancelReason = cancelReason || order.cancelReason
+            order.cancelledAt = order.cancelledAt || new Date()
+
+            if (previousStatus !== EOrderStatus.cancelled) {
+                for (const item of order.items) {
+                    await Product.findByIdAndUpdate(item.productId, {
+                        $inc: {
+                            stock: item.quantity,
+                            soldCount: -item.quantity,
+                        },
+                    })
+                }
+            }
+        }
+
+        await order.save()
+        return order
     }
 }

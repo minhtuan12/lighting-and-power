@@ -31,7 +31,7 @@ export default async function TopCategories({
                     >
                         <Flex gap={15} vertical align="center">
                             <DefaultImage
-                                src={item.image}
+                                src={item.image || '/images/logo-only.png'}
                                 className="w-full h-40"
                             />
                             <div className="text-center text-[15px] font-bold text-black">

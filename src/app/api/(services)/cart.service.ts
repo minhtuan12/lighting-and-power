@@ -52,7 +52,7 @@ export class CartService {
 
         // Check stock availability
         if (availableStock < data.quantity) {
-            throw new Error(`Only ${availableStock} items available in stock`)
+            throw new Error(`Chỉ còn ${availableStock} sản phẩm trong kho`)
         }
 
         // Check min order quantity

@@ -14,13 +14,14 @@ import {
     MAX_FILE_SIZE,
     PAGE_LIMIT,
 } from '@/constants/common'
+import { useDocumentCategories } from '@/hooks/admin/use-document-categories'
 import { useDocuments } from '@/hooks/admin/use-documents'
 import useDebounce from '@/hooks/use-debounce'
 import { showMessage } from '@/hooks/use-message'
 import useUpload from '@/hooks/use-upload'
-import { getDocumentTypes } from '@/lib/utils'
 import { breadcrumbAtom, filterDocumentAtom } from '@/stores'
-import { IDocument, IDocumentType } from '@/types/document'
+import { IDocument } from '@/types/document'
+import { IDocumentCategory } from '@/types/document-category'
 import { LoadingOutlined } from '@ant-design/icons'
 import { generateJSON } from '@tiptap/core'
 import { Image } from '@tiptap/extension-image'
@@ -42,18 +43,22 @@ import {
 } from 'antd'
 import { useAtom, useSetAtom } from 'jotai'
 import { Download, Edit2, FileText, Filter, Plus, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export const Documents = () => {
     const [form] = Form.useForm()
+    const [categoryForm] = Form.useForm()
     const [searchText, setSearchText] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
+    const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false)
     const [editingDocument, setEditingDocument] = useState<IDocument | null>(
         null,
     )
+    const [editingCategory, setEditingCategory] =
+        useState<IDocumentCategory | null>(null)
     const [contentType, setContentType] = useState<'text' | 'file'>('text')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([])
     const [loadingUploadImage, setLoadingUploadImage] = useState(false)
     const [content, setContent] = useState('')
     const [imageFile, setImageFile] = useState<File | null>(null)
@@ -62,6 +67,16 @@ export const Documents = () => {
     const { isUploadingImage, uploadImagesToCloudinary } = useUpload()
     const [filter, setFilter] = useAtom(filterDocumentAtom)
     const setBreadcrumb = useSetAtom(breadcrumbAtom)
+
+    const {
+        categories,
+        isCreating: isCreatingCategory,
+        isUpdating: isUpdatingCategory,
+        isDeleting: isDeletingCategory,
+        createCategoryAsync,
+        updateCategoryAsync,
+        deleteCategoryAsync,
+    } = useDocumentCategories()
 
     const {
         documents: data,
@@ -77,6 +92,12 @@ export const Documents = () => {
     } = useDocuments({ ...filter })
 
     const handleOpenModal = (doc?: IDocument) => {
+        if (!doc && categoryOptions.length === 0) {
+            showMessage.warning('Vui lòng tạo danh mục thiết bị trước')
+            setIsCategoryModalOpen(true)
+            return
+        }
+
         if (doc) {
             setEditingDocument(doc)
             setContentType(doc.contentType)
@@ -92,7 +113,13 @@ export const Documents = () => {
             setEditingDocument(null)
             setContentType('text')
             setContent('')
-            form.resetFields()
+            form.setFieldsValue({
+                title: '',
+                description: '',
+                type: filter.type || categoryOptions?.[0]?.value,
+                contentType: 'text',
+                content: '',
+            })
         }
         setSelectedFile(null)
         setIsModalOpen(true)
@@ -168,10 +195,10 @@ export const Documents = () => {
                     id: editingDocument._id!,
                     data: documentData,
                 })
-                showMessage.success('Cập nhật tài liệu thành công')
+                showMessage.success('Cập nhật mục thành công')
             } else {
                 await createDocumentAsync(documentData as any)
-                showMessage.success('Tạo tài liệu thành công')
+                showMessage.success('Tạo mục thành công')
             }
 
             handleCloseModal()
@@ -184,10 +211,80 @@ export const Documents = () => {
         if (record._id) {
             try {
                 await deleteDocumentAsync(record._id)
-                showMessage.success('Xóa tài liệu thành công')
+                showMessage.success('Xóa mục thành công')
             } catch (error: any) {
-                showMessage.error(error.message || 'Lỗi xóa tài liệu')
+                showMessage.error(error.message || 'Lỗi xóa mục')
             }
+        }
+    }
+
+    const handleOpenCategoryForm = (category?: IDocumentCategory) => {
+        if (category) {
+            setEditingCategory(category)
+            categoryForm.setFieldsValue({
+                name: category.name,
+                description: category.description,
+                color: category.color || 'blue',
+                isPublished: category.isPublished ?? true,
+            })
+        } else {
+            setEditingCategory(null)
+            categoryForm.resetFields()
+            categoryForm.setFieldsValue({
+                color: 'blue',
+                isPublished: true,
+            })
+        }
+        setIsCategoryFormOpen(true)
+    }
+
+    const handleSubmitCategory = async (values: any) => {
+        try {
+            if (editingCategory?._id) {
+                await updateCategoryAsync({
+                    id: editingCategory._id,
+                    data: values,
+                })
+                showMessage.success('Cập nhật danh mục thành công')
+            } else {
+                await createCategoryAsync(values)
+                showMessage.success('Tạo danh mục thành công')
+            }
+            setIsCategoryFormOpen(false)
+        } catch (error: any) {
+            showMessage.error(error.message || 'Có lỗi xảy ra')
+        }
+    }
+
+    const handleDeleteCategory = async (record: IDocumentCategory) => {
+        if (!record._id) return
+        try {
+            await deleteCategoryAsync(record._id)
+            showMessage.success('Xóa danh mục thành công')
+        } catch (error: any) {
+            showMessage.error(error.message || 'Không thể xóa danh mục')
+        }
+    }
+
+    const handleUpdateCategoryStatus = async (
+        status: boolean,
+        record: IDocumentCategory,
+    ) => {
+        if (!record._id) return
+        try {
+            await updateCategoryAsync({
+                id: record._id,
+                data: {
+                    name: record.name,
+                    description: record.description,
+                    color: record.color,
+                    isPublished: status,
+                    order: record.order,
+                },
+            })
+            showMessage.success('Cập nhật danh mục thành công')
+        } catch (error: any) {
+            showMessage.error(error.message || 'Cập nhật danh mục thất bại')
         }
     }
 
@@ -210,7 +307,7 @@ export const Documents = () => {
 
     const columns = [
         {
-            title: 'Tiêu đề',
+            title: 'Mục nội dung',
             dataIndex: 'title',
             key: 'title',
             width: 250,
@@ -219,19 +316,19 @@ export const Documents = () => {
             ),
         },
         {
-            title: 'Loại',
+            title: 'Danh mục',
             dataIndex: 'type',
             key: 'type',
             width: 150,
             align: 'center',
             render: (type: string) => {
-                const typeConfig = documentTypes.find((t) => t.value === type)
+                const typeConfig = categoryMap.get(type)
                 return (
                     <Tag
                         color={typeConfig?.color}
                         variant="outlined"
                     >
-                        {typeConfig?.label}
+                        {typeConfig?.name || 'Khác'}
                     </Tag>
                 )
             },
@@ -294,7 +391,7 @@ export const Documents = () => {
                         title="Chỉnh sửa"
                     />
                     <Popconfirm
-                        title="Xóa tài liệu"
+                        title="Xóa mục"
                         description="Bạn có chắc chắn muốn xóa?"
                         okText="Xóa"
                         cancelText="Hủy"
@@ -313,7 +410,107 @@ export const Documents = () => {
         },
     ]
 
+    const categoryColumns = useMemo(
+        () => [
+            {
+                title: 'Danh mục',
+                dataIndex: 'name',
+                key: 'name',
+                render: (text: string) => (
+                    <div className="font-semibold text-gray-900">{text}</div>
+                ),
+            },
+            {
+                title: 'Màu',
+                dataIndex: 'color',
+                key: 'color',
+                width: 120,
+                align: 'center' as const,
+                render: (color: string) => (
+                    <Tag color={color} variant="outlined">
+                        {color}
+                    </Tag>
+                ),
+            },
+            {
+                title: 'Xuất bản',
+                dataIndex: 'isPublished',
+                key: 'isPublished',
+                width: 120,
+                align: 'center' as const,
+                render: (isPublished: boolean, record: IDocumentCategory) => (
+                    <Switch
+                        checked={isPublished}
+                        loading={
+                            isUpdatingCategory &&
+                            editingCategory?._id === record._id
+                        }
+                        onChange={(value) =>
+                            handleUpdateCategoryStatus(value, record)
+                        }
+                    />
+                ),
+            },
+            {
+                title: 'Hành động',
+                key: 'action',
+                width: 140,
+                align: 'center' as const,
+                render: (_: any, record: IDocumentCategory) => (
+                    <Space size={8}>
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<Edit2 size={16} />}
+                            onClick={() => handleOpenCategoryForm(record)}
+                            title="Chỉnh sửa"
+                        />
+                        <Popconfirm
+                            title="Xóa danh mục"
+                            description="Bạn có chắc chắn muốn xóa?"
+                            okText="Xóa"
+                            cancelText="Hủy"
+                            onConfirm={() => handleDeleteCategory(record)}
+                        >
+                            <Button
+                                type="text"
+                                danger
+                                size="small"
+                                icon={<Trash2 size={16} />}
+                                title="Xóa"
+                            />
+                        </Popconfirm>
+                    </Space>
+                ),
+            },
+        ],
+        [editingCategory, isUpdatingCategory],
+    )
+
     const isSubmitting = isCreating || isUpdating || isUploading
+
+    const categoryOptions = useMemo<
+        Array<{ label: string; value: string; color?: string }>
+    >(
+        () =>
+            categories.map((cat: IDocumentCategory) => ({
+                label: cat.name,
+                value: cat.slug,
+                color: cat.color,
+            })),
+        [categories],
+    )
+
+    const categoryMap = useMemo<Map<string, IDocumentCategory>>(
+        () =>
+            new Map(
+                categories.map((cat: IDocumentCategory) => [
+                    cat.slug,
+                    cat,
+                ]),
+            ),
+        [categories],
+    )
 
     const debounceSearch = useDebounce(
         (value: string) => setFilter((prev) => ({ ...prev, search: value })),
@@ -340,14 +537,17 @@ export const Documents = () => {
     )
 
     useEffect(() => {
-        async function fetchDocumentTypes() {
-            const data = await getDocumentTypes()
-            setDocumentTypes(data)
-        }
+        setBreadcrumb([{ title: 'Quản lý tài liệu thiết bị' }])
+    }, [setBreadcrumb])
 
-        fetchDocumentTypes()
-        setBreadcrumb([{ title: 'Quản lý tài liệu' }])
-    }, [setBreadcrumb, setDocumentTypes])
+    useEffect(() => {
+        if (!filter.type && categories.length > 0) {
+            setFilter((prev) => ({
+                ...prev,
+                type: categories[0].slug,
+            }))
+        }
+    }, [categories, filter.type, setFilter])
 
     return (
         <Card
@@ -359,7 +559,7 @@ export const Documents = () => {
                     <Space className="space-x-2">
                         <div className="grid grid-cols-4 gap-4">
                             <SearchBar
-                                placeholder="Tìm kiếm theo tên tài liệu"
+                                placeholder="Tìm theo tên mục"
                                 value={searchText}
                                 onChange={(e) => handleSearch(e.target.value)}
                             />
@@ -373,7 +573,7 @@ export const Documents = () => {
                                             .includes(input.toLowerCase()),
                                 }}
                                 allowClear
-                                placeholder="Lọc theo loại tài liệu"
+                                placeholder="Lọc theo danh mục thiết bị"
                                 value={filter.type || undefined}
                                 onChange={(e) =>
                                     setFilter((prev) => ({
@@ -381,7 +581,7 @@ export const Documents = () => {
                                         type: e,
                                     }))
                                 }
-                                options={documentTypes}
+                                options={categoryOptions}
                                 suffixIcon={<Filter size={16} />}
                             />
 
@@ -410,12 +610,18 @@ export const Documents = () => {
 
                     <Space size={12}>
                         <Button
+                            onClick={() => setIsCategoryModalOpen(true)}
+                            className="rounded-lg h-10"
+                        >
+                            Quản lý danh mục
+                        </Button>
+                        <Button
                             onClick={() => handleOpenModal()}
                             type="primary"
                             icon={<Plus size={16} />}
                             className="rounded-lg h-10 bg-blue-500 hover:bg-blue-600 font-semibold flex items-center"
                         >
-                            Thêm tài liệu
+                            Thêm mục
                         </Button>
                     </Space>
                 </div>
@@ -427,7 +633,7 @@ export const Documents = () => {
                 rowKey="_id"
                 pagination={{
                     pageSize: PAGE_LIMIT,
-                    showTotal: (total) => `Tổng: ${total} tài liệu`,
+                    showTotal: (total) => `Tổng: ${total} mục`,
                 }}
                 loading={{
                     indicator: <LoadingOutlined />,
@@ -442,8 +648,8 @@ export const Documents = () => {
                 title={
                     <div className="mb-6 text-lg">
                         {editingDocument
-                            ? 'Chỉnh sửa tài liệu'
-                            : 'Thêm tài liệu mới'}
+                            ? 'Chỉnh sửa mục'
+                            : 'Thêm mục mới'}
                     </div>
                 }
                 open={isModalOpen}
@@ -456,7 +662,7 @@ export const Documents = () => {
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={{
-                        type: documentTypes?.[0]?.value ?? '',
+                        type: categoryOptions?.[0]?.value ?? '',
                         contentType: CONTENT_TYPES[0].value,
                     }}
                     className="!flex-1"
@@ -514,8 +720,8 @@ export const Documents = () => {
                                 ]}
                             >
                                 <FloatingInput
-                                    label="Tiêu đề"
-                                    placeholder="Nhập tiêu đề tài liệu"
+                                    label="Tên mục"
+                                    placeholder="Nhập tên mục"
                                 />
                             </Form.Item>
 
@@ -523,7 +729,7 @@ export const Documents = () => {
                                 <FloatingTextArea
                                     label="Mô tả ngắn"
                                     rows={3}
-                                    placeholder="Mô tả ngắn về tài liệu"
+                                    placeholder="Mô tả ngắn về mục"
                                 />
                             </Form.Item>
 
@@ -533,13 +739,13 @@ export const Documents = () => {
                                     rules={[
                                         {
                                             required: true,
-                                            message: 'Chọn loại tài liệu',
+                                            message: 'Chọn danh mục thiết bị',
                                         },
                                     ]}
                                 >
                                     <FloatingSelect
-                                        label="Chọn loại"
-                                        options={documentTypes}
+                                        label="Danh mục thiết bị"
+                                        options={categoryOptions}
                                     />
                                 </Form.Item>
 
@@ -573,7 +779,7 @@ export const Documents = () => {
                                     StarterKit,
                                     Image,
                                 ])}
-                                placeholder="Nhập nội dung tài liệu"
+                                placeholder="Nhập nội dung mục"
                                 setUploading={setLoadingUploadImage}
                                 onChange={(value: any) => setContent(value)}
                             />
@@ -622,6 +828,124 @@ export const Documents = () => {
                                 }
                             >
                                 {editingDocument ? 'Cập nhật' : 'Tạo mới'}
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
+                open={isCategoryModalOpen}
+                onCancel={() => setIsCategoryModalOpen(false)}
+                footer={null}
+                title="Danh mục thiết bị"
+                width={700}
+            >
+                <div className="flex justify-between items-center mb-4">
+                    <div className="font-semibold">Danh sách danh mục</div>
+                    <Button
+                        type="primary"
+                        icon={<Plus size={16} />}
+                        onClick={() => handleOpenCategoryForm()}
+                    >
+                        Thêm danh mục
+                    </Button>
+                </div>
+                <Table
+                    rowKey="_id"
+                    columns={categoryColumns as any}
+                    dataSource={categories}
+                    pagination={false}
+                    loading={{
+                        indicator: <LoadingOutlined />,
+                        spinning:
+                            isCreatingCategory ||
+                            isUpdatingCategory ||
+                            isDeletingCategory,
+                    }}
+                    className="custom-table rounded-lg"
+                />
+            </Modal>
+
+            <Modal
+                open={isCategoryFormOpen}
+                onCancel={() => setIsCategoryFormOpen(false)}
+                footer={null}
+                title={
+                    editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục'
+                }
+                width={560}
+            >
+                <Form
+                    form={categoryForm}
+                    layout="vertical"
+                    onFinish={handleSubmitCategory}
+                    initialValues={{
+                        color: 'blue',
+                        isPublished: true,
+                    }}
+                >
+                    <Form.Item
+                        name="name"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Vui lòng nhập tên danh mục',
+                            },
+                        ]}
+                    >
+                        <FloatingInput
+                            label="Tên danh mục"
+                            placeholder="Nhập tên danh mục thiết bị"
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="description">
+                        <FloatingTextArea
+                            label="Mô tả"
+                            rows={3}
+                            placeholder="Mô tả ngắn về danh mục"
+                        />
+                    </Form.Item>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <Form.Item name="color">
+                            <FloatingSelect
+                                label="Màu hiển thị"
+                                options={[
+                                    { label: 'Blue', value: 'blue' },
+                                    { label: 'Gold', value: 'gold' },
+                                    { label: 'Green', value: 'green' },
+                                    { label: 'Red', value: 'red' },
+                                    { label: 'Cyan', value: 'cyan' },
+                                    { label: 'Geekblue', value: 'geekblue' },
+                                    { label: 'Purple', value: 'purple' },
+                                    { label: 'Magenta', value: 'magenta' },
+                                    { label: 'Volcano', value: 'volcano' },
+                                ]}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="isPublished"
+                            label="Xuất bản"
+                            valuePropName="checked"
+                        >
+                            <Switch />
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item>
+                        <Space className="justify-end w-full mt-6">
+                            <Button onClick={() => setIsCategoryFormOpen(false)}>
+                                Hủy
+                            </Button>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={isCreatingCategory || isUpdatingCategory}
+                            >
+                                {editingCategory ? 'Cập nhật' : 'Tạo mới'}
                             </Button>
                         </Space>
                     </Form.Item>

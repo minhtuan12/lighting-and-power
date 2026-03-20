@@ -42,7 +42,6 @@ export interface IOrder {
     // Địa chỉ giao hàng
     shippingAddress: {
         province: string
-        district: string
         ward: string
         address: string
     }

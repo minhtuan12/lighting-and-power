@@ -8,7 +8,7 @@ import { breadcrumbAtom } from "@/stores/ui"
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons"
 import { Breadcrumb, Button, Layout, Menu, theme } from "antd"
 import { useAtomValue } from "jotai"
-import { AlignStartVertical, Book, FileQuestion, Settings, Store, User } from "lucide-react"
+import { AlignStartVertical, Book, FileQuestion, Package, Settings, Store, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -33,6 +33,12 @@ const menu = [
         label: <Link href={routes.product.url}>{routes.product.title}</Link>,
         url: routes.product.url,
         key: routes.product.url,
+    },
+    {
+        icon: <Package size={20} />,
+        label: <Link href={routes.order.url}>{routes.order.title}</Link>,
+        url: routes.order.url,
+        key: routes.order.url,
     },
     {
         icon: <Book size={20} />,
@@ -85,9 +91,11 @@ export default function RootLayout({
                     collapsible
                     collapsed={collapsed}
                     theme="dark"
+                    width={250}
+                    className="custom-menu-admin"
                 >
                     <Link href={routes.account.url}>
-                        <div className="px-4 my-6">
+                        <div className="px-4 my-6 flex justify-center">
                             <Icon src={"/images/logo.png"} size={180} />
                         </div>
                     </Link>

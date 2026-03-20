@@ -1,7 +1,7 @@
 import { getCategoryBySlug } from '@/fetch-data/categories'
 import { getProductDetail } from '@/fetch-data/products'
 import { ICategory } from '@/types/category'
-import { SearchParams } from '@/types/general'
+import { Province, SearchParams, Ward } from '@/types/general'
 import { IProductFilterParams } from '@/types/product'
 import { cache } from 'react'
 
@@ -368,6 +368,49 @@ export const getProvinces = cache(
 		}
 	},
 )
+
+export async function getProvinceAndWardNameByCode(
+	provinceCode?: number,
+	wardCode?: number,
+): Promise<{
+	provinceName: string
+	wardName: string
+}> {
+	if (!provinceCode && !wardCode) {
+		return { provinceName: '', wardName: '' }
+	}
+
+	try {
+		if (!provinceCode) {
+			return { provinceName: '', wardName: '' }
+		}
+
+		const province: Province | null =
+			await getProvinces(provinceCode, 2)
+
+		if (!province) {
+			return { provinceName: '', wardName: '' }
+		}
+
+		const provinceName = province.name || ''
+		let wardName = ''
+
+		if (wardCode && Array.isArray(province.wards)) {
+			const ward = province.wards.find(
+				(w: Ward) => w.code === wardCode,
+			)
+			wardName = ward?.name || ''
+		}
+
+		return { provinceName, wardName }
+	} catch (e) {
+		console.log(
+			'Error get province/ward by code',
+			e,
+		)
+		return { provinceName: '', wardName: '' }
+	}
+}
 
 export const safeLocalStorage = {
 	getItem: (key: string): string | null => {

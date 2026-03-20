@@ -1,5 +1,6 @@
 import { fetchAPI } from "@/lib/api-client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { showMessage } from "../use-message"
 
 interface UpdateItem {
     quantity: number
@@ -57,6 +58,9 @@ export function useCart() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() })
         },
+        onError: (err) => {
+            showMessage.error(err?.message || '');
+        }
     })
 
     // ✏️ Update item
@@ -66,6 +70,9 @@ export function useCart() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_KEYS.lists() })
         },
+        onError: (err) => {
+            showMessage.error(err?.message || '');
+        }
     })
 
     // ❌ Remove item
