@@ -1,16 +1,17 @@
 "use client"
 
-import SearchBar from "@/components/SearchBar"
 import DefaultImage from "@/components/DefaultImage"
+import SearchBar from "@/components/SearchBar"
 import { PAGE_LIMIT } from "@/constants/common"
 import { routes } from "@/constants/routes"
 import { useAdminOrders } from "@/hooks/admin/use-orders"
-import { showMessage } from "@/hooks/use-message"
 import useDebounce from "@/hooks/use-debounce"
+import { showMessage } from "@/hooks/use-message"
+import { getProvinceAndWardNameByCode } from "@/lib/utils"
 import { breadcrumbAtom } from "@/stores/ui"
 import { EOrderStatus, EPaymentStatus, IOrder } from "@/types/order"
 import { LoadingOutlined } from "@ant-design/icons"
-import { Card, Col, Modal, Row, Select, Table, Tag, Typography, Input } from "antd"
+import { Card, Col, Input, Modal, Row, Select, Table, Tag, Typography } from "antd"
 import { useSetAtom } from "jotai"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -32,11 +33,11 @@ const PAYMENT_STATUS_OPTIONS: {
     label: string
     color: string
 }[] = [
-    { value: EPaymentStatus.pending, label: "Chờ thanh toán", color: "gold" },
-    { value: EPaymentStatus.paid, label: "Đã thanh toán", color: "green" },
-    { value: EPaymentStatus.failed, label: "Thất bại", color: "red" },
-    { value: EPaymentStatus.refunded, label: "Hoàn tiền", color: "volcano" },
-]
+        { value: EPaymentStatus.pending, label: "Chờ thanh toán", color: "gold" },
+        { value: EPaymentStatus.paid, label: "Đã thanh toán", color: "green" },
+        { value: EPaymentStatus.failed, label: "Thất bại", color: "red" },
+        { value: EPaymentStatus.refunded, label: "Hoàn tiền", color: "volcano" },
+    ]
 
 const AdminOrders = () => {
     const setBreadcrumb = useSetAtom(breadcrumbAtom)
@@ -53,6 +54,16 @@ const AdminOrders = () => {
     const [pendingStatus, setPendingStatus] = useState<EOrderStatus | null>(null)
     const [cancelReason, setCancelReason] = useState("")
     const [statusModalOpen, setStatusModalOpen] = useState(false)
+    const [address, setAddress] = useState({ provinceName: '', wardName: '' });
+
+    useEffect(() => {
+        if (selectedOrder) {
+            getProvinceAndWardNameByCode(
+                Number(selectedOrder.shippingAddress.province),
+                Number(selectedOrder.shippingAddress.ward),
+            ).then((res) => setAddress(res))
+        }
+    }, [selectedOrder]);
 
     const { data, isLoading, isFetching, updateStatusAsync, isUpdating } =
         useAdminOrders({
@@ -363,9 +374,8 @@ const AdminOrders = () => {
                                 <div className="text-sm">
                                     {[
                                         selectedOrder.shippingAddress.address,
-                                        selectedOrder.shippingAddress.ward,
-                                        selectedOrder.shippingAddress.district,
-                                        selectedOrder.shippingAddress.province,
+                                        address.ward,
+                                        address.province,
                                     ]
                                         .filter(Boolean)
                                         .join(", ")}
