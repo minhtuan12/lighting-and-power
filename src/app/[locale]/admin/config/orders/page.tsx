@@ -374,8 +374,8 @@ const AdminOrders = () => {
                                 <div className="text-sm">
                                     {[
                                         selectedOrder.shippingAddress.address,
-                                        address.ward,
-                                        address.province,
+                                        address.wardName,
+                                        address.provinceName,
                                     ]
                                         .filter(Boolean)
                                         .join(", ")}
