@@ -1,11 +1,13 @@
-import BadgeRibbon from "@/components/BadgeRibbon"
-import DefaultImage from "@/components/DefaultImage"
-import RichTextContent from "@/components/RichTextContent"
-import { getProductDetail } from "@/fetch-data/products"
-import { IProduct } from "@/types/product"
-import { Col, Flex, Row, Table } from "antd"
-import { getTranslations } from "next-intl/server"
-import AddToCart from "../AddToCart"
+import BadgeRibbon from '@/components/BadgeRibbon'
+import DefaultImage from '@/components/DefaultImage'
+import RichTextContent from '@/components/RichTextContent'
+import { getProductDetail } from '@/fetch-data/products'
+import { IProduct } from '@/types/product'
+import { Col, Flex, Row, Table } from 'antd'
+import { getTranslations } from 'next-intl/server'
+import AddToCart from '../AddToCart'
+import ProductComments from './ProductComments'
+import RelatedProducts from './RelatedProducts'
 
 export default async function ProductDetail({
     slug,
@@ -14,7 +16,7 @@ export default async function ProductDetail({
     slug?: string
     id?: string
 }) {
-    const t = await getTranslations("product")
+    const t = await getTranslations('product')
     const { data } = await getProductDetail({ slug, id })
     const product: IProduct | null = data.product
 
@@ -24,46 +26,46 @@ export default async function ProductDetail({
 
     const details = [
         {
-            label: t("filter.fields.manufacturers"),
-            key: "manufacturer",
+            label: t('filter.fields.manufacturers'),
+            key: 'manufacturer',
         },
         {
-            label: t("filter.fields.origins"),
-            key: "origin",
+            label: t('filter.fields.origins'),
+            key: 'origin',
         },
         {
-            label: t("shortDescription"),
-            key: "shortDescription",
+            label: t('shortDescription'),
+            key: 'shortDescription',
         },
         {
-            label: t("weight"),
-            key: "weight",
+            label: t('weight'),
+            key: 'weight',
         },
         {
-            label: t("dimensions.length"),
-            key: "dimensions.length",
+            label: t('dimensions.length'),
+            key: 'dimensions.length',
         },
         {
-            label: t("dimensions.width"),
-            key: "dimensions.width",
+            label: t('dimensions.width'),
+            key: 'dimensions.width',
         },
         {
-            label: t("dimensions.height"),
-            key: "dimensions.height",
+            label: t('dimensions.height'),
+            key: 'dimensions.height',
         },
     ]
 
     const specColumns = [
         {
-            title: t("filter.fields.specifications"),
-            dataIndex: "name",
-            key: "name",
+            title: t('filter.fields.specifications'),
+            dataIndex: 'name',
+            key: 'name',
             width: 180,
         },
         {
-            title: t("value"),
-            dataIndex: "value",
-            key: "value",
+            title: t('value'),
+            dataIndex: 'value',
+            key: 'value',
         },
     ]
 
@@ -71,9 +73,13 @@ export default async function ProductDetail({
         <div className="flex-1 ml-6 space-y-10">
             <Row gutter={30}>
                 <Col span={8}>
-                    <Flex vertical className="w-full" gap={10}>
+                    <Flex
+                        vertical
+                        className="w-full"
+                        gap={10}
+                    >
                         <BadgeRibbon
-                            text={t("authentic")}
+                            text={t('authentic')}
                             color="orange"
                             placement="start"
                         >
@@ -100,13 +106,19 @@ export default async function ProductDetail({
                 </Col>
 
                 <Col span={16}>
-                    <Flex vertical gap={20}>
+                    <Flex
+                        vertical
+                        gap={20}
+                    >
                         <h3 className="text-[24px] font-semibold text-black">
                             {product.name}
                         </h3>
-                        <Flex vertical gap={8}>
+                        <Flex
+                            vertical
+                            gap={8}
+                        >
                             {details.map(({ label, key }) => {
-                                const fields = key.split(".")
+                                const fields = key.split('.')
                                 let value: string | number | undefined
                                 if (fields.length > 1) {
                                     const parent =
@@ -115,7 +127,7 @@ export default async function ProductDetail({
                                         ]
                                     if (
                                         parent &&
-                                        typeof parent === "object" &&
+                                        typeof parent === 'object' &&
                                         parent !== null
                                     ) {
                                         value = (parent as Record<string, any>)[
@@ -136,7 +148,7 @@ export default async function ProductDetail({
                                         <Col span={14}>{value}</Col>
                                     </Row>
                                 ) : (
-                                    ""
+                                    ''
                                 )
                             })}
                         </Flex>
@@ -148,10 +160,10 @@ export default async function ProductDetail({
                                     className="bg-[#D1FFD3] !w-full !h-19 !p-[12px_28px] !text-center !text-md !font-bold !text-[#005E06]"
                                 >
                                     <div>
-                                        {t("remaining")}: {product.stock}{" "}
+                                        {t('remaining')}: {product.stock}{' '}
                                         {product.unit}
                                     </div>
-                                    <div>{t("sameDayDelivery")}</div>
+                                    <div>{t('sameDayDelivery')}</div>
                                 </Flex>
                                 <Flex
                                     vertical
@@ -164,12 +176,12 @@ export default async function ProductDetail({
                                         className="w-full"
                                         justify="space-between"
                                     >
-                                        <b>{t("quantity")}: </b>
+                                        <b>{t('quantity')}: </b>
                                         <span>
-                                            {t("min")}:{" "}
+                                            {t('min')}:{' '}
                                             {product.minOrderQuantity}
                                         </span>
-                                        <span>{t("multiple")}: 1</span>
+                                        <span>{t('multiple')}: 1</span>
                                     </Flex>
                                     <AddToCart
                                         product={product}
@@ -190,13 +202,13 @@ export default async function ProductDetail({
                                                 span={12}
                                                 className="text-center !text-md"
                                             >
-                                                {t("quantity")} ({product.unit})
+                                                {t('quantity')} ({product.unit})
                                             </Col>
                                             <Col
                                                 span={12}
                                                 className="text-center !text-md"
                                             >
-                                                {t("priceEach")} (VNĐ)
+                                                {t('priceEach')} (VNĐ)
                                             </Col>
                                         </Row>
                                         {product.priceTiers.map(
@@ -217,7 +229,7 @@ export default async function ProductDetail({
                                                         className="text-center !text-md"
                                                     >
                                                         {tier.price.toLocaleString(
-                                                            "vi-VN",
+                                                            'vi-VN',
                                                         )}
                                                     </Col>
                                                 </Row>
@@ -231,8 +243,13 @@ export default async function ProductDetail({
             </Row>
 
             {product.description && (
-                <Flex vertical gap={5}>
-                    <h3 className="text-[20px] font-semibold">{t("description")}</h3>
+                <Flex
+                    vertical
+                    gap={5}
+                >
+                    <h3 className="text-[20px] font-semibold">
+                        {t('description')}
+                    </h3>
                     <RichTextContent html={product.description} />
                 </Flex>
             )}
@@ -241,10 +258,10 @@ export default async function ProductDetail({
                 <Row className="w-full mt-8">
                     <Col className="space-y-3 detail-product-table w-full">
                         <h3 className="text-[20px] font-semibold">
-                            {t("filter.fields.specifications")}
+                            {t('filter.fields.specifications')}
                         </h3>
                         <Table
-                            rowKey={"name"}
+                            rowKey={'name'}
                             bordered
                             columns={specColumns}
                             dataSource={product.specifications}
@@ -255,7 +272,25 @@ export default async function ProductDetail({
                 </Row>
             )}
 
-            {/* TODO: Feedback UI */}
+            {product.relatedProducts && product.relatedProducts.length > 0 && (
+                <Flex
+                    vertical
+                    gap={5}
+                    className="w-full"
+                >
+                    <h3 className="text-[20px] font-semibold">
+                        Các sản phẩm liên quan
+                    </h3>
+                    <RelatedProducts
+                        products={product.relatedProducts as IProduct[]}
+                    />
+                </Flex>
+            )}
+
+            <ProductComments
+                productId={product._id}
+                comments={product.comments as any}
+            />
         </div>
     )
 }

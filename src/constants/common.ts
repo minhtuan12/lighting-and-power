@@ -29,3 +29,9 @@ export const ALLOWED_FILE_TYPES = [
 export const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 export const CHECKOUT_FLOW_KEY = "lp_checkout_flow"
 export const CHECKOUT_FLOW_TTL_MS = 15 * 60 * 1000
+export const USER_ROLE = {
+    USER: "user",
+    ADMIN: "admin",
+} as const
+
+export const COMPANY_NAME = "Lighting & Power"

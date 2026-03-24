@@ -1,4 +1,5 @@
 import { CategoryService } from "@/app/api/(services)/category.service"
+import { CommentService } from "@/app/api/(services)/comment.service"
 import { ProductService } from "@/app/api/(services)/product.service"
 import { withMiddleware } from "@/lib/api-handler"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
@@ -24,6 +25,14 @@ async function getProductBySlug(
             product = await ProductService.getById(params.slug)
         } else {
             product = await ProductService.getBySlug(params.slug)
+        }
+
+        let comments = []
+        if (product) {
+            const commentsData = await CommentService.getProductComments(product._id.toString(), { limit: 5 });
+            comments = commentsData.comments
+            product = product.toObject()
+            product.comments = comments
         }
 
         const categoryBreadcrumb = await CategoryService.getBreadcrumb(

@@ -39,6 +39,11 @@ export const routes = {
         url: "/admin/config/contact",
         key: "contact",
     },
+    comments: {
+        title: "Các bình luận",
+        url: "/admin/config/comments",
+        key: "comments",
+    },
 
     trangChu: {
         title: "Trang chủ",

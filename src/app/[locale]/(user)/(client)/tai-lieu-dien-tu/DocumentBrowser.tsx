@@ -6,7 +6,7 @@ import Loading from '@/components/Loading'
 import RichTextContent from '@/components/RichTextContent'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
-import { Button, Card, Empty, Flex, Menu, Typography } from 'antd'
+import { Card, Empty, Flex, Menu, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -65,24 +65,22 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
                 <Loading />
             ) : (
                 <Flex
-                    wrap
+                    className="justify-center w-full overflow-x-auto py-2 scrollbar-thin"
                     gap={10}
-                    className="justify-center"
                 >
-                    {categories.map((cat) => (
-                        <Button
+                    {categories.map((cat) => {
+                        const isActive = activeCategory?.slug === cat.slug;
+                        return <div
                             key={cat.slug}
-                            type={
-                                activeCategory?.slug === cat.slug
-                                    ? 'primary'
-                                    : 'default'
-                            }
-                            className="rounded-full"
+                            className={`min-w-30 cursor-pointer p-3 rounded-md text-center 
+                                ${isActive ? 'bg-[var(--primary)] text-white'
+                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                }`}
                             onClick={() => setActiveCategory(cat)}
                         >
                             {cat.name}
-                        </Button>
-                    ))}
+                        </div>
+                    })}
                 </Flex>
             )}
 
@@ -119,59 +117,55 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
                     )}
                 </Card>
 
-                <Card
-                    className="flex-1 shadow-md border border-gray-100"
-                    styles={{ body: { padding: 0 } }}
-                >
-                    <div className="relative min-h-[360px] overflow-hidden rounded-lg">
-                        <div
-                            className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-70"
-                            style={{
-                                backgroundImage: "url('/images/L&P.png')",
-                                translate: 'rotate(-15deg)',
-                            }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/70 to-white/60" />
-                        <div className="relative p-6 lg:p-8">
-                            {activeSection ? (
-                                <div className="space-y-4">
-                                    <Title level={4} className="!mb-1 select-none">
-                                        {activeSection.title}
-                                    </Title>
-                                    {activeSection.thumbnail && (
-                                        <DefaultImage
-                                            src={activeSection.thumbnail}
-                                            className="w-full h-[320px]"
-                                            title={activeSection.title}
+
+                <div className="relative min-h-[360px] overflow-hidden rounded-lg flex-1">
+                    <div
+                        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-70"
+                        style={{
+                            backgroundImage: "url('/images/L&P.png')",
+                            translate: 'rotate(-15deg)',
+                        }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/70 to-white/60" />
+                    <div className="relative p-6 lg:p-8">
+                        {activeSection ? (
+                            <div className="space-y-4">
+                                <Title level={4} className="!mb-1 select-none">
+                                    {activeSection.title}
+                                </Title>
+                                {activeSection.thumbnail && (
+                                    <DefaultImage
+                                        src={activeSection.thumbnail}
+                                        className="w-full h-[320px]"
+                                        title={activeSection.title}
+                                    />
+                                )}
+                                {activeSection.description && (
+                                    <Text className="text-base select-none">
+                                        {activeSection.description}
+                                    </Text>
+                                )}
+                                {activeSection.contentType === 'text' &&
+                                    activeSection.content && (
+                                        <RichTextContent
+                                            html={activeSection.content}
+                                            className='select-none'
                                         />
                                     )}
-                                    {activeSection.description && (
-                                        <Text className="text-base select-none">
-                                            {activeSection.description}
-                                        </Text>
+                                {activeSection.contentType === 'file' &&
+                                    activeSection.fileUrl && (
+                                        <FileViewer
+                                            documents={[
+                                                { uri: activeSection.fileUrl },
+                                            ]}
+                                        />
                                     )}
-                                    {activeSection.contentType === 'text' &&
-                                        activeSection.content && (
-                                            <RichTextContent
-                                                html={activeSection.content}
-                                                className='select-none'
-                                            />
-                                        )}
-                                    {activeSection.contentType === 'file' &&
-                                        activeSection.fileUrl && (
-                                            <FileViewer
-                                                documents={[
-                                                    { uri: activeSection.fileUrl },
-                                                ]}
-                                            />
-                                        )}
-                                </div>
-                            ) : (
-                                <Empty description="Chọn một mục nội dung" />
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <Empty description="Chọn một mục nội dung" />
+                        )}
                     </div>
-                </Card>
+                </div>
             </Flex>
         </Flex>
     )

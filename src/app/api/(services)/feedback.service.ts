@@ -167,7 +167,7 @@ export class FeedbackService {
                 .sort(sort)
                 .skip(skip)
                 .limit(limit)
-                .populate("userId", "name avatar")
+                .populate("userId", "fullName avatar role")
                 .lean(),
             Feedback.countDocuments(filter),
         ])

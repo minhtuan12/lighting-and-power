@@ -1,3 +1,5 @@
+import { IComment } from "./comment"
+
 export enum EProductStatus {
     draft = "draft",
     active = "active",
@@ -67,13 +69,15 @@ export interface IProduct {
     status?: EProductStatus
     isFeatured?: boolean // Sản phẩm nổi bật
     tags?: EProductTag[]
-    relatedProducts?: string[] // ID sản phẩm liên quan
+    relatedProducts?: string[] | IProduct[] // ID sản phẩm liên quan
 
     // Stats
     viewCount: number
     soldCount: number
     rating?: number // Đánh giá trung bình
     reviewCount?: number
+
+    comments?: IComment[]
 
     createdAt?: Date
     updatedAt?: Date

@@ -9,11 +9,11 @@ import { EUserRole } from './types/user'
 
 const protectedRoutes = [
     routes.gioHang.url,
-    // routes.taiLieuDienTu.url,
+    routes.taiLieuDienTu.url,
     routes.trangCaNhan.url,
 
     '/cart',
-    // '/documents',
+    '/documents',
     '/profile',
 ]
 
