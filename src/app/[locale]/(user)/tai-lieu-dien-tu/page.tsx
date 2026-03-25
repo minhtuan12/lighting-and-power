@@ -1,9 +1,9 @@
-import DocumentBrowser from "@/app/[locale]/(user)/(client)/tai-lieu-dien-tu/DocumentBrowser"
 import { routes } from "@/constants/routes"
 import { fetchDocumentCategories } from "@/fetch-data/documents"
 import { routing } from "@/i18n/routing"
 import type { Metadata } from "next"
 import { getLocale, getTranslations } from "next-intl/server"
+import DocumentBrowser from "../(components)/(document)/DocumentBrowser"
 
 export const revalidate = 3600
 
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
         typeof localizedPath === "string"
             ? localizedPath
             : localizedPath?.[locale as "en" | "vi"] ??
-              routes.taiLieuDienTu.url
+            routes.taiLieuDienTu.url
 
     const title = t("common.document")
     const description =
@@ -36,21 +36,21 @@ export async function generateMetadata(): Promise<Metadata> {
     const baseKeywords =
         locale === "vi"
             ? [
-                  "tài liệu kỹ thuật",
-                  "tài liệu điện tử",
-                  "hướng dẫn",
-                  "cấu tạo",
-                  "định nghĩa",
-                  "thông số kỹ thuật",
-              ]
+                "tài liệu kỹ thuật",
+                "tài liệu điện tử",
+                "hướng dẫn",
+                "cấu tạo",
+                "định nghĩa",
+                "thông số kỹ thuật",
+            ]
             : [
-                  "technical documents",
-                  "device documentation",
-                  "user guide",
-                  "structure",
-                  "definition",
-                  "technical specifications",
-              ]
+                "technical documents",
+                "device documentation",
+                "user guide",
+                "structure",
+                "definition",
+                "technical specifications",
+            ]
     const keywords = Array.from(
         new Set([title, ...baseKeywords, ...categoryKeywords]),
     )
@@ -68,15 +68,15 @@ export async function generateMetadata(): Promise<Metadata> {
             languages:
                 typeof localizedPath === "string"
                     ? {
-                          en: localizedPath,
-                          vi: localizedPath,
-                      }
+                        en: localizedPath,
+                        vi: localizedPath,
+                    }
                     : {
-                          en: localizedPath?.en ?? "/documents",
-                          vi:
-                              localizedPath?.vi ??
-                              routes.taiLieuDienTu.url,
-                      },
+                        en: localizedPath?.en ?? "/documents",
+                        vi:
+                            localizedPath?.vi ??
+                            routes.taiLieuDienTu.url,
+                    },
         },
         openGraph: {
             title,

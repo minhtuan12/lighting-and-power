@@ -437,10 +437,9 @@ button[aria-label='Download'] {
 }
 
 .rich-content-image {
+    text-align: justify;
     img {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        width: 100%;
     }
 }
 

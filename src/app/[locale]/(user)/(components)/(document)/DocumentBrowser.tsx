@@ -53,7 +53,7 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
         <Flex
             vertical
             gap={20}
-            className="!mt-6 !mb-20"
+            className="!mt-6 !mb-20 min-h-[calc(100vh-403px)]"
         >
             <div className="w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
                 <h1 className="text-center text-lg text-white font-semibold">
@@ -86,8 +86,15 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
 
             <Flex
                 gap={20}
-                className="w-full"
+                className="w-full flex-1 relative"
             >
+                <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                        backgroundImage: "url('/images/L&P.png')",
+                        translate: 'rotate(-15deg)',
+                    }}
+                />
                 <Card className="w-[280px] h-fit shadow-md border border-gray-100">
                     <Title
                         level={5}
@@ -117,16 +124,7 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
                     )}
                 </Card>
 
-
-                <div className="relative min-h-[360px] overflow-hidden rounded-lg flex-1">
-                    <div
-                        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-70"
-                        style={{
-                            backgroundImage: "url('/images/L&P.png')",
-                            translate: 'rotate(-15deg)',
-                        }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/70 to-white/60" />
+                <div className="relative rounded-lg flex-1">
                     <div className="relative p-6 lg:p-8">
                         {activeSection ? (
                             <div className="space-y-4">
