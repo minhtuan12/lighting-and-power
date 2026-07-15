@@ -23,6 +23,21 @@ import { breadcrumbAtom, filterDocumentAtom } from '@/stores'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
 import { LoadingOutlined } from '@ant-design/icons'
+import {
+    DndContext,
+    DragEndEvent,
+    PointerSensor,
+    closestCenter,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core'
+import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { generateJSON } from '@tiptap/core'
 import { Image } from '@tiptap/extension-image'
 import StarterKit from '@tiptap/starter-kit'
@@ -42,8 +57,51 @@ import {
     Upload,
 } from 'antd'
 import { useAtom, useSetAtom } from 'jotai'
-import { Download, Edit2, FileText, Filter, Plus, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Download, Edit2, FileText, Filter, GripVertical, Plus, Trash2 } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+
+interface SortableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+    'data-row-key': string
+}
+
+const SortableRow = (props: SortableRowProps) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        setActivatorNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: props['data-row-key'] })
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        ...(isDragging ? { position: 'relative', zIndex: 999, background: '#fafafa' } : {}),
+    }
+
+    return (
+        <tr {...props} ref={setNodeRef} style={style} {...attributes}>
+            {React.Children.map(props.children, (child: any) => {
+                if (child?.key === 'sort') {
+                    return React.cloneElement(child, {
+                        children: (
+                            <GripVertical
+                                ref={setActivatorNodeRef as any}
+                                {...listeners}
+                                size={16}
+                                className="cursor-grab text-gray-400 hover:text-gray-600 mx-auto"
+                            />
+                        ),
+                    })
+                }
+                return child
+            })}
+        </tr>
+    )
+}
 
 export const Documents = () => {
     const [form] = Form.useForm()
@@ -89,7 +147,45 @@ export const Documents = () => {
         updateDocumentAsync,
         deleteDocumentAsync,
         uploadFileAsync,
+        reorderAsync,
     } = useDocuments({ ...filter })
+
+    const [orderedDocuments, setOrderedDocuments] = useState<IDocument[]>([])
+
+    useEffect(() => {
+        setOrderedDocuments(data?.documents || [])
+    }, [data?.documents])
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    )
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event
+        if (!over || active.id === over.id) return
+
+        if (!filter.type) {
+            showMessage.warning('Vui lòng lọc theo 1 danh mục để sắp xếp thứ tự')
+            return
+        }
+
+        const oldIndex = orderedDocuments.findIndex((d) => d._id === active.id)
+        const newIndex = orderedDocuments.findIndex((d) => d._id === over.id)
+        if (oldIndex === -1 || newIndex === -1) return
+
+        const newList = arrayMove(orderedDocuments, oldIndex, newIndex)
+        setOrderedDocuments(newList) // optimistic
+
+        try {
+            await reorderAsync({
+                type: filter.type,
+                orderedIds: newList.map((d) => d._id!) as string[],
+            })
+        } catch (error: any) {
+            showMessage.error(error.message || 'Sắp xếp thất bại')
+            setOrderedDocuments(data?.documents || []) // revert on failure
+        }
+    }
 
     const handleOpenModal = (doc?: IDocument) => {
         if (!doc && categoryOptions.length === 0) {
@@ -306,6 +402,13 @@ export const Documents = () => {
     }
 
     const columns = [
+        {
+            title: '',
+            key: 'sort',
+            width: 40,
+            align: 'center' as const,
+            render: () => null,
+        },
         {
             title: 'Mục nội dung',
             dataIndex: 'title',
@@ -627,21 +730,33 @@ export const Documents = () => {
                 </div>
             </div>
 
-            <Table
-                columns={columns as any}
-                dataSource={data?.documents || []}
-                rowKey="_id"
-                pagination={{
-                    pageSize: PAGE_LIMIT,
-                    showTotal: (total) => `Tổng: ${total} mục`,
-                }}
-                loading={{
-                    indicator: <LoadingOutlined />,
-                    spinning: isDeleting || isLoading,
-                }}
-                className="custom-table rounded-lg"
-                scroll={{ y: 'calc(100vh - 320px)' }}
-            />
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={orderedDocuments.map((d) => d._id!) as string[]}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <Table
+                        columns={columns as any}
+                        dataSource={orderedDocuments}
+                        rowKey="_id"
+                        components={{ body: { row: SortableRow } }}
+                        pagination={{
+                            pageSize: PAGE_LIMIT,
+                            showTotal: (total) => `Tổng: ${total} mục`,
+                        }}
+                        loading={{
+                            indicator: <LoadingOutlined />,
+                            spinning: isDeleting || isLoading,
+                        }}
+                        className="custom-table rounded-lg"
+                        scroll={{ y: 'calc(100vh - 320px)' }}
+                    />
+                </SortableContext>
+            </DndContext>
 
             {/* Modal */}
             <Modal

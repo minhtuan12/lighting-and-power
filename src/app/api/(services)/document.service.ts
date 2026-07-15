@@ -72,7 +72,7 @@ export class DocumentService {
 
             const total = await Document.countDocuments(query)
             const documents = await Document.find(query)
-                .sort({ order: 1, createdAt: -1 })
+                .sort({ type: 1, order: 1, createdAt: -1 })
                 .skip(skip)
                 .limit(PAGE_LIMIT)
                 .lean()
@@ -242,5 +242,25 @@ export class DocumentService {
             console.error('Remove product from document error:', error)
             throw new Error(error.message || 'Failed to remove product')
         }
+    }
+
+    static async reorder(type: string, orderedIds: string[]) {
+        if (!type) {
+            throw new Error("Type is required")
+        }
+        if (!orderedIds?.length) {
+            return { message: "Không có mục nào để sắp xếp" }
+        }
+
+        const bulkOps = orderedIds.map((id, index) => ({
+            updateOne: {
+                filter: { _id: id, type }, // scoped to type, defensive against stale IDs
+                update: { $set: { order: index } },
+            },
+        }))
+
+        await Document.bulkWrite(bulkOps)
+
+        return { message: "Sắp xếp lại thành công" }
     }
 }

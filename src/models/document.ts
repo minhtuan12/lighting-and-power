@@ -85,6 +85,7 @@ DocumentSchema.index({ productIds: 1 })
 DocumentSchema.index({ type: 1 })
 DocumentSchema.index({ isPublished: 1 })
 DocumentSchema.index({ createdAt: -1 })
+DocumentSchema.index({ type: 1, order: 1 })
 
 const Document =
     mongoose.models.Document ||

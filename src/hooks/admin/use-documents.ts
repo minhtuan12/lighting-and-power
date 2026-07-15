@@ -19,22 +19,22 @@ const documentAPI = {
     getAll: (params?: Record<string, any>) => {
         const queryString = params
             ? `?${new URLSearchParams(
-                  Object.entries(params).reduce(
-                      (acc, [key, value]) => {
-                          if (
-                              value !== undefined &&
-                              value !== null &&
-                              value !== ""
-                          ) {
-                              acc[key] = Array.isArray(value)
-                                  ? value.join(",")
-                                  : String(value)
-                          }
-                          return acc
-                      },
-                      {} as Record<string, string>,
-                  ),
-              ).toString()}`
+                Object.entries(params).reduce(
+                    (acc, [key, value]) => {
+                        if (
+                            value !== undefined &&
+                            value !== null &&
+                            value !== ""
+                        ) {
+                            acc[key] = Array.isArray(value)
+                                ? value.join(",")
+                                : String(value)
+                        }
+                        return acc
+                    },
+                    {} as Record<string, string>,
+                ),
+            ).toString()}`
             : ""
         return fetchAPI(`${DOCUMENT_API_URL}${queryString}`)
     },
@@ -124,6 +124,28 @@ export function useDocuments(params?: Record<string, any>) {
             documentAPI.uploadFile(file, folder),
     })
 
+    const reorderMutation = useMutation({
+        mutationFn: async ({
+            type,
+            orderedIds,
+        }: {
+            type: string
+            orderedIds: string[]
+        }) => {
+            const res = await fetch('/api/admin/documents/reorder', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, orderedIds }),
+            })
+            const json = await res.json()
+            if (!json.success) throw new Error(json.message)
+            return json
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['documents'] })
+        },
+    })
+
     return {
         // Data
         documents: documents?.data,
@@ -150,5 +172,8 @@ export function useDocuments(params?: Record<string, any>) {
         uploadFile: uploadFileMutation.mutate,
         uploadFileAsync: uploadFileMutation.mutateAsync,
         isUploading: uploadFileMutation.isPending,
+
+        reorderAsync: reorderMutation.mutateAsync,
+        isReordering: reorderMutation.isPending,
     }
 }
