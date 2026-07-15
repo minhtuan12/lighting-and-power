@@ -57,7 +57,7 @@ async function login(request: NextRequest) {
             httpOnly: true,
             secure: true,
             sameSite: "lax",
-            maxAge: 3600 * 24 * 7,
+            maxAge: 3600 * 24 * 7 * 4,
             path: "/",
         })
 
