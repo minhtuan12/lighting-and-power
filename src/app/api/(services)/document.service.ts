@@ -162,10 +162,17 @@ export class DocumentService {
         id: string,
     ): Promise<{ success: boolean; message: string }> {
         try {
-            const document = await Document.findByIdAndDelete(id)
+            const document = await Document.findById(id)
             if (!document) {
-                throw new Error('Document not found')
+                throw new Error("Document not found")
             }
+
+            const { type } = document
+
+            await Document.findByIdAndDelete(id)
+
+            // Re-normalize order for remaining docs in this type (fill the gap)
+            await DocumentService.reindexType(type)
 
             return { success: true, message: 'Document deleted successfully' }
         } catch (error: any) {
@@ -262,5 +269,22 @@ export class DocumentService {
         await Document.bulkWrite(bulkOps)
 
         return { message: "Sắp xếp lại thành công" }
+    }
+
+    static async reindexType(type: string) {
+        const remaining = await Document.find({ type })
+            .sort({ order: 1, createdAt: -1 })
+            .select("_id")
+
+        if (!remaining.length) return
+
+        const bulkOps = remaining.map((doc, index) => ({
+            updateOne: {
+                filter: { _id: doc._id },
+                update: { $set: { order: index } },
+            },
+        }))
+
+        await Document.bulkWrite(bulkOps)
     }
 }
