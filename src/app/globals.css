@@ -458,7 +458,8 @@ button[aria-label='Download'] {
 
 .custom-menu-admin {
     .ant-menu-item {
-        margin-block: 10px !important;
+        height: 50px !important;
+        margin-block: 0 !important;
 
         &:hover,
         &:active {

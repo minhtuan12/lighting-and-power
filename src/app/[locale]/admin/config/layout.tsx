@@ -84,9 +84,9 @@ export default function RootLayout({
         const keyParts = item.key.split("/").filter(Boolean)
         return (
             pathnameParts.length >= keyParts.length &&
-            keyParts.every((part, index) => part === pathnameParts[index])
+            keyParts.every((part) => pathnameParts.includes(part))
         )
-    })?.url
+    })?.key
 
     return (
         <ProtectedRoute requireAdmin>

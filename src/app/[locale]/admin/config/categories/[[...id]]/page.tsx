@@ -23,7 +23,7 @@ import {
     Table,
 } from "antd"
 import { useAtom, useSetAtom } from "jotai"
-import { ChevronLeft, Filter, Plus } from "lucide-react"
+import { ChevronLeft, Filter, Plus, X } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -120,7 +120,7 @@ const Category = () => {
                 align: "center",
                 render: (image: string) => (
                     <Space size={12} align="center">
-                        {image && (
+                        {image ? (
                             <Image
                                 preview={false}
                                 style={{
@@ -132,7 +132,7 @@ const Category = () => {
                                 width={80}
                                 height={50}
                             />
-                        )}
+                        ) : <X color="grey"/>}
                     </Space>
                 ),
             },
@@ -171,7 +171,7 @@ const Category = () => {
                             count={record?.childrenCount || 0}
                             color={
                                 childrenBadgeColors[
-                                    Math.min(record?.childrenCount || 0, 2)
+                                Math.min(record?.childrenCount || 0, 2)
                                 ]
                             }
                         />

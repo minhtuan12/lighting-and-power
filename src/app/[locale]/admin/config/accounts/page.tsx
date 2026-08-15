@@ -83,7 +83,7 @@ const Account = () => {
     }, [setBreadcrumb])
 
     return (
-        <div className="p-6 bg-gray-50">
+        <div className="bg-gray-50">
             <Card
                 variant="borderless"
                 className="rounded-xl shadow-sm [&>.ant-card-body]:!pb-2"

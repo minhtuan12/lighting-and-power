@@ -11,7 +11,7 @@ import { getProvinceAndWardNameByCode } from "@/lib/utils"
 import { breadcrumbAtom } from "@/stores/ui"
 import { EOrderStatus, EPaymentStatus, IOrder } from "@/types/order"
 import { LoadingOutlined } from "@ant-design/icons"
-import { Card, Col, Input, Modal, Row, Select, Table, Tag, Typography } from "antd"
+import { Card, Col, Flex, Image, Input, Modal, Row, Select, Table, Tag, Typography } from "antd"
 import { useSetAtom } from "jotai"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -156,6 +156,7 @@ const AdminOrders = () => {
             {
                 title: "Sản phẩm",
                 key: "items",
+                width: 300,
                 render: (_: any, record: IOrder) => {
                     const first = record.items?.[0]
                     return (
@@ -187,7 +188,8 @@ const AdminOrders = () => {
                 title: "Tổng tiền",
                 dataIndex: "total",
                 key: "total",
-                width: 140,
+                align: 'right' as const,
+                width: 180,
                 render: (value: number) => (
                     <div className="font-semibold">
                         {value?.toLocaleString("vi-VN")} VND
@@ -199,12 +201,13 @@ const AdminOrders = () => {
                 dataIndex: "paymentStatus",
                 key: "paymentStatus",
                 width: 140,
+                align: "center" as const,
                 render: (status: EPaymentStatus) => {
                     const item = PAYMENT_STATUS_OPTIONS.find(
                         (opt) => opt.value === status,
                     )
                     return (
-                        <Tag color={item?.color || "default"}>
+                        <Tag color={item?.color || "default"} variant="outlined">
                             {item?.label || status}
                         </Tag>
                     )
@@ -215,6 +218,7 @@ const AdminOrders = () => {
                 dataIndex: "status",
                 key: "status",
                 width: 170,
+                align: "center" as const,
                 render: (status: EOrderStatus, record: IOrder) => (
                     <Select
                         value={status}
@@ -269,7 +273,7 @@ const AdminOrders = () => {
     }, [setBreadcrumb])
 
     return (
-        <div className="p-6 bg-gray-50">
+        <div className="bg-gray-50">
             <Card
                 variant="borderless"
                 className="rounded-xl shadow-sm [&>.ant-card-body]:!pb-2"
@@ -346,149 +350,130 @@ const AdminOrders = () => {
                 onCancel={() => setSelectedOrder(null)}
                 footer={null}
                 title="Chi tiết đơn hàng"
-                width={760}
+                width={850}
             >
                 {selectedOrder && (
                     <div className="space-y-4">
-                        <Row gutter={20}>
-                            <Col span={12}>
-                                <Title level={5} className="!mb-2">
-                                    Khách hàng
+                        <Row gutter={50} className="mt-4">
+                            <Col span={10}>
+                                <Title level={5} className="!mb-2 !text-blue-900">
+                                    Thông tin khách hàng
                                 </Title>
-                                <div className="text-sm">
-                                    <div>
-                                        <b>{selectedOrder.customerInfo.name}</b>
+                                <Flex orientation="vertical" gap={10}>
+                                    <div className="text-[15px]">
+                                        <b>Họ tên: </b>{selectedOrder.customerInfo.name}
                                     </div>
-                                    <div>{selectedOrder.customerInfo.phone}</div>
-                                    {selectedOrder.customerInfo.email && (
-                                        <div>
-                                            {selectedOrder.customerInfo.email}
+                                    <div className="text-[15px]">
+                                        <b>Số điện thoại: </b>{selectedOrder.customerInfo.phone}
+                                    </div>
+                                    {selectedOrder.customerInfo.email && (<div className="text-[15px]">
+                                        <b>Email:</b>{selectedOrder.customerInfo.email}
+                                    </div>
+                                    )}
+                                    <div className="text-[15px]">
+                                        <b>Địa chỉ giao hàng:</b> {[
+                                            selectedOrder.shippingAddress.address,
+                                            address.wardName,
+                                            address.provinceName,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(", ")}
+                                    </div>
+                                    <div className="text-[15px] flex items-center gap-2">
+                                        <b>Trạng thái: </b>
+                                        <Tag
+                                            color={
+                                                STATUS_OPTIONS.find(
+                                                    (i) => i.value === selectedOrder.status,
+                                                )?.color || "default"
+                                            }
+                                            variant="outlined"
+                                        >
+                                            {
+                                                STATUS_OPTIONS.find(
+                                                    (i) => i.value === selectedOrder.status,
+                                                )?.label
+                                            }
+                                        </Tag>
+                                    </div>
+                                    <div className="text-[15px] flex items-center gap-2">
+                                        <b>Thanh toán: </b>
+                                        <Tag
+                                            color={
+                                                PAYMENT_STATUS_OPTIONS.find(
+                                                    (i) =>
+                                                        i.value ===
+                                                        selectedOrder.paymentStatus,
+                                                )?.color || "default"
+                                            }
+                                            variant="outlined"
+                                        >
+                                            {
+                                                PAYMENT_STATUS_OPTIONS.find(
+                                                    (i) =>
+                                                        i.value ===
+                                                        selectedOrder.paymentStatus,
+                                                )?.label
+                                            }
+                                        </Tag>
+                                    </div>
+                                    {selectedOrder.note && (
+                                        <div className="text-[15px] flex items-center gap-2">
+                                            <b>Ghi chú: </b>
+                                            {selectedOrder.note}
                                         </div>
                                     )}
-                                </div>
+                                    {selectedOrder.cancelReason && (
+                                        <div className="text-[15px] flex items-center gap-2">
+                                            <b className="!text-[red]">Lý do hủy: </b>
+                                            {selectedOrder.cancelReason}
+                                        </div>
+                                    )}
+                                </Flex>
                             </Col>
-                            <Col span={12}>
-                                <Title level={5} className="!mb-2">
-                                    Địa chỉ giao hàng
+                            <Col span={14}>
+                                <Title level={5} className="!mb-2 !text-blue-900">
+                                    Sản phẩm
                                 </Title>
-                                <div className="text-sm">
-                                    {[
-                                        selectedOrder.shippingAddress.address,
-                                        address.wardName,
-                                        address.provinceName,
-                                    ]
-                                        .filter(Boolean)
-                                        .join(", ")}
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <Row gutter={20}>
-                            <Col span={12}>
-                                <Text type="secondary">Trạng thái</Text>
-                                <div className="mt-1">
-                                    <Tag
-                                        color={
-                                            STATUS_OPTIONS.find(
-                                                (i) => i.value === selectedOrder.status,
-                                            )?.color || "default"
-                                        }
-                                    >
-                                        {
-                                            STATUS_OPTIONS.find(
-                                                (i) => i.value === selectedOrder.status,
-                                            )?.label
-                                        }
-                                    </Tag>
-                                </div>
-                            </Col>
-                            <Col span={12}>
-                                <Text type="secondary">Thanh toán</Text>
-                                <div className="mt-1">
-                                    <Tag
-                                        color={
-                                            PAYMENT_STATUS_OPTIONS.find(
-                                                (i) =>
-                                                    i.value ===
-                                                    selectedOrder.paymentStatus,
-                                            )?.color || "default"
-                                        }
-                                    >
-                                        {
-                                            PAYMENT_STATUS_OPTIONS.find(
-                                                (i) =>
-                                                    i.value ===
-                                                    selectedOrder.paymentStatus,
-                                            )?.label
-                                        }
-                                    </Tag>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        {selectedOrder.note && (
-                            <div>
-                                <div className="text-xs text-gray-400 mb-1">
-                                    Ghi chú
-                                </div>
-                                <div className="bg-gray-50 rounded-lg p-3 text-gray-800 text-sm leading-relaxed border border-gray-100">
-                                    {selectedOrder.note}
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedOrder.cancelReason && (
-                            <div>
-                                <div className="text-xs text-gray-400 mb-1">
-                                    Lý do hủy
-                                </div>
-                                <div className="bg-gray-50 rounded-lg p-3 text-gray-800 text-sm leading-relaxed border border-gray-100">
-                                    {selectedOrder.cancelReason}
-                                </div>
-                            </div>
-                        )}
-
-                        <div>
-                            <Title level={5} className="!mb-2">
-                                Sản phẩm
-                            </Title>
-                            <div className="space-y-3">
-                                {selectedOrder.items?.map((item) => (
-                                    <div
-                                        key={`${item.productId}-${item.productName}`}
-                                        className="flex items-center justify-between border rounded-lg p-3"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            {item.productImage ? (
-                                                <DefaultImage
-                                                    src={item.productImage}
-                                                    title={item.productName}
-                                                    className="w-10 h-10"
-                                                />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-[8px] border border-gray-200 flex items-center justify-center text-[10px] text-gray-400">
-                                                    IMG
-                                                </div>
-                                            )}
-                                            <div>
-                                                <div className="font-semibold text-gray-900">
-                                                    {item.productName}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    SL: {item.quantity}
+                                <div className="space-y-3">
+                                    {selectedOrder.items?.map((item) => (
+                                        <div
+                                            key={`${item.productId}-${item.productName}`}
+                                            className="flex items-center justify-between border rounded-sm p-3"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {item.productImage ? (
+                                                    // <DefaultImage
+                                                    //     src={item.productImage}
+                                                    //     title={item.productName}
+                                                    //     className="w-10 h-10"
+                                                    // />
+                                                    <Image src={item.productImage} className="!w-14 !h-14 rounded-sm" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-[8px] border border-gray-200 flex items-center justify-center text-[10px] text-gray-400">
+                                                        IMG
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="font-semibold text-gray-900">
+                                                        {item.productName}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        SL: {item.quantity}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div className="text-sm font-semibold">
+                                                {item.subtotal?.toLocaleString(
+                                                    "vi-VN",
+                                                )}{" "}
+                                                VND
+                                            </div>
                                         </div>
-                                        <div className="text-sm font-semibold">
-                                            {item.subtotal?.toLocaleString(
-                                                "vi-VN",
-                                            )}{" "}
-                                            VND
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                                    ))}
+                                </div>
+                            </Col>
+                        </Row>
                     </div>
                 )}
             </Modal>
