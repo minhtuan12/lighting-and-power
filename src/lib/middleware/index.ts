@@ -15,6 +15,6 @@ export function composeMiddleware(...middlewares: Middleware[]) {
 }
 
 // Export all middleware
-export { requireRole, verifyToken } from "./auth.middleware"
+export { optionalVerifyToken, requireRole, verifyToken } from "./auth.middleware"
 export { logger } from "./logger.middleware"
 export { rateLimit } from "./rate-limit.middleware"

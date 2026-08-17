@@ -10,6 +10,7 @@
         "search": "Tìm kiếm",
         "product-detail": "Chi tiết sản phẩm",
         "document": "Tài liệu điện tử",
+        "community": "Cộng đồng",
         "address": "Địa chỉ",
         "phone": "Số điện thoại",
         "email": "Email",
@@ -54,6 +55,8 @@
         "featuredProducts": "Sản phẩm nổi bật",
         "authentic": "Chính hãng",
         "addToCart": "Thêm vào giỏ hàng",
+        "addToFavourite": "Thêm vào yêu thích",
+        "removeFromFavourite": "Bỏ khỏi yêu thích",
         "buyNow": "Mua ngay",
         "price": "Giá",
         "inStock": "Còn hàng",
@@ -110,7 +113,10 @@
         "setAddressDefault": "Đặt làm địa chỉ mặc định",
         "changePasswordSuccess": "Đổi mật khẩu thành công",
         "changePasswordFailed": "Đổi mật khẩu thất bại",
-        "password": "Đổi mật khẩu"
+        "password": "Đổi mật khẩu",
+        "community": "Bài viết cộng đồng",
+        "favourites": "Sản phẩm yêu thích",
+        "noFavourites": "Chưa có sản phẩm yêu thích"
     },
     "cart": {
         "searchProd": "Tìm sản phẩm",

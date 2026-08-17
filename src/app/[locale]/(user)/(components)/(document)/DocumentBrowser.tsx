@@ -7,6 +7,7 @@ import RichTextContent from '@/components/RichTextContent'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
 import { Card, Empty, Flex, Menu, Typography, Watermark, WatermarkProps } from 'antd'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -37,6 +38,7 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
     const [activeSection, setActiveSection] = useState<IDocument | null>(null)
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
     const [isLoadingSections, setIsLoadingSections] = useState(false)
+    const t = useTranslations('common');
 
     const [config, setConfig] = useState<WatermarkConfig>({
         content: 'Lighting & Power',
@@ -87,7 +89,7 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
         >
             <div className="w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
                 <h1 className="text-center text-lg text-white font-semibold">
-                    TÀI LIỆU KỸ THUẬT
+                    {t('document').toUpperCase()}
                 </h1>
             </div>
 

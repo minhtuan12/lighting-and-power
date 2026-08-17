@@ -39,6 +39,10 @@ export const routing = defineRouting({
             en: "/documents",
             vi: "/tai-lieu-dien-tu",
         },
+        [routes.congDong.url]: {
+            en: "/community",
+            vi: "/cong-dong",
+        },
     },
 })
 

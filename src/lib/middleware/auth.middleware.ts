@@ -63,6 +63,32 @@ export async function verifyToken(request: NextRequest): Promise<any> {
     }
 }
 
+/**
+ * Hydrates the request user when a valid access token exists, but keeps public
+ * endpoints public when the visitor is anonymous or has an expired token.
+ */
+export async function optionalVerifyToken(request: NextRequest): Promise<null> {
+    try {
+        const token = (await cookies()).get("accessToken")?.value
+        if (!token) return null
+
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+            id?: string
+            role?: string
+        }
+        if (decoded.id && decoded.role) {
+            setRequestUser(request, {
+                ...getRequestUser(request),
+                userId: decoded.id,
+                role: decoded.role,
+            })
+        }
+    } catch {
+        // Public reads should continue as anonymous when the token is invalid.
+    }
+    return null
+}
+
 export function requireRole(...roles: string[]) {
     return async (request: NextRequest): Promise<any> => {
         const user = getRequestUser(request)

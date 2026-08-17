@@ -4,7 +4,7 @@ import Loading from '@/components/Loading'
 import { routes } from '@/constants/routes'
 import { useAuth } from '@/hooks/use-me'
 import { Avatar, Breadcrumb, Card, Flex, Row, Typography } from 'antd'
-import { Lock, Package, UserRound } from 'lucide-react'
+import { Heart, Lock, Package, StickyNote, UserRound } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 
@@ -13,6 +13,8 @@ const { Title, Text } = Typography
 const LazyInfoTab = lazy(() => import('./(tabs)/info'))
 const LazyChangePasswordTab = lazy(() => import('./(tabs)/password'))
 const LazyOrdersTab = lazy(() => import('./(tabs)/orders'))
+const MyCommunityPostsTab = lazy(() => import('./(tabs)/my-community-posts'))
+const FavouriteProductsTab = lazy(() => import('./(tabs)/favourite-products'))
 
 export default function () {
     const t = useTranslations()
@@ -56,6 +58,19 @@ export default function () {
                     />
                 ),
             },
+            {
+                key: 'community',
+                icon: (
+                    <StickyNote
+                        size={25}
+                        color={getColor('community')}
+                    />
+                ),
+            },
+            {
+                key: 'favourites',
+                icon: <Heart size={25} color={getColor('favourites')} />,
+            },
         ],
         [activeTab, getColor],
     )
@@ -68,6 +83,10 @@ export default function () {
                 return <LazyInfoTab />
             case 'password':
                 return <LazyChangePasswordTab />
+            case 'community':
+                return <MyCommunityPostsTab />
+            case 'favourites':
+                return <FavouriteProductsTab />
             default:
                 return <LazyInfoTab />
         }
@@ -100,7 +119,7 @@ export default function () {
                 className="!mt-2"
             >
                 <Card
-                    className="w-[350px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
+                    className="!sticky top-50 self-start w-[330px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
                     style={{
                         background: 'rgba(255, 255, 255, 0.21)',
                         backdropFilter: 'blur(3.5px)',
@@ -127,7 +146,7 @@ export default function () {
                             >
                                 {user.fullName}
                             </Title>
-                            <Text>
+                            <Text className='!text-gray-500'>
                                 {t('profile.memberSince', {
                                     date: new Date(
                                         user.createdAt as string,
@@ -141,24 +160,27 @@ export default function () {
                         className="!mt-4"
                         gap={10}
                     >
-                        {menu.map((item) => (
-                            <Row
-                                key={item.key}
-                                onClick={() => setActiveTab(item.key)}
-                                className="gap-4 h-13 px-4 py-3 cursor-pointer rounded-md items-center hover:!bg-[var(--light-primary)]"
-                                style={{
-                                    background:
-                                        activeTab !== item.key
-                                            ? '#f9fafb'
-                                            : 'var(--light-primary)',
-                                }}
-                            >
-                                {item.icon}
-                                <Text style={{ color: getColor(item.key) }}>
-                                    {t(`profile.${item.key}`)}
-                                </Text>
-                            </Row>
-                        ))}
+                        {menu.map((item) => {
+                            const isActive = activeTab === item.key;
+                            return (
+                                <Row
+                                    key={item.key}
+                                    onClick={() => setActiveTab(item.key)}
+                                    className={`${isActive ? 'font-semibold' : ''} gap-4 h-13 px-4 py-3 cursor-pointer rounded-md items-center hover:!bg-[var(--light-primary)]`}
+                                    style={{
+                                        background:
+                                            isActive
+                                                ? 'var(--light-primary)'
+                                                : '#f9fafb',
+                                    }}
+                                >
+                                    {item.icon}
+                                    <Text style={{ color: getColor(item.key) }}>
+                                        {t(`profile.${item.key}`)}
+                                    </Text>
+                                </Row>
+                            )
+                        })}
                     </Flex>
                 </Card>
                 <Card
@@ -172,11 +194,9 @@ export default function () {
                         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                     }}
                 >
-                    <div className="mt-2">
-                        <Suspense fallback={<Loading />}>
-                            {renderTab()}
-                        </Suspense>
-                    </div>
+                    <Suspense fallback={<Loading />}>
+                        {renderTab()}
+                    </Suspense>
                 </Card>
             </Flex>
         </Flex>

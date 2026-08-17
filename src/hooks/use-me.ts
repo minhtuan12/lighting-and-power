@@ -117,8 +117,8 @@ export function useLogout() {
             queryClient.setQueryData(AUTH_KEYS.me, null)
 
             // Redirect to login
-            router.push(routes.trangChu.url)
             router.refresh() // Refresh để server components update
+            window.location.reload()
         },
         onError: (error: Error) => {
             console.error("Logout failed:", error.message)

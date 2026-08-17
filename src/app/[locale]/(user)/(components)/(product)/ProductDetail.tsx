@@ -5,7 +5,7 @@ import { getProductDetail } from '@/fetch-data/products'
 import { IProduct } from '@/types/product'
 import { Col, Flex, Row, Table } from 'antd'
 import { getTranslations } from 'next-intl/server'
-import AddToCart from '../AddToCart'
+import AddToFavourite from '../AddToFavourite'
 import ProductComments from './ProductComments'
 import RelatedProducts from './RelatedProducts'
 
@@ -88,6 +88,9 @@ export default async function ProductDetail({
                                 title={`${product.name}-${slug ?? id}`}
                                 className="w-full h-[265px] border-none"
                             />
+                            <div className="absolute top-0 right-0 z-10 bg-gray-600 rounded-bl-[6px] p-1.5">
+                                <AddToFavourite product={product} />
+                            </div>
                         </BadgeRibbon>
                         <Flex
                             className="w-full overflow-x-auto scrollbar-thin"
@@ -110,9 +113,11 @@ export default async function ProductDetail({
                         vertical
                         gap={20}
                     >
-                        <h3 className="text-[24px] font-semibold text-black">
-                            {product.name}
-                        </h3>
+                        <Flex align="center" justify="space-between" gap={8}>
+                            <h3 className="text-[24px] font-semibold text-black">
+                                {product.name}
+                            </h3>
+                        </Flex>
                         <Flex
                             vertical
                             gap={8}
@@ -143,6 +148,7 @@ export default async function ProductDetail({
                                     <Row
                                         className="text-black text-[14px]"
                                         gutter={32}
+                                        key={key}
                                     >
                                         <Col span={6}>{label}</Col>
                                         <Col span={14}>{value}</Col>
@@ -183,12 +189,6 @@ export default async function ProductDetail({
                                         </span>
                                         <span>{t('multiple')}: 1</span>
                                     </Flex>
-                                    <AddToCart
-                                        product={product}
-                                        size="large"
-                                        minQuantity={product.minOrderQuantity}
-                                        maxQuantity={product.stock}
-                                    />
                                 </Flex>
                             </Col>
                             {product.priceTiers &&

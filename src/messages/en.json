@@ -10,6 +10,7 @@
         "search": "Search",
         "product-detail": "Product Detail",
         "document": "Documents",
+        "community": "Community",
         "address": "Address",
         "phone": "Phone Number",
         "email": "Email",
@@ -54,6 +55,8 @@
         "featuredProducts": "Featured Products",
         "authentic": "Authentic",
         "addToCart": "Add to Cart",
+        "addToFavourite": "Add to Favourite",
+        "removeFromFavourite": "Remove from Favourite",
         "buyNow": "Buy Now",
         "price": "Price",
         "inStock": "In Stock",
@@ -109,7 +112,10 @@
         "setAddressDefault": "Set as Default Address",
         "changePasswordSuccess": "Changed Password Successfully",
         "changePasswordFailed": "Failed to change password",
-        "password": "Change Password"
+        "password": "Change Password",
+        "community": "Community Posts",
+        "favourites": "Favourite Products",
+        "noFavourites": "No favourite products yet"
     },
     "cart": {
         "searchProd": "Search Product",

@@ -6,7 +6,6 @@ import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd'
 import { ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
-import Cart from '../Cart'
 import { Icon } from '../Icon'
 import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher'
 import UserMenu from './UserMenu'
@@ -70,6 +69,14 @@ export default async function Header({
                 </Link>
             ),
             key: routes.taiLieuDienTu.url,
+        },
+        {
+            label: (
+                <Link href={routes.congDong.url}>
+                    {t(routes.congDong.key).toUpperCase()}
+                </Link>
+            ),
+            key: routes.congDong.url,
         },
         {
             label: (
@@ -160,12 +167,12 @@ export default async function Header({
                                 </Button>
                             </Flex>
                         )}
-                        <Link
+                        {/* <Link
                             href={routes.gioHang.url}
                             className="flex items-center gap-2"
                         >
                             <Cart />
-                        </Link>
+                        </Link> */}
                         {success && data && <UserMenu user={data} />}
                     </Flex>
                 </Flex>

@@ -65,6 +65,11 @@ export const routes = {
         url: "/tai-lieu-dien-tu",
         key: "document",
     },
+    congDong: {
+        title: "Cộng đồng",
+        url: "/cong-dong",
+        key: "community",
+    },
     lienHe: {
         title: "Liên hệ",
         url: "/lien-he",

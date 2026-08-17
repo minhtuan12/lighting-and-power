@@ -75,10 +75,10 @@ const UserSchema = new Schema<IUser>(
         passwordExpiresAt: {
             type: Date,
             default: function () {
-                // Mặc định hết hạn sau 6 tháng (180 ngày)
-                const sixMonths = new Date()
-                sixMonths.setMonth(sixMonths.getMonth() + 6)
-                return sixMonths
+                // Mặc định hết hạn sau 12 tháng (360 ngày)
+                const twelveMonths = new Date()
+                twelveMonths.setMonth(twelveMonths.getMonth() + 12)
+                return twelveMonths
             },
         },
         mustChangePassword: {
@@ -152,7 +152,7 @@ UserSchema.methods.isPasswordExpiringSoon = function (): boolean {
     const now = new Date()
     const daysLeft = Math.ceil(
         (this.passwordExpiresAt.getTime() - now.getTime()) /
-            (1000 * 60 * 60 * 24),
+        (1000 * 60 * 60 * 24),
     )
     return daysLeft > 0 && daysLeft <= 7
 }

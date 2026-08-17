@@ -9,7 +9,7 @@ interface IResponse {
 
 export async function getCurrentUser(): Promise<IResponse> {
     try {
-        const ACCESS_TOKEN_MAX_AGE = 3600 * 24 * 7
+        const ACCESS_TOKEN_MAX_AGE = 3600 * 24 * 7 * 4 * 12
         const cookieStore = await cookies()
         const accessToken = cookieStore.get("accessToken")?.value
 

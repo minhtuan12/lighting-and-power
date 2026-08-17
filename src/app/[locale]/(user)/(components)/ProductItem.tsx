@@ -9,13 +9,13 @@ import Link from "next/link"
 import JotaiProvider from "../../(providers)/jotai-provider"
 import QueryProvider from "../../(providers)/query-provider"
 import RemainingStock from "./(product)/RemainingStock"
-import AddToCart from "./AddToCart"
+import AddToFavourite from "./AddToFavourite"
 
 interface IProps {
     item: IProduct
     wrapClassName?: string
     className?: string
-    enableAddToCart?: boolean
+    enableAddToCart?: boolean // Kept for compatibility with existing callers.
 }
 
 function ItemContent({ item, className, enableAddToCart }: IProps) {
@@ -26,10 +26,13 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
             style={{
                 border: "1px solid #b0b0b0",
             }}
-            className={`hover:!border-[var(--primary)] overflow-hidden rounded-[5px] [&>.ant-card-body]:!px-[8px] [&>.ant-card-body]:!pt-2 [&>.ant-card-body]:!pb-3 w-full ${className}`}
+            className={`overflow-hidden rounded-[5px] [&>.ant-card-body]:!px-0 [&>.ant-card-body]:!pt-0 [&>.ant-card-body]:!pb-3 w-full ${className}`}
         >
+            <div className="absolute top-0 right-0 z-10 bg-gray-600 rounded-bl-[6px] p-1.5">
+                <AddToFavourite product={item} />
+            </div>
             <Flex className="w-full h-full" vertical gap={7}>
-                <div className="relative w-full h-[173px] border-[#B7B7B7] border">
+                <div className="relative w-full h-[173px] border-b-[#B7B7B7] border-b-[1px]">
                     <Link
                         target="_blank"
                         href={`${routes.chiTietSanPham.url}/${item.slug}`}
@@ -39,22 +42,22 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                             src={item.images?.[0] ?? ""}
                             className="w-full h-full absolute"
                             fill
-                            objectFit="contain"
+                            objectFit="cover"
                             loading="lazy"
                         />
                     </Link>
                 </div>
-                <Flex vertical className="!flex-1" gap={8} justify="space-between">
-                    <Link
-                        target="_blank"
-                        href={`${routes.chiTietSanPham.url}/${item.slug}`}
-                        style={{
-                            textDecoration: "none",
-                        }}
-                        className="line-clamp-3 !text-black"
-                    >
-                        {item.name}
-                    </Link>
+                <Flex vertical className="!flex-1 !px-3" gap={8} justify="space-between">
+                    <Flex align="center" justify="space-between" gap={8}>
+                        <Link
+                            target="_blank"
+                            href={`${routes.chiTietSanPham.url}/${item.slug}`}
+                            style={{ textDecoration: "none" }}
+                            className="line-clamp-3 !text-black flex-1 font-semibold"
+                        >
+                            {item.name}
+                        </Link>
+                    </Flex>
                     <Flex vertical className="!flex-1" gap={8} justify="end">
                         {item.price && (
                             <Flex gap={1}>
@@ -65,13 +68,6 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                             </Flex>
                         )}
                         {item.stock && <RemainingStock stock={item.stock} />}
-                        {enableAddToCart && (
-                            <AddToCart
-                                product={item}
-                                minQuantity={item.minOrderQuantity}
-                                maxQuantity={item.stock}
-                            />
-                        )}
                     </Flex>
                 </Flex>
             </Flex>
@@ -95,6 +91,7 @@ export default function ProductItem({
     >
         <ItemContent item={item} className={className} enableAddToCart />
     </Link>
+
     return <JotaiProvider>
         <QueryProvider>
             {content}
