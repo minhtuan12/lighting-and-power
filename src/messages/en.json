@@ -117,6 +117,28 @@
         "favourites": "Favourite Products",
         "noFavourites": "No favourite products yet"
     },
+    "memberProfile": {
+        "back": "Back to community",
+        "addFriend": "Add friend",
+        "pending": "Cancel request",
+        "accept": "Accept",
+        "friends": "Friends",
+        "message": "Message",
+        "connected": "Connected",
+        "member": "Member",
+        "joined": "Joined {year}",
+        "posts": "Posts",
+        "noPosts": "No public posts yet",
+        "about": "About this member",
+        "postsCount": "Posts",
+        "friendsCount": "Friends",
+        "likesCount": "Likes"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "unread": "{count} unread",
+        "empty": "No notifications yet"
+    },
     "cart": {
         "searchProd": "Search Product",
         "quantity": "Quantity",

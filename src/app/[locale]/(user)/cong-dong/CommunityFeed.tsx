@@ -4,13 +4,14 @@ import RichTextContent from '@/components/RichTextContent'
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 import { useMe } from '@/hooks/use-me'
 import { showMessage } from '@/hooks/use-message'
+import { getSocket } from '@/lib/socket-client'
 import { ECommunityPostType, ICommunityPost } from '@/types/community'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Divider, Flex, Form, Input, Tag } from 'antd'
 import {
     Book,
+    Dot,
     MessageCircle,
-    MoreHorizontal,
     PenLine,
     Share2,
     Sparkles,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LoginModal from '../(components)/LoginModal'
 import './community.css'
 
@@ -74,12 +75,21 @@ function ago(date: string | Date) {
 function PostCard({
     post,
     refresh,
+    friendIds,
+    onFriendAdded,
 }: {
     post: ICommunityPost
     refresh: () => void
+    friendIds: Set<string>
+    onFriendAdded: (userId: string) => void
 }) {
     const [busy, setBusy] = useState(false)
-    const locale = useLocale();
+    const [friendRequested, setFriendRequested] = useState(false)
+    const { user } = useMe()
+    const locale = useLocale()
+    const isCurrentUser = user?._id === post.author._id
+    const isFriend = friendIds.has(String(post.author._id))
+    const authorTagColor = post.author.role === 'admin' ? 'blue' : isFriend ? 'orange' : 'green'
     const like = async () => {
         setBusy(true)
         try {
@@ -111,29 +121,68 @@ function PostCard({
         showMessage.success('Đã sao chép liên kết bài viết')
     }
 
-    const Icon = labels[post.type].icon;
+    const addFriend = async () => {
+        if (friendRequested || isFriend || post.author.role === 'admin') return
+        setFriendRequested(true)
+        try {
+            await api('/api/social/friends', { method: 'POST', body: JSON.stringify({ userId: post.author._id, action: 'request' }) })
+            onFriendAdded(post.author._id)
+        } catch (error: any) {
+            setFriendRequested(false)
+            showMessage.error(error.message)
+        }
+    }
+    const Icon = labels[post.type].icon
     return (
         <article className="community-post">
             <div className="post-author">
                 <Avatar
                     src={post.author.avatar}
-                    icon={<UserOutlined className='!-mr-[1px]' />}
+                    icon={<UserOutlined className="!-mr-[1px]" />}
                     alt=""
                     className="!h-10 !w-10"
                 />
                 <div>
-                    <Flex align='center' gap={6}>
-                        <strong>{post.author.fullName}</strong>
-                        <Tag
-                            color={post.author.role === 'admin' ? 'blue' : 'green'}
-                            className='!mt-0'
-                        >
-                            {post.author.role === 'admin'
-                                ? 'Cửa hàng chính thức'
-                                : 'Thành viên'}
-                        </Tag>
+                    <Flex
+                        align="center"
+                        gap={6}
+                    >
+                        {isCurrentUser ? (
+                            <strong>{post.author.fullName}</strong>
+                        ) : (
+                            <Link
+                                href={`/${locale}/thanh-vien/${post.author._id}`}
+                                className="font-semibold hover:!text-[var(--primary)] !text-black"
+                            >
+                                {post.author.fullName}
+                            </Link>
+                        )}
+                        {isCurrentUser ? (
+                            <Tag
+                                color="purple"
+                                className="!mt-0"
+                            >
+                                Tôi
+                            </Tag>
+                        ) : (
+                            !isFriend ? <Tag
+                                color={authorTagColor}
+                                className="!mt-0"
+                            >
+                                {post.author.role === 'admin'
+                                    ? 'Cửa hàng chính thức'
+                                    : 'Thành viên'}
+                            </Tag> : <Tag color="orange" className="!mt-0">Bạn bè</Tag>
+                        )}
+                        {!isCurrentUser && !isFriend && post.author.role !== 'admin' && (
+                            <button type="button" onClick={addFriend} disabled={friendRequested} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:underline disabled:cursor-default disabled:opacity-60">
+                                <Dot color='black' size={18} />{friendRequested ? 'Đang chờ phản hồi kết bạn' : 'Thêm bạn bè'}
+                            </button>
+                        )}
                     </Flex>
-                    <div className='text-gray-500 text-xs'>{ago(post.createdAt)}</div>
+                    <div className="text-gray-500 text-xs">
+                        {ago(post.createdAt)}
+                    </div>
                 </div>
                 {/* <button
                     className="quiet-button"
@@ -144,7 +193,9 @@ function PostCard({
             </div>
             <div className="post-label">
                 <Icon size={16} />
-                <div className='mt-0.5'>{labels[post.type].label || labels.post.label}</div>
+                <div className="mt-0.5">
+                    {labels[post.type].label || labels.post.label}
+                </div>
             </div>
             <Link
                 href={`/${locale}/cong-dong/bai-viet/${post._id}`}
@@ -152,7 +203,10 @@ function PostCard({
             >
                 {post.title}
             </Link>
-            <RichTextContent className='post-content' html={post.content} />
+            <RichTextContent
+                className="post-content"
+                html={post.content}
+            />
             {post.mediaUrl && (
                 <img
                     className="post-image"
@@ -194,9 +248,11 @@ function PostCard({
 }
 
 export default function CommunityFeed() {
-    const t = useTranslations('common');
+    const t = useTranslations('common')
     const { user } = useMe()
     const [posts, setPosts] = useState<ICommunityPost[]>([])
+    const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+    const presenceReceived = useRef(false)
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
         members: 0,
@@ -221,8 +277,40 @@ export default function CommunityFeed() {
     }
     useEffect(() => {
         load()
-        api('/api/community/stats').then(setStats).catch(console.error)
+        api('/api/community/stats').then((data) => {
+            setStats((current) => presenceReceived.current ? { ...data, activeUsers: current.activeUsers } : data)
+        }).catch(console.error)
     }, [])
+    useEffect(() => {
+        const socket = getSocket()
+        const receivePresence = (presence: { onlineUsers: number }) => {
+            presenceReceived.current = true
+            setStats((current) => ({ ...current, activeUsers: presence.onlineUsers }))
+        }
+        socket?.on('presence:update', receivePresence)
+        const requestPresence = () => socket?.emit('presence:request')
+        if (socket?.connected) requestPresence()
+        else socket?.on('connect', requestPresence)
+        return () => {
+            socket?.off('presence:update', receivePresence)
+            socket?.off('connect', requestPresence)
+        }
+    }, [])
+    useEffect(() => {
+        if (!user) {
+            setFriendIds(new Set())
+            return
+        }
+        api('/api/social/friends').then((rows: any[]) => {
+            const ids = rows.filter((row) => row.status === 'accepted').map((row) => {
+                const requester = row.requesterId?._id || row.requesterId
+                const addressee = row.addresseeId?._id || row.addresseeId
+                return String(requester) === String(user._id) ? String(addressee) : String(requester)
+            })
+            setFriendIds(new Set(ids))
+        }).catch(() => setFriendIds(new Set()))
+    }, [user?._id])
+    const handleFriendAdded = (friendId: string) => setFriendIds((current) => new Set(current).add(String(friendId)))
     const submit = async (values: {
         type: ECommunityPostType
         title: string
@@ -253,91 +341,99 @@ export default function CommunityFeed() {
             </div>
             <div className="community-shell">
                 <section className="community-main">
-                    {user ? <div className="community-composer">
-                        <div className="p-4 gap-3 items-center flex">
-                            <Avatar
-                                src={user?.avatar}
-                                icon={<UserOutlined />}
-                                className="!h-10 !w-11"
-                            />
-                            <button
-                                className="composer-trigger"
-                                onClick={() => setComposerOpen(!composerOpen)}
-                            >
-                                <span>
-                                    Bạn đang nghĩ gì, chia sẻ với cộng đồng…
-                                </span>
-                                <PenLine size={18} />
-                            </button>
-                        </div>
-                        {composerOpen && (
-                            <Form
-                                form={form}
-                                className="composer-form !p-3"
-                                layout="vertical"
-                                initialValues={{
-                                    type: ECommunityPostType.post,
-                                }}
-                                onFinish={submit}
-                            >
-                                <div className="composer-types">
-                                    {Object.values(ECommunityPostType).map(
-                                        (type) => {
-                                            const Icon = labels[type].icon
-                                            return (
-                                                <button
-                                                    key={type}
-                                                    className={`${selectedType === type
-                                                        ? 'type-active'
-                                                        : ''
-                                                        } flex items-center gap-1.5`}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setSelectedType(type)
-                                                        form.setFieldValue(
-                                                            'type',
-                                                            type,
-                                                        )
-                                                    }}
-                                                >
-                                                    <Icon size={14} />
-                                                    {labels[type].label}
-                                                </button>
-                                            )
-                                        },
-                                    )}
-                                </div>
-                                <Form.Item
-                                    name="title"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message:
-                                                'Vui lòng nhập tiêu đề bài viết',
-                                        },
-                                    ]}
+                    {user ? (
+                        <div className="community-composer">
+                            <div className="p-4 gap-3 items-center flex">
+                                <Avatar
+                                    src={user?.avatar}
+                                    icon={<UserOutlined />}
+                                    className="!h-10 !w-11"
+                                />
+                                <button
+                                    className="composer-trigger"
+                                    onClick={() =>
+                                        setComposerOpen(!composerOpen)
+                                    }
                                 >
-                                    <Input placeholder="Tiêu đề bài viết" />
-                                </Form.Item>
-                                <Form.Item
-                                    name="content"
-                                    rules={[
-                                        {
-                                            validator: async (_, value) => {
-                                                const text = String(value || '')
-                                                    .replace(/<[^>]*>/g, '')
-                                                    .trim()
-                                                if (!text)
-                                                    throw new Error(
-                                                        'Vui lòng nhập nội dung bài viết',
-                                                    )
+                                    <span>
+                                        Bạn đang nghĩ gì, chia sẻ với cộng đồng…
+                                    </span>
+                                    <PenLine size={18} />
+                                </button>
+                            </div>
+                            {composerOpen && (
+                                <Form
+                                    form={form}
+                                    className="composer-form !p-3"
+                                    layout="vertical"
+                                    initialValues={{
+                                        type: ECommunityPostType.post,
+                                    }}
+                                    onFinish={submit}
+                                >
+                                    <div className="composer-types">
+                                        {Object.values(ECommunityPostType).map(
+                                            (type) => {
+                                                const Icon = labels[type].icon
+                                                return (
+                                                    <button
+                                                        key={type}
+                                                        className={`${selectedType ===
+                                                            type
+                                                            ? 'type-active'
+                                                            : ''
+                                                            } flex items-center gap-1.5`}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedType(
+                                                                type,
+                                                            )
+                                                            form.setFieldValue(
+                                                                'type',
+                                                                type,
+                                                            )
+                                                        }}
+                                                    >
+                                                        <Icon size={14} />
+                                                        {labels[type].label}
+                                                    </button>
+                                                )
                                             },
-                                        },
-                                    ]}
-                                >
-                                    <SimpleEditor placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…" />
-                                </Form.Item>
-                                {/*
+                                        )}
+                                    </div>
+                                    <Form.Item
+                                        name="title"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message:
+                                                    'Vui lòng nhập tiêu đề bài viết',
+                                            },
+                                        ]}
+                                    >
+                                        <Input placeholder="Tiêu đề bài viết" />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="content"
+                                        rules={[
+                                            {
+                                                validator: async (_, value) => {
+                                                    const text = String(
+                                                        value || '',
+                                                    )
+                                                        .replace(/<[^>]*>/g, '')
+                                                        .trim()
+                                                    if (!text)
+                                                        throw new Error(
+                                                            'Vui lòng nhập nội dung bài viết',
+                                                        )
+                                                },
+                                            },
+                                        ]}
+                                    >
+                                        <SimpleEditor placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…" />
+                                    </Form.Item>
+                                    {/*
                                 <textarea
                                     rows={5}
                                     placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…"
@@ -349,7 +445,7 @@ export default function CommunityFeed() {
                                         })
                                     }
                                 /> */}
-                                {/* <input
+                                    {/* <input
                                     placeholder="URL hình ảnh (không bắt buộc)"
                                     value={form.mediaUrl}
                                     onChange={(e) =>
@@ -359,21 +455,32 @@ export default function CommunityFeed() {
                                         })
                                     }
                                 /> */}
-                                <button
-                                    className="primary-button mt-2"
-                                    type="submit"
-                                >
-                                    Đăng bài viết
-                                </button>
-                            </Form>
-                        )}
-                    </div> : <div className="community-composer p-6 text-center">
-                        <div className="text-gray-600">Vui lòng đăng nhập để đăng bài</div>
-                        <button className="primary-button mt-3" onClick={() => setLoginOpen(true)}>
-                            {t('login')}
-                        </button>
-                        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
-                    </div>}
+                                    <button
+                                        className="primary-button mt-2"
+                                        type="submit"
+                                    >
+                                        Đăng bài viết
+                                    </button>
+                                </Form>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="community-composer p-6 text-center">
+                            <div className="text-gray-600">
+                                Vui lòng đăng nhập để đăng bài
+                            </div>
+                            <button
+                                className="primary-button mt-3"
+                                onClick={() => setLoginOpen(true)}
+                            >
+                                {t('login')}
+                            </button>
+                            <LoginModal
+                                open={loginOpen}
+                                onClose={() => setLoginOpen(false)}
+                            />
+                        </div>
+                    )}
                     <Divider
                         variant="dashed"
                         size="large"
@@ -387,6 +494,8 @@ export default function CommunityFeed() {
                                 key={post._id}
                                 post={post}
                                 refresh={load}
+                                friendIds={friendIds}
+                                onFriendAdded={handleFriendAdded}
                             />
                         ))
                     ) : (
@@ -401,7 +510,7 @@ export default function CommunityFeed() {
                         <div className="stats-row">
                             <span>Thành viên</span>
                             <strong>
-                                {stats.members.toLocaleString('vi-VN')}
+                                1,000
                             </strong>
                         </div>
                         <div className="stats-row">

@@ -118,6 +118,28 @@
         "favourites": "Sản phẩm yêu thích",
         "noFavourites": "Chưa có sản phẩm yêu thích"
     },
+    "memberProfile": {
+        "back": "Quay lại cộng đồng",
+        "addFriend": "Thêm bạn",
+        "pending": "Hủy lời mời",
+        "accept": "Chấp nhận",
+        "friends": "Bạn bè",
+        "message": "Nhắn tin",
+        "connected": "Đã kết nối",
+        "member": "Thành viên",
+        "joined": "Tham gia năm {year}",
+        "posts": "Bài viết",
+        "noPosts": "Chưa có bài viết công khai",
+        "about": "Thông tin thành viên",
+        "postsCount": "Bài viết",
+        "friendsCount": "Bạn bè",
+        "likesCount": "Lượt thích"
+    },
+    "notifications": {
+        "title": "Thông báo",
+        "unread": "{count} chưa đọc",
+        "empty": "Chưa có thông báo"
+    },
     "cart": {
         "searchProd": "Tìm sản phẩm",
         "quantity": "Số lượng",

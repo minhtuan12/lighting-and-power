@@ -5,6 +5,7 @@ import { ICommunityComment, ICommunityPost } from '@/types/community'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Flex, Tag } from 'antd'
 import { ArrowLeft, MessageCircle, Send, Share2, Zap } from 'lucide-react'
+import { useLocale } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import '../../community.css'
@@ -45,6 +46,7 @@ export default function PostDetail({
 }: {
     params: Promise<{ id: string }>
 }) {
+    const locale = useLocale()
     const [post, setPost] = useState<ICommunityPost | null>(null)
     const [comments, setComments] = useState<ICommunityComment[]>([])
     const [content, setContent] = useState('')
@@ -118,7 +120,9 @@ export default function PostDetail({
                         />
                         <div>
                             <Flex align='center' gap={6}>
-                                <strong>{post.author.fullName}</strong>
+                                <Link href={`/${locale}/thanh-vien/${post.author._id}`} className="font-semibold hover:!text-[var(--primary)] !text-black">
+                                    {post.author.fullName}
+                                </Link>
                                 <Tag
                                     color={post.author.role === 'admin' ? 'blue' : 'green'}
                                     className='!mt-0'

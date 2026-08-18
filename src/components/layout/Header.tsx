@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { Icon } from '../Icon'
 import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher'
+import NotificationBell from './NotificationBell'
 import UserMenu from './UserMenu'
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -103,10 +104,14 @@ export default async function Header({
                         span={8}
                         style={{ display: 'flex', justifyContent: 'left' }}
                     >
-                        <Input
-                            placeholder={t('search')}
-                            className="!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[35px] !border-[#B4B4B4]"
-                        />
+                        <Flex
+                            gap={7}
+                            align="center"
+                            className="text-[#C40000] font-bold"
+                        >
+                            <Icon src="/images/header-phone.png" />
+                            {config.hotline}
+                        </Flex>
                     </Col>
                     <Col
                         span={8}
@@ -126,14 +131,6 @@ export default async function Header({
                             gap={30}
                             className="items-end"
                         >
-                            <Flex
-                                gap={7}
-                                align="center"
-                                className="text-[#C40000] font-bold"
-                            >
-                                <Icon src="/images/header-phone.png" />
-                                {config.hotline}
-                            </Flex>
                             <LanguageCurrencySwitcher />
                         </Flex>
                     </Col>
@@ -173,26 +170,49 @@ export default async function Header({
                         >
                             <Cart />
                         </Link> */}
-                        {success && data && <UserMenu user={data} />}
+                        {success && data && (
+                            <Flex
+                                align="center"
+                                gap={12}
+                            >
+                                <NotificationBell />
+                                <UserMenu user={data} />
+                            </Flex>
+                        )}
                     </Flex>
                 </Flex>
             </div>
             <Row className="h-[60px] px-10 max-md:!px-6 bg-[var(--primary)] lg:!hidden">
-                <Col span={2} className='!flex !items-center !justify-start'>
+                <Col
+                    span={2}
+                    className="!flex !items-center !justify-start"
+                >
                     <Icon
                         src="/images/logo-only.png"
                         alt="Header Logo Only"
                         size={40}
                     />
                 </Col>
-                <Col span={20} className='!flex !items-center !justify-center'>
+                <Col
+                    span={20}
+                    className="!flex !items-center !justify-center"
+                >
                     <Input
                         placeholder={t('search')}
                         className="!bg-[#E3E3E3] !rounded-[10px] !w-2/3 !h-[35px] !border-[#B4B4B4]"
                     />
                 </Col>
-                <Col span={2} className='!flex !items-center !justify-end'>
-                    <UserMenu user={data} />
+                <Col
+                    span={2}
+                    className="!flex !items-center !justify-end"
+                >
+                    <Flex
+                        align="center"
+                        gap={8}
+                    >
+                        {success && data && <NotificationBell />}
+                        <UserMenu user={data} />
+                    </Flex>
                 </Col>
             </Row>
         </header>

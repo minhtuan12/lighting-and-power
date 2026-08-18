@@ -1,4 +1,5 @@
 import GoToTopButton from "@/components/GoToTopButton"
+import MessengerBubble from "@/components/MessengerBubble"
 import Loading from "@/components/Loading"
 import { getCategories } from "@/fetch-data/categories"
 import { getConfig } from "@/fetch-data/config"
@@ -44,6 +45,7 @@ export default async function RootLayout({
                 </div>
                 <Footer config={config.data} categories={categories.data} />
                 <GoToTopButton />
+                <MessengerBubble />
             </main>
         </Suspense>
     )
