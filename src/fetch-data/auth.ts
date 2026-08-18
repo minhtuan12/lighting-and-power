@@ -19,21 +19,24 @@ export async function getCurrentUser(): Promise<IResponse> {
                 headers: {
                     Cookie: `accessToken=${accessToken}`,
                 },
-                next: {
-                    revalidate: ACCESS_TOKEN_MAX_AGE,
-                    tags: ["user", "me"],
-                },
+                cache: "no-store"
             },
         )
+        
+        console.log(`[getCurrentUser] Fetching ${process.env.NEXT_PUBLIC_API_URL!}/api/auth/me`)
+        console.log(`[getCurrentUser] Token present: ${!!accessToken}`)
+        console.log(`[getCurrentUser] Response status: ${res.status}`)
 
         if (!res.ok) {
+            const errorText = await res.text().catch(() => 'No text')
+            console.log(`[getCurrentUser] Error body: ${errorText}`)
             if (res.status === 401) {
                 return {
                     success: false,
                     message: "Unauthorized",
                 }
             }
-            throw new Error("Failed to fetch user data")
+            throw new Error(`Failed to fetch user data: ${res.status} ${errorText}`)
         }
 
         return res.json()

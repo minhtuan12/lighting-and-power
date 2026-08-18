@@ -8,7 +8,8 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import JotaiProvider from '../../(providers)/jotai-provider'
 import QueryProvider from '../../(providers)/query-provider'
-import LoginModal from './LoginModal'
+import { useSetAtom } from 'jotai'
+import { loginModalAtom } from '@/stores/ui'
 
 function AddToFavouriteContent({
     product,
@@ -20,7 +21,7 @@ function AddToFavouriteContent({
     const t = useTranslations('product')
     const { isAuthenticated } = useAuth()
     const { favouriteIds, toggleFavourite, isToggling } = useFavourites()
-    const [loginOpen, setLoginOpen] = useState(false)
+    const setLoginOpen = useSetAtom(loginModalAtom)
     const active = favouriteIds.includes(product._id)
 
     async function click() {
@@ -37,10 +38,6 @@ function AddToFavouriteContent({
                     className={`${active ? 'fill-[#ef5a22] !text-[#ef5a22]' : 'fill-white'} cursor-pointer text-white`}
                 />
             </Tooltip>
-            <LoginModal
-                open={loginOpen}
-                onClose={() => setLoginOpen(false)}
-            />
         </>
     )
 }

@@ -98,12 +98,11 @@ export default function LanguageCurrencySwitcher() {
     const [currency, setCurrency] = useState("VND")
     const currentLocale = localeConfig[locale as keyof typeof localeConfig]
 
-    const handleApply = () =>
-        useCallback(() => {
-            safeLocalStorage.setItem("locale", lang)
-            safeLocalStorage.setItem("currency", currency)
-            router.replace(pathname, { locale: lang })
-        }, [lang, currency])
+    const handleApply = useCallback(() => {
+        safeLocalStorage.setItem("locale", lang)
+        safeLocalStorage.setItem("currency", currency)
+        router.replace(pathname, { locale: lang })
+    }, [lang, currency, pathname, router])
 
     const items: MenuProps["items"] = [
         {

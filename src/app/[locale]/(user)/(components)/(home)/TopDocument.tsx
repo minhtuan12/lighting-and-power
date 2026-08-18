@@ -19,9 +19,8 @@ function DocumentItem({ item }: { item: IDocument }) {
                     <Image
                         alt={item.title ?? ""}
                         src={"/images/electronic.jpg"}
-                        className="w-full h-full absolute"
+                        className="w-full h-full absolute object-cover"
                         fill
-                        objectFit="cover"
                         loading="lazy"
                     />
                 </div>

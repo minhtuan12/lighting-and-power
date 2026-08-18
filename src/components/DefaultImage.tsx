@@ -16,9 +16,8 @@ export default function DefaultImage({
             <Image
                 alt={title ?? ""}
                 src={src}
-                className="w-full h-full absolute rounded-[10px]"
+                className="w-full h-full absolute rounded-[10px] object-cover"
                 fill
-                objectFit="cover"
                 loading="lazy"
             />
         </div>

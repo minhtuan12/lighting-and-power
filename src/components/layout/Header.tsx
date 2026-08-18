@@ -6,9 +6,12 @@ import { Button, Col, Flex, Input, Menu, MenuProps, Row } from 'antd'
 import { ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { Icon } from '../Icon'
 import LanguageCurrencySwitcher from '../LanguageCurrencySwitcher'
 import UserMenu from './UserMenu'
+import C2CToggle from './C2CToggle'
+import HeaderAuthButtons from './HeaderAuthButtons'
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -36,8 +39,13 @@ export default async function Header({
     categories: ICategory[]
 }) {
     const t = await getTranslations('common')
+    const tC2c = await getTranslations('c2c')
     const { success, data } = await getCurrentUser()
-    const items: MenuItem[] = [
+    const headersList = await headers()
+    const host = headersList.get('host') || ''
+    const isC2C = host.startsWith('c2c.')
+
+    const defaultItems: MenuItem[] = [
         {
             label: (
                 <Link href={routes.trangChu.url}>
@@ -88,6 +96,35 @@ export default async function Header({
         },
     ]
 
+    const c2cItems: MenuItem[] = [
+        {
+            label: (
+                <Link href={routes.trangChu.url}>
+                    HOME
+                </Link>
+            ),
+            key: routes.trangChu.url,
+        },
+        {
+            label: (
+                <Link href="/dang-ban">
+                    {tC2c('postAd').toUpperCase()}
+                </Link>
+            ),
+            key: "/dang-ban",
+        },
+        {
+            label: (
+                <Link href="/quan-ly">
+                    {tC2c('manageTransactions').toUpperCase()}
+                </Link>
+            ),
+            key: "/quan-ly",
+        },
+    ]
+
+    const items = isC2C ? c2cItems : defaultItems
+
     return (
         <header className="fixed top-0 z-[999] w-full bg-white">
             <Flex
@@ -103,10 +140,7 @@ export default async function Header({
                         span={8}
                         style={{ display: 'flex', justifyContent: 'left' }}
                     >
-                        <Input
-                            placeholder={t('search')}
-                            className="!bg-[#E3E3E3] !rounded-[10px] !w-[258px] !h-[35px] !border-[#B4B4B4]"
-                        />
+                        <C2CToggle />
                     </Col>
                     <Col
                         span={8}
@@ -152,20 +186,12 @@ export default async function Header({
                         rootClassName="w-70"
                         className="flex-1 [&_li:first-child]:!pl-0 !bg-transparent [&>li]:!flex [&>li]:!items-center [&>.ant-menu-item]:!text-white [&>.ant-menu-item]:!text-[17px] [&>.ant-menu-item:hover::after]:!border-none [&>.ant-menu]:!rounded-[4px]"
                     />
-                    <Flex gap={35}>
+                    <Flex gap={35} align="center">
                         {!success && (
-                            <Flex gap={35}>
-                                <Button className="!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white">
-                                    <Link href={routes.dangKy.url}>
-                                        {t(routes.dangKy.key).toUpperCase()}
-                                    </Link>
-                                </Button>
-                                <Button className="!bg-[#0063CD] !rounded-[10px] !border-[#0063CD] !text-white">
-                                    <Link href={routes.dangNhap.url}>
-                                        {t(routes.dangNhap.key).toUpperCase()}
-                                    </Link>
-                                </Button>
-                            </Flex>
+                            <HeaderAuthButtons
+                                registerText={t(routes.dangKy.key).toUpperCase()}
+                                loginText={t(routes.dangNhap.key).toUpperCase()}
+                            />
                         )}
                         {/* <Link
                             href={routes.gioHang.url}

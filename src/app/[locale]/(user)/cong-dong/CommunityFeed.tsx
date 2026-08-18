@@ -19,7 +19,8 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import LoginModal from '../(components)/LoginModal'
+import { useSetAtom } from 'jotai'
+import { loginModalAtom } from '@/stores/ui'
 import './community.css'
 
 const labels = {
@@ -205,7 +206,7 @@ export default function CommunityFeed() {
         topics: [] as string[],
     })
     const [composerOpen, setComposerOpen] = useState(false)
-    const [loginOpen, setLoginOpen] = useState(false)
+    const setLoginOpen = useSetAtom(loginModalAtom)
     const [form] = Form.useForm()
     const [selectedType, setSelectedType] = useState(ECommunityPostType.post)
     const load = async () => {
@@ -372,7 +373,6 @@ export default function CommunityFeed() {
                         <button className="primary-button mt-3" onClick={() => setLoginOpen(true)}>
                             {t('login')}
                         </button>
-                        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
                     </div>}
                     <Divider
                         variant="dashed"
