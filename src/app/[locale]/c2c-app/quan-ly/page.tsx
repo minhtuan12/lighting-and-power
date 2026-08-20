@@ -8,21 +8,42 @@ import { useTranslations } from "next-intl"
 export default function QuanLyPage() {
     const t = useTranslations('c2c')
     const [products, setProducts] = useState<any[]>([])
+    const [purchases, setPurchases] = useState<any[]>([])
+    const [sales, setSales] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     const fetchMyProducts = () => {
         setLoading(true)
-        fetch("/api/c2c/products/me")
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) setProducts(data.data.products)
-            })
-            .finally(() => setLoading(false))
+        Promise.all([
+            fetch("/api/c2c/products/me").then(res => res.json()),
+            fetch("/api/c2c/orders/me").then(res => res.json())
+        ])
+        .then(([productsData, ordersData]) => {
+            if (productsData.success) setProducts(productsData.data.products)
+            if (ordersData.success) {
+                setPurchases(ordersData.data.purchases)
+                setSales(ordersData.data.sales)
+            }
+        })
+        .finally(() => setLoading(false))
     }
 
     useEffect(() => {
         fetchMyProducts()
     }, [])
+
+    const confirmDelivery = async (orderId: string) => {
+        try {
+            const res = await fetch(`/api/c2c/orders/${orderId}/confirm`, { method: "POST" })
+            const data = await res.json()
+            if (data.success) {
+                message.success("Đã xác nhận nhận hàng, tiền sẽ được chuyển cho người bán.")
+                fetchMyProducts()
+            } else throw new Error(data.error)
+        } catch (error: any) {
+            message.error(error.message || "Lỗi xác nhận")
+        }
+    }
 
     const handleDelete = async (id: string) => {
         try {
@@ -118,31 +139,110 @@ export default function QuanLyPage() {
         },
     ]
 
-    const orderColumns = [
+    const purchaseColumns = [
         {
             title: t('orderId'),
-            dataIndex: 'orderId',
-            key: 'orderId',
+            dataIndex: 'payosOrderCode',
+            key: 'payosOrderCode',
+            render: (val: any) => <b>#{val}</b>
         },
         {
             title: t('product'),
-            dataIndex: 'productName',
+            dataIndex: 'productId',
             key: 'productName',
+            render: (val: any) => (
+                <div className="flex items-center gap-2">
+                    {val?.images?.[0] && <img src={val.images[0]} alt="" className="w-10 h-10 object-cover rounded" />}
+                    <span>{val?.title || t('noTitle')}</span>
+                </div>
+            )
         },
         {
             title: t('purchaseDate'),
-            dataIndex: 'date',
+            dataIndex: 'createdAt',
             key: 'date',
+            render: (val: string) => <span className="text-gray-500">{new Date(val).toLocaleDateString('vi-VN')}</span>,
         },
         {
             title: t('totalAmount'),
-            dataIndex: 'total',
+            dataIndex: 'amount',
             key: 'total',
+            render: (val: number) => <span className="font-bold text-red-500">{val?.toLocaleString()} đ</span>,
         },
         {
             title: t('status'),
             dataIndex: 'status',
             key: 'status',
+            render: (val: string) => (
+                <Tag color={val === 'paid' ? 'blue' : val === 'completed' ? 'green' : val === 'cancelled' ? 'red' : 'default'}>
+                    {val === 'paid' ? 'Đã thanh toán' : val === 'completed' ? 'Hoàn thành' : val === 'cancelled' ? 'Đã hủy' : val}
+                </Tag>
+            ),
+        },
+        {
+            title: t('action'),
+            key: 'action',
+            render: (_: any, record: any) => (
+                <Space size="middle">
+                    {record.status === 'paid' && (
+                        <Popconfirm title="Bạn xác nhận đã nhận hàng và đồng ý trả tiền cho người bán?" onConfirm={() => confirmDelivery(record._id)}>
+                            <Button type="primary" size="small" className="bg-green-600">Đã nhận được hàng</Button>
+                        </Popconfirm>
+                    )}
+                </Space>
+            ),
+        },
+    ]
+
+    const saleColumns = [
+        {
+            title: t('orderId'),
+            dataIndex: 'payosOrderCode',
+            key: 'payosOrderCode',
+            render: (val: any) => <b>#{val}</b>
+        },
+        {
+            title: t('product'),
+            dataIndex: 'productId',
+            key: 'productName',
+            render: (val: any) => (
+                <div className="flex items-center gap-2">
+                    {val?.images?.[0] && <img src={val.images[0]} alt="" className="w-10 h-10 object-cover rounded" />}
+                    <span>{val?.title || t('noTitle')}</span>
+                </div>
+            )
+        },
+        {
+            title: "Người mua",
+            dataIndex: 'buyerId',
+            key: 'buyer',
+            render: (val: any, record: any) => (
+                <div>
+                    <div>{val?.fullName}</div>
+                    <div className="text-xs text-gray-500">{record.shippingPhone}</div>
+                </div>
+            )
+        },
+        {
+            title: "Địa chỉ giao hàng",
+            dataIndex: 'shippingAddress',
+            key: 'address',
+            render: (val: string, record: any) => (
+                <div className="max-w-[200px] text-xs">
+                    <div>{val}</div>
+                    {record.shippingNote && <div className="text-orange-500 italic">Ghi chú: {record.shippingNote}</div>}
+                </div>
+            )
+        },
+        {
+            title: t('status'),
+            dataIndex: 'status',
+            key: 'status',
+            render: (val: string) => (
+                <Tag color={val === 'paid' ? 'blue' : val === 'completed' ? 'green' : val === 'cancelled' ? 'red' : 'default'}>
+                    {val === 'paid' ? 'Đã thanh toán (Chờ giao hàng)' : val === 'completed' ? 'Hoàn thành' : val === 'cancelled' ? 'Đã hủy' : val}
+                </Tag>
+            ),
         }
     ]
 
@@ -180,10 +280,27 @@ export default function QuanLyPage() {
                         children: (
                             <Table
                                 className="custom-table"
-                                columns={orderColumns}
-                                dataSource={[]}
+                                columns={purchaseColumns}
+                                dataSource={purchases}
+                                rowKey="_id"
+                                loading={loading}
                                 locale={{ emptyText: t('noOrders') }}
-                                pagination={{ hideOnSinglePage: true }}
+                                pagination={{ pageSize: 10, hideOnSinglePage: true }}
+                            />
+                        )
+                    },
+                    {
+                        key: '3',
+                        label: "Đơn hàng đã bán",
+                        children: (
+                            <Table
+                                className="custom-table"
+                                columns={saleColumns}
+                                dataSource={sales}
+                                rowKey="_id"
+                                loading={loading}
+                                locale={{ emptyText: t('noOrders') }}
+                                pagination={{ pageSize: 10, hideOnSinglePage: true }}
                             />
                         )
                     }

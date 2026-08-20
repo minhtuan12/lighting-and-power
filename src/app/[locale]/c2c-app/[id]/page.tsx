@@ -1,15 +1,16 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Spin, Button, Tag, Divider, Avatar } from "antd"
-import { Phone, User } from "lucide-react"
+import { Phone, User, ShoppingCart, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import RichTextContent from "@/components/RichTextContent"
 
 export default function ProductDetailPage() {
     const t = useTranslations('c2c')
     const params = useParams()
+    const router = useRouter()
     const id = params?.id
     const [product, setProduct] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -54,6 +55,22 @@ export default function ProductDetailPage() {
                     <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
                     <div className="text-3xl font-bold text-red-600 mb-4">
                         {product.price.toLocaleString('vi-VN')} đ
+                    </div>
+
+                    <div className="mb-6 flex flex-col gap-3">
+                        <Button
+                            type="primary"
+                            className="w-full flex items-center justify-center gap-2 font-bold text-lg h-14 transition-colors"
+                            onClick={() => router.push(`/c2c-app/checkout/${product._id}`)}
+                            disabled={product.status !== 'active'}
+                        >
+                            <ShoppingCart />
+                            {product.status !== 'active' ? t('statusSold') : t('buyNowEscrow')}
+                        </Button>
+                        <div className="text-center text-sm text-green-600 font-medium flex items-center justify-center gap-1">
+                            <ShieldCheck size={16} />
+                            {t('paySecurely')}
+                        </div>
                     </div>
 
                     <div className="mb-6 flex gap-4">

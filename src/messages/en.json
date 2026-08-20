@@ -266,6 +266,12 @@
         "edit": "Edit",
         "editAd": "Edit Ad",
         "editAdSuccess": "Ad updated successfully!",
-        "fetchError": "Error fetching data"
+        "fetchError": "Error fetching data",
+        "buyNowEscrow": "Buy Now",
+        "paySecurely": "Pay securely via PayOS",
+        "checkout": "Secure Checkout",
+        "shippingAddress": "Shipping Address (For seller)",
+        "shippingNote": "Note for seller",
+        "payosProcessing": "Redirecting to PayOS..."
     }
 }
