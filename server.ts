@@ -13,7 +13,8 @@ app.prepare().then(() => {
     const httpServer = createServer((request, response) => handler(request, response))
     const io = new Server(httpServer, { path: '/api/socket', cors: { origin: true, credentials: true } })
     const onlineUsers = new Map<string, number>()
-    const broadcastPresence = () => io.emit('presence:update', { onlineUsers: onlineUsers.size })
+    const presencePayload = () => ({ onlineUsers: onlineUsers.size, userIds: [...onlineUsers.keys()] })
+    const broadcastPresence = () => io.emit('presence:update', presencePayload())
     setRealtimeServer(io)
     io.use((socket, nextMiddleware) => {
         try {
@@ -30,9 +31,9 @@ app.prepare().then(() => {
         const userId = String(socket.data.userId)
         socket.join(`user:${userId}`)
         onlineUsers.set(userId, (onlineUsers.get(userId) || 0) + 1)
-        socket.emit('presence:update', { onlineUsers: onlineUsers.size })
+        socket.emit('presence:update', presencePayload())
         socket.on('presence:request', () => {
-            socket.emit('presence:update', { onlineUsers: onlineUsers.size })
+            socket.emit('presence:update', presencePayload())
         })
         broadcastPresence()
         socket.on('disconnect', () => {

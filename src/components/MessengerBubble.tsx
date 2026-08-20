@@ -8,7 +8,7 @@ import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Flex, Input, Skeleton } from 'antd'
 import { ArrowLeft, MessageCircle, Send, X } from 'lucide-react'
 import { useLocale } from 'next-intl'
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 
 const api = async (url: string, options?: RequestInit) => {
     const response = await fetch(url, {
@@ -30,6 +30,21 @@ const timeLabel = (value?: string) =>
             minute: '2-digit',
         })
         : ''
+const dayKey = (value: string) => new Date(value).toLocaleDateString('en-CA')
+const dateLabel = (value: string) => {
+    const date = new Date(value)
+    const today = new Date()
+    const yesterday = new Date()
+    yesterday.setDate(today.getDate() - 1)
+    if (dayKey(value) === dayKey(today.toISOString())) return 'Hôm nay'
+    if (dayKey(value) === dayKey(yesterday.toISOString())) return 'Hôm qua'
+    return date.toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    })
+}
 
 function MessengerContent() {
     const locale = useLocale()
@@ -40,6 +55,8 @@ function MessengerContent() {
     const [messages, setMessages] = useState<any[]>([])
     const [content, setContent] = useState('')
     const [error, setError] = useState('')
+    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([])
+    const messagesEndRef = useRef<HTMLDivElement>(null)
     const load = () =>
         user &&
         api('/api/social/conversations')
@@ -73,10 +90,15 @@ function MessengerContent() {
                 setMessages((current) => [...current, message])
             load()
         }
+        const receivePresence = (presence: { userIds?: string[] }) =>
+            setOnlineUserIds(presence.userIds || [])
         socket?.on('message:new', receive)
+        socket?.on('presence:update', receivePresence)
+        if (socket?.connected) socket.emit('presence:request')
         return () => {
             window.removeEventListener('messenger:open', openForUser)
             socket?.off('message:new', receive)
+            socket?.off('presence:update', receivePresence)
         }
     }, [user?._id, selected?._id])
 
@@ -93,6 +115,15 @@ function MessengerContent() {
             method: 'PATCH',
         }).then(load)
     }, [selected?._id])
+    useEffect(() => {
+        if (!selected || loadingMsg) return
+        requestAnimationFrame(() => {
+            messagesEndRef.current?.scrollIntoView({
+                behavior: 'auto',
+                block: 'end',
+            })
+        })
+    }, [selected?._id, messages.length, loadingMsg])
 
     const unread = useMemo(
         () =>
@@ -148,11 +179,18 @@ function MessengerContent() {
                                         gap={12}
                                         align="center"
                                     >
-                                        <Avatar
-                                            size={40}
-                                            src={selected.other.avatar}
-                                            icon={<UserOutlined />}
-                                        />
+                                        <span className="relative inline-flex">
+                                            <Avatar
+                                                size={40}
+                                                src={selected.other.avatar}
+                                                icon={<UserOutlined />}
+                                            />
+                                            {onlineUserIds.includes(
+                                                String(selected.other._id),
+                                            ) && (
+                                                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#31a24c]" />
+                                                )}
+                                        </span>
                                         {selected.other.fullName}
                                     </Flex>
                                 </Flex>
@@ -176,24 +214,42 @@ function MessengerContent() {
                         </div>
                     ) : selected ? (
                         <>
-                            <div className="flex-1 space-y-3 overflow-y-auto bg-white p-3">
+                            <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto bg-white p-3">
                                 {loadingMsg ? (
                                     <Skeleton />
                                 ) : (
-                                    messages.map((message) => (
-                                        <div
-                                            key={message._id}
-                                            className={`max-w-[70%] rounded-2xl px-3 py-2 text-sm ${message.senderId === user._id ? 'ml-auto bg-[#f4511e] text-white rounded-br-[3px]' : 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'}`}
-                                        >
-                                            <div>{message.content}</div>
-                                            <small
-                                                className={`flex ${message.senderId === user._id ? 'justify-end' : ''} mt-1 block text-[10px] opacity-70`}
-                                            >
-                                                {timeLabel(message.createdAt)}
-                                            </small>
-                                        </div>
-                                    ))
+                                    messages.map((message, index) => {
+                                        const showDate =
+                                            index === 0 ||
+                                            dayKey(
+                                                messages[index - 1].createdAt,
+                                            ) !== dayKey(message.createdAt)
+                                        return (
+                                            <Fragment key={message._id}>
+                                                {showDate && (
+                                                    <div className="pt-2 text-center text-[11px] font-medium text-gray-400">
+                                                        {dateLabel(
+                                                            message.createdAt,
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div
+                                                    className={`max-w-[70%] rounded-2xl px-3 py-2 text-sm ${message.senderId === user._id ? 'ml-auto bg-[#f4511e] text-white rounded-br-[3px]' : 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'}`}
+                                                >
+                                                    <div>{message.content}</div>
+                                                    <small
+                                                        className={`flex ${message.senderId === user._id ? 'justify-end' : ''} mt-1 block text-[10px] opacity-70`}
+                                                    >
+                                                        {timeLabel(
+                                                            message.createdAt,
+                                                        )}
+                                                    </small>
+                                                </div>
+                                            </Fragment>
+                                        )
+                                    })
                                 )}
+                                <div ref={messagesEndRef} />
                             </div>
                             <div className="flex gap-2 border-t border-[#dfe6ea] p-2">
                                 <Input
@@ -224,11 +280,18 @@ function MessengerContent() {
                                         }
                                         className="cursor-pointer flex w-full items-center gap-3 border-b border-[#edf0f2] px-2 py-3 text-left transition-colors hover:bg-[#f7f9fa]"
                                     >
-                                        <Avatar
-                                            src={conversation.other?.avatar}
-                                            icon={<UserOutlined />}
-                                            size={40}
-                                        />
+                                        <div className="relative">
+                                            <Avatar
+                                                src={conversation.other?.avatar}
+                                                icon={<UserOutlined />}
+                                                size={40}
+                                            />
+                                            {onlineUserIds.includes(
+                                                String(conversation.other._id),
+                                            ) && (
+                                                    <span className="absolute bottom-0 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#31a24c]" />
+                                                )}
+                                        </div>
                                         <span className="min-w-0 flex-1">
                                             <strong className="block truncate">
                                                 {conversation.other?.fullName}
