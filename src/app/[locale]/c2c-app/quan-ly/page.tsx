@@ -92,8 +92,8 @@ export default function QuanLyPage() {
             dataIndex: 'status',
             key: 'status',
             render: (val: string) => (
-                <Tag color={val === 'active' ? 'green' : val === 'sold' ? 'gray' : 'red'}>
-                    {val === 'active' ? t('statusActive') : val === 'sold' ? t('statusSold') : t('statusHidden')}
+                <Tag color={val === 'active' ? 'green' : val === 'sold' ? 'gray' : val === 'pending' ? 'gold' : val === 'rejected' ? 'red' : 'default'}>
+                    {val === 'active' ? t('statusActive') : val === 'sold' ? t('statusSold') : val === 'pending' ? t('statusPending') : val === 'rejected' ? t('statusRejected') : t('statusHidden')}
                 </Tag>
             ),
         },
@@ -103,7 +103,12 @@ export default function QuanLyPage() {
             render: (_: any, record: any) => (
                 <Space size="middle">
                     {record.status === 'active' && (
-                        <Button size="small" onClick={() => markAsSold(record._id)}>{t('markAsSold')}</Button>
+                        <>
+                            <Link href={`/sua-tin/${record._id}`}>
+                                <Button size="small">{t('edit')}</Button>
+                            </Link>
+                            <Button size="small" onClick={() => markAsSold(record._id)}>{t('markAsSold')}</Button>
+                        </>
                     )}
                     <Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record._id)}>
                         <Button size="small" danger>{t('delete')}</Button>

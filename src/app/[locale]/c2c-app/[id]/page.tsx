@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { Spin, Button, Tag, Divider, Avatar } from "antd"
 import { Phone, User } from "lucide-react"
 import { useTranslations } from "next-intl"
+import RichTextContent from "@/components/RichTextContent"
 
 export default function ProductDetailPage() {
     const t = useTranslations('c2c')
@@ -54,7 +55,7 @@ export default function ProductDetailPage() {
                     <div className="text-3xl font-bold text-red-600 mb-4">
                         {product.price.toLocaleString('vi-VN')} đ
                     </div>
-                    
+
                     <div className="mb-6 flex gap-4">
                         <Tag color={product.condition === 'new' ? 'green' : product.condition === 'like_new' ? 'blue' : 'orange'} className="text-sm px-3 py-1">
                             {product.condition === 'new' ? t('conditionNew') : product.condition === 'like_new' ? t('conditionLikeNew') : t('conditionUsed')}
@@ -65,7 +66,7 @@ export default function ProductDetailPage() {
                     </div>
 
                     <Divider />
-                    
+
                     <div className="flex items-center gap-4 mb-6">
                         <Avatar size="large" src={product.seller?.avatar} icon={<User />} />
                         <div>
@@ -75,12 +76,12 @@ export default function ProductDetailPage() {
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                        <Button 
-                            type="primary" 
+                        <Button
+                            type="primary"
                             className="w-full flex items-center justify-center gap-2 font-bold text-lg h-12 transition-colors"
                             onClick={() => setShowContact(true)}
                         >
-                            <Phone /> 
+                            <Phone />
                             {showContact ? product.contactInfo : t('clickToShowPhone')}
                         </Button>
                         <div className="text-center text-xs text-gray-500 mt-2">
@@ -93,7 +94,7 @@ export default function ProductDetailPage() {
                     <div>
                         <h3 className="font-bold text-lg mb-2">{t('descriptionDetail')}</h3>
                         <div className="whitespace-pre-wrap text-gray-700">
-                            {product.description || t('noDescription')}
+                            {product.description ? <RichTextContent html={product.description} /> : t('noDescription')}
                         </div>
                     </div>
                 </div>

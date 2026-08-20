@@ -215,6 +215,8 @@
         "statusActive": "Active",
         "statusSold": "Sold",
         "statusHidden": "Hidden",
+        "statusPending": "Pending Approval",
+        "statusRejected": "Rejected",
         "action": "Action",
         "markAsSold": "Mark as Sold",
         "confirmDelete": "Are you sure you want to delete this ad?",
@@ -260,6 +262,10 @@
         "c2cMember": "Flea Market Member",
         "clickToShowPhone": "CLICK TO SHOW PHONE NUMBER",
         "contactSellerDirectly": "Contact the seller directly to negotiate the purchase.",
-        "noDescription": "No additional description."
+        "noDescription": "No additional description.",
+        "edit": "Edit",
+        "editAd": "Edit Ad",
+        "editAdSuccess": "Ad updated successfully!",
+        "fetchError": "Error fetching data"
     }
 }

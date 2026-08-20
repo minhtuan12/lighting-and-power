@@ -168,7 +168,7 @@ export default async function Header({
                                 <Icon src="/images/header-phone.png" />
                                 {config.hotline}
                             </Flex>
-                            <LanguageCurrencySwitcher />
+                            {/* <LanguageCurrencySwitcher /> */}
                         </Flex>
                     </Col>
                 </Row>

@@ -201,7 +201,7 @@
     "c2c": {
         "postAd": "Đăng tin",
         "manageTransactions": "Đơn mua & Tin bán",
-        "manageFleaMarket": "Quản lý chợ đồ cũ",
+        "manageFleaMarket": "Quản lý",
         "postNewAd": "Đăng tin mới",
         "product": "Sản phẩm",
         "postDateColumn": "Ngày đăng",
@@ -216,6 +216,8 @@
         "statusActive": "Đang bán",
         "statusSold": "Đã bán",
         "statusHidden": "Ẩn",
+        "statusPending": "Chờ duyệt",
+        "statusRejected": "Bị từ chối",
         "action": "Thao tác",
         "markAsSold": "Báo đã bán",
         "confirmDelete": "Bạn có chắc muốn xóa tin này?",
@@ -261,6 +263,10 @@
         "c2cMember": "Thành viên chợ C2C",
         "clickToShowPhone": "BẤM ĐỂ HIỆN SỐ ĐIỆN THOẠI",
         "contactSellerDirectly": "Liên hệ trực tiếp với người bán để thỏa thuận mua hàng.",
-        "noDescription": "Không có mô tả thêm."
+        "noDescription": "Không có mô tả thêm.",
+        "edit": "Sửa",
+        "editAd": "Sửa tin",
+        "editAdSuccess": "Cập nhật tin thành công!",
+        "fetchError": "Lỗi khi tải dữ liệu"
     }
 }

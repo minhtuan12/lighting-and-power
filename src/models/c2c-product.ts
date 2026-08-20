@@ -15,8 +15,8 @@ const C2CProductSchema = new Schema(
         contactInfo: { type: String, required: true, trim: true, maxlength: 100 },
         status: {
             type: String,
-            enum: ["active", "sold", "hidden"],
-            default: "active",
+            enum: ["pending", "active", "sold", "hidden", "rejected"],
+            default: "pending",
         },
     },
     { timestamps: true }
@@ -25,5 +25,8 @@ const C2CProductSchema = new Schema(
 C2CProductSchema.index({ status: 1, createdAt: -1 })
 C2CProductSchema.index({ sellerId: 1, createdAt: -1 })
 
-export default mongoose.models.C2CProduct ||
-    mongoose.model("C2CProduct", C2CProductSchema)
+if (mongoose.models.C2CProduct) {
+    delete mongoose.models.C2CProduct
+}
+
+export default mongoose.model("C2CProduct", C2CProductSchema)

@@ -71,7 +71,7 @@ export const C2CService = {
             condition: ["new", "like_new", "used"].includes(input.condition) ? input.condition : "used",
             images: Array.isArray(input.images) ? input.images.map(String).slice(0, 10) : [],
             contactInfo,
-            status: "active"
+            status: "pending"
         })
         
         return this.getProduct(created._id.toString())
@@ -91,7 +91,7 @@ export const C2CService = {
             product.images = input.images.map(String).slice(0, 10)
         }
         if (input.contactInfo !== undefined) product.contactInfo = String(input.contactInfo).trim()
-        if (input.status !== undefined && ["active", "sold", "hidden"].includes(input.status)) {
+        if (input.status !== undefined && ["pending", "active", "sold", "hidden", "rejected"].includes(input.status)) {
             product.status = input.status
         }
 

@@ -1,22 +1,59 @@
 'use client'
 
-import { useState } from "react"
-import { Form, Input, InputNumber, Select, Button, Card, message, Upload } from "antd"
-import { useRouter } from "next/navigation"
-import { Plus, X } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Form, Input, InputNumber, Select, Button, Card, message, Upload, Spin } from "antd"
+import { useRouter, useParams } from "next/navigation"
+import { Plus, X, ArrowLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor"
 
-export default function DangBanPage() {
+export default function SuaTinPage() {
     const t = useTranslations('c2c')
     const [loading, setLoading] = useState(false)
+    const [initialLoading, setInitialLoading] = useState(true)
     const router = useRouter()
+    const params = useParams()
+    const id = params.id as string
     const [form] = Form.useForm()
+
+    const [existingImages, setExistingImages] = useState<string[]>([])
     const [imageFiles, setImageFiles] = useState<File[]>([])
     const [imageFilesPreview, setImageFilesPreview] = useState<string[]>([])
 
+    useEffect(() => {
+        if (!id) return;
+        setInitialLoading(true)
+        fetch(`/api/c2c/products/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    const p = data.data;
+                    form.setFieldsValue({
+                        title: p.title,
+                        price: p.price,
+                        condition: p.condition,
+                        contactInfo: p.contactInfo,
+                        description: p.description,
+                    })
+                    if (p.images && p.images.length > 0) {
+                        setExistingImages(p.images)
+                    }
+                } else {
+                    message.error(t('fetchError'))
+                    router.push('/quan-ly')
+                }
+            })
+            .catch(() => {
+                message.error(t('fetchError'))
+                router.push('/quan-ly')
+            })
+            .finally(() => setInitialLoading(false))
+    }, [id, form, router, t])
+
+    const totalImagesCount = existingImages.length + imageFiles.length
+
     const handleImageSelect = (file: File) => {
-        if (imageFiles.length >= 5) {
+        if (totalImagesCount >= 5) {
             message.warning(t('maxImages'))
             return false
         }
@@ -31,7 +68,11 @@ export default function DangBanPage() {
         return false
     }
 
-    const handleRemoveImage = (index: number) => {
+    const handleRemoveExistingImage = (index: number) => {
+        setExistingImages(existingImages.filter((_, i) => i !== index))
+    }
+
+    const handleRemoveNewImage = (index: number) => {
         setImageFiles(imageFiles.filter((_, i) => i !== index))
         setImageFilesPreview(imageFilesPreview.filter((_, i) => i !== index))
     }
@@ -60,10 +101,10 @@ export default function DangBanPage() {
     const onFinish = async (values: any) => {
         setLoading(true)
         try {
-            let uploadedImages: string[] = []
+            let newlyUploadedImages: string[] = []
             if (imageFiles.length > 0) {
                 message.loading({ content: t('uploadingImages'), key: 'upload' })
-                uploadedImages = await uploadImages(imageFiles)
+                newlyUploadedImages = await uploadImages(imageFiles)
                 message.success({ content: t('uploadImagesSuccess'), key: 'upload' })
             }
 
@@ -73,19 +114,19 @@ export default function DangBanPage() {
                 condition: values.condition,
                 contactInfo: values.contactInfo,
                 description: values.description,
-                images: uploadedImages
+                images: [...existingImages, ...newlyUploadedImages]
             }
 
-            const res = await fetch("/api/c2c/products", {
-                method: "POST",
+            const res = await fetch(`/api/c2c/products/${id}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             })
 
             const data = await res.json()
             if (data.success) {
-                message.success(t('postAdSuccess'))
-                router.push("/") // Về trang chủ C2C
+                message.success(t('editAdSuccess'))
+                router.push("/quan-ly")
             } else {
                 throw new Error(data.message)
             }
@@ -96,9 +137,16 @@ export default function DangBanPage() {
         }
     }
 
+    if (initialLoading) {
+        return <div className="flex justify-center items-center py-20"><Spin size="large" /></div>
+    }
+
     return (
         <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">{t('postProductAd')}</h2>
+            <div className="flex items-center gap-4 mb-6">
+                <Button icon={<ArrowLeft size={18} />} onClick={() => router.back()} type="text" className="bg-gray-100 hover:bg-gray-200" />
+                <h2 className="text-2xl font-bold mb-0">{t('editAd')}</h2>
+            </div>
             <Card>
                 <Form layout="vertical" form={form} onFinish={onFinish}>
                     <Form.Item name="title" label={t('title')} rules={[{ required: true, message: t('titleRequired') }]}>
@@ -134,20 +182,32 @@ export default function DangBanPage() {
                     </Form.Item>
 
                     <Form.Item label={t('imagesMax5')}>
-                        <div className="flex gap-4">
-                            {imageFilesPreview.map((preview, idx) => (
-                                <div key={idx} className="relative w-24 h-24 border border-gray-200 rounded overflow-hidden shadow-sm">
-                                    <img src={preview} alt="preview" className="w-full h-full object-cover" />
+                        <div className="flex flex-wrap gap-4">
+                            {existingImages.map((url, idx) => (
+                                <div key={`existing-${idx}`} className="relative w-24 h-24 border border-gray-200 rounded overflow-hidden shadow-sm">
+                                    <img src={url} alt="preview" className="w-full h-full object-cover" />
                                     <button
                                         type="button"
-                                        onClick={() => handleRemoveImage(idx)}
+                                        onClick={() => handleRemoveExistingImage(idx)}
                                         className="absolute top-1 right-1 bg-white/80 p-1 rounded-full hover:bg-white text-red-500 transition-colors"
                                     >
                                         <X size={14} />
                                     </button>
                                 </div>
                             ))}
-                            {imageFiles.length < 5 && (
+                            {imageFilesPreview.map((preview, idx) => (
+                                <div key={`new-${idx}`} className="relative w-24 h-24 border border-gray-200 rounded overflow-hidden shadow-sm">
+                                    <img src={preview} alt="preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveNewImage(idx)}
+                                        className="absolute top-1 right-1 bg-white/80 p-1 rounded-full hover:bg-white text-red-500 transition-colors"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                            {totalImagesCount < 5 && (
                                 <Upload
                                     beforeUpload={handleImageSelect}
                                     showUploadList={false}
@@ -164,7 +224,7 @@ export default function DangBanPage() {
 
                     <Form.Item className="mb-0 mt-6">
                         <Button type="primary" htmlType="submit" loading={loading} className="w-full !bg-[var(--brand-btn-bg)] hover:!bg-[var(--brand-btn-hover)] !border-none h-10 text-lg transition-colors">
-                            {t('postAd')}
+                            {t('edit')}
                         </Button>
                     </Form.Item>
                 </Form>
