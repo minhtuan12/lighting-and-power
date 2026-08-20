@@ -49,6 +49,7 @@
         "mongoose": "^9.0.2",
         "next": "16.0.10",
         "next-intl": "^4.7.0",
+        "pnpm": "^10.34.5",
         "react": "^19.2.1",
         "react-doc-viewer": "^0.1.15",
         "react-dom": "^19.2.1",

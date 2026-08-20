@@ -1,0 +1,10 @@
+/* Cấu hình màu sắc riêng cho C2C (Chợ đồ cũ) */
+.theme-c2c {
+    --primary: #ef5a22;
+    --secondary: #e68a00;
+    --brand-btn-bg: var(--primary);
+    --brand-btn-hover: color-mix(in srgb, var(--primary) 85%, black);
+    --ant-primary-color: var(--primary);
+    --ant-primary-hover-color: var(--brand-btn-hover);
+    /* Bạn có thể thêm các biến màu khác cần thiết ở đây */
+}

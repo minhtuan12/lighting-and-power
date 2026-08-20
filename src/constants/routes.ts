@@ -44,6 +44,11 @@ export const routes = {
         url: "/admin/config/comments",
         key: "comments",
     },
+    c2cAdmin: {
+        title: "Duyệt tin chợ C2C",
+        url: "/admin/config/c2c-products",
+        key: "c2c-products",
+    },
 
     trangChu: {
         title: "Trang chủ",

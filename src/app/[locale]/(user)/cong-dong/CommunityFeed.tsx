@@ -5,9 +5,11 @@ import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor
 import { useMe } from '@/hooks/use-me'
 import { showMessage } from '@/hooks/use-message'
 import { getSocket } from '@/lib/socket-client'
+import { loginModalAtom } from '@/stores'
 import { ECommunityPostType, ICommunityPost } from '@/types/community'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Divider, Flex, Form, Input, Tag } from 'antd'
+import { useSetAtom } from 'jotai'
 import {
     Book,
     Dot,
@@ -20,7 +22,6 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import LoginModal from '../(components)/LoginModal'
 import './community.css'
 
 const labels = {
@@ -261,7 +262,7 @@ export default function CommunityFeed() {
         topics: [] as string[],
     })
     const [composerOpen, setComposerOpen] = useState(false)
-    const [loginOpen, setLoginOpen] = useState(false)
+    const setLoginOpen = useSetAtom(loginModalAtom)
     const [form] = Form.useForm()
     const [selectedType, setSelectedType] = useState(ECommunityPostType.post)
     const load = async () => {
@@ -466,21 +467,11 @@ export default function CommunityFeed() {
                         </div>
                     ) : (
                         <div className="community-composer p-6 text-center">
-                            <div className="text-gray-600">
-                                Vui lòng đăng nhập để đăng bài
-                            </div>
-                            <button
-                                className="primary-button mt-3"
-                                onClick={() => setLoginOpen(true)}
-                            >
+                            <div className="text-gray-600">Vui lòng đăng nhập để đăng bài</div>
+                            <button className="primary-button mt-3" onClick={() => setLoginOpen(true)}>
                                 {t('login')}
                             </button>
-                            <LoginModal
-                                open={loginOpen}
-                                onClose={() => setLoginOpen(false)}
-                            />
-                        </div>
-                    )}
+                        </div>)}
                     <Divider
                         variant="dashed"
                         size="large"

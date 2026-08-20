@@ -6,6 +6,8 @@ import { getMessages } from "next-intl/server"
 import { Inter } from "next/font/google"
 import { notFound } from "next/navigation"
 import "../globals.css"
+import AppProvider from "./(providers)/app-provider"
+import LoginModal from "./(user)/(components)/LoginModal"
 
 const inter = Inter({
     subsets: ["latin"],
@@ -53,7 +55,12 @@ export default async function RootLayout({
                 className={`${inter.className} ${inter.variable} antialiased`}
             >
                 <NextIntlClientProvider messages={messages}>
-                    <AntdRegistry>{children}</AntdRegistry>
+                    <AntdRegistry>
+                        <AppProvider>
+                            {children}
+                            <LoginModal />
+                        </AppProvider>
+                    </AntdRegistry>
                 </NextIntlClientProvider>
             </body>
         </html>

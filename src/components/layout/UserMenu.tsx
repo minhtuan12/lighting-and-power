@@ -1,7 +1,5 @@
 'use client'
 
-import JotaiProvider from '@/app/[locale]/(providers)/jotai-provider'
-import QueryProvider from '@/app/[locale]/(providers)/query-provider'
 import { routes } from '@/constants/routes'
 import { useLogout } from '@/hooks/use-me'
 import { useIsMobile, useIsTablet } from '@/hooks/use-media-query'
@@ -25,13 +23,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Loading from '../Loading'
+import { useSetAtom } from 'jotai'
+import { loginModalAtom, authModalTabAtom } from '@/stores/ui'
 
 interface IProps {
     user?: IUser
 }
 
-function UserMenuContent({ user }: IProps) {
+export default function UserMenu({ user }: IProps) {
     const [open, setOpen] = useState(false)
+    const setLoginModal = useSetAtom(loginModalAtom)
+    const setActiveTab = useSetAtom(authModalTabAtom)
     const t = useTranslations()
     const { logoutAsync } = useLogout()
     const isMobile = useIsMobile()
@@ -135,10 +137,7 @@ function UserMenuContent({ user }: IProps) {
                 {
                     key: routes.dangKy.url,
                     label: (
-                        <Link
-                            href={routes.dangKy.url}
-                            className={`flex gap-1 ${styles.fontSize} !w-full`}
-                        >
+                        <div onClick={() => { setActiveTab('register'); setLoginModal(true); setOpen(false); }}>
                             <Button
                                 className="w-full !bg-[var(--light-primary)]"
                                 size="large"
@@ -149,16 +148,13 @@ function UserMenuContent({ user }: IProps) {
                                 />
                                 {t('common.register')}
                             </Button>
-                        </Link>
+                        </div>
                     ),
                 },
                 {
                     key: routes.dangNhap.url,
                     label: (
-                        <Link
-                            href={routes.dangNhap.url}
-                            className={`flex gap-1 ${styles.fontSize} !w-full`}
-                        >
+                        <div onClick={() => { setActiveTab('login'); setLoginModal(true); setOpen(false); }}>
                             <Button
                                 type="primary"
                                 className="w-full"
@@ -170,7 +166,7 @@ function UserMenuContent({ user }: IProps) {
                                 />
                                 {t('common.login')}
                             </Button>
-                        </Link>
+                        </div>
                     ),
                 },
             ]),
@@ -247,15 +243,5 @@ function UserMenuContent({ user }: IProps) {
                 </Dropdown>
             )}
         </Suspense>
-    )
-}
-
-export default function UserMenu({ user }: IProps) {
-    return (
-        <JotaiProvider>
-            <QueryProvider>
-                <UserMenuContent user={user} />
-            </QueryProvider>
-        </JotaiProvider>
     )
 }

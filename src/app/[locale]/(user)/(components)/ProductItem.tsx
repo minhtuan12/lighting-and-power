@@ -40,9 +40,8 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                         <Image
                             alt={item.name ?? ""}
                             src={item.images?.[0] ?? ""}
-                            className="w-full h-full absolute"
+                            className="w-full h-full absolute object-cover"
                             fill
-                            objectFit="cover"
                             loading="lazy"
                         />
                     </Link>

@@ -4,6 +4,8 @@ import { routes } from "@/constants/routes"
 import { useAuth } from "@/hooks/use-me"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { useSetAtom } from "jotai"
+import { loginModalAtom } from "@/stores/ui"
 
 interface ProtectedRouteProps {
     children: React.ReactNode
@@ -16,11 +18,10 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
     const router = useRouter()
     const pathname = usePathname()
+    const setLoginModal = useSetAtom(loginModalAtom)
     const { user, isAuthenticated, isAdmin, isLoading } = useAuth()
 
     const publicRoutes = [
-        routes.dangKy.url,
-        routes.dangNhap.url,
         routes.trangChu.url,
         routes.gioHang.url,
         routes.taiLieuDienTu.url,
@@ -34,10 +35,11 @@ export function ProtectedRoute({
         if (isPublicRoute) return
 
         if (!isLoading && !isAuthenticated) {
-            const loginUrl = requireAdmin
-                ? routes.login.url
-                : routes.dangNhap.url
-            router.push(loginUrl)
+            if (requireAdmin) {
+                router.push(routes.login.url)
+            } else {
+                setLoginModal(true)
+            }
             return
         }
 
