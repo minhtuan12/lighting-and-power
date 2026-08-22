@@ -60,7 +60,7 @@ export default function QuanLyPage() {
             dataIndex: 'title',
             key: 'title',
             render: (text: string, record: any) => (
-                <Link href={`/${record._id}`} className="font-medium !text-[var(--primary)] hover:opacity-80 transition-opacity">
+                            <Link href={`/san-pham/${record._id}`} className="font-medium !text-[var(--primary)] hover:opacity-80 transition-opacity">
                     {text || record.name || t('noTitle')}
                 </Link>
             ),

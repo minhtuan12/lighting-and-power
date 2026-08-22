@@ -38,7 +38,7 @@ export default function C2CFeedPage() {
                 <Row gutter={[20, 20]}>
                     {products.map(product => (
                         <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
-                            <Link href={`/${product._id}`}>
+                            <Link href={`/san-pham/${product._id}`}>
                                 <Card
                                     hoverable
                                     cover={

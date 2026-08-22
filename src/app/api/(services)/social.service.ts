@@ -153,9 +153,29 @@ export const SocialService = {
             const other = conversation.participantIds.find((participant: any) => participant._id.toString() !== userId)
             const latest: any = await Message.findOne({ conversationId: conversation._id }).sort({ createdAt: -1 }).lean()
             const unread = await Message.countDocuments({ conversationId: conversation._id, senderId: { $ne: me }, readAt: null })
-            return { ...conversation, other, latest, unread }
+            return { ...conversation, other, latest, unread, displayName: conversation.isGroup ? conversation.name : other?.fullName }
         }))
         return serialize(result)
+    },
+    async createGroup(userId: string, name: string, memberIds: string[]) {
+        const owner = oid(userId)
+        const uniqueIds = [...new Set([userId, ...memberIds])].map(oid)
+        if (uniqueIds.length < 3) throw new Error('A group needs at least two friends')
+        const friends = await Friendship.find({ status: 'accepted', $or: [{ requesterId: owner, addresseeId: { $in: uniqueIds } }, { addresseeId: owner, requesterId: { $in: uniqueIds } }] }).lean()
+        const friendIds = new Set(friends.map((friend: any) => (friend.requesterId.toString() === userId ? friend.addresseeId : friend.requesterId).toString()))
+        if (uniqueIds.slice(1).some((member) => !friendIds.has(member.toString()))) throw new Error('Only friends can be added to a group')
+        return serialize(await Conversation.create({ participantIds: uniqueIds, isGroup: true, name: String(name || 'Group chat').trim().slice(0, 120), ownerId: owner }))
+    },
+    async addGroupMembers(userId: string, conversationId: string, memberIds: string[]) {
+        const conversation: any = await Conversation.findOne({ _id: oid(conversationId), isGroup: true, ownerId: oid(userId) })
+        if (!conversation) throw new Error('Group not found or unauthorized')
+        const ids = [...new Set(memberIds)].map(oid)
+        const friends = await Friendship.find({ status: 'accepted', $or: [{ requesterId: oid(userId), addresseeId: { $in: ids } }, { addresseeId: oid(userId), requesterId: { $in: ids } }] }).lean()
+        const friendIds = new Set(friends.map((friend: any) => (friend.requesterId.toString() === userId ? friend.addresseeId : friend.requesterId).toString()))
+        if (ids.some((member) => !friendIds.has(member.toString()))) throw new Error('Only friends can be added to a group')
+        conversation.participantIds = [...new Set([...conversation.participantIds.map((id: any) => id.toString()), ...ids.map((id) => id.toString())])].map(oid)
+        await conversation.save()
+        return serialize(conversation)
     },
     async markConversationRead(userId: string, conversationId: string) {
         const conversation = await Conversation.findOne({ _id: oid(conversationId), participantIds: oid(userId) })
@@ -176,18 +196,22 @@ export const SocialService = {
                 .lean(),
         )
     },
-    async sendMessage(userId: string, conversationId: string, content: string) {
+    async sendMessage(userId: string, conversationId: string, input: { content?: string; attachmentUrl?: string; attachmentName?: string; attachmentMimeType?: string; attachmentSize?: number }) {
         const conversation = await Conversation.findOne({
             _id: oid(conversationId),
             participantIds: oid(userId),
         })
-        const text = String(content || '').trim()
+        const text = String(input.content || '').trim()
         if (!conversation) throw new Error('Conversation not found')
-        if (!text) throw new Error('Message content is required')
+        if (!text && !input.attachmentUrl) throw new Error('Message content or attachment is required')
         const message = await Message.create({
                 conversationId: conversation._id,
                 senderId: oid(userId),
                 content: text,
+                attachmentUrl: input.attachmentUrl,
+                attachmentName: input.attachmentName,
+                attachmentMimeType: input.attachmentMimeType,
+                attachmentSize: input.attachmentSize,
             })
         const recipients = conversation.participantIds.filter((participant: any) => participant.toString() !== userId)
         recipients.forEach((recipient: any) => emitToUser(recipient.toString(), 'message:new', serialize(message)))

@@ -99,6 +99,7 @@ export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
     const host = request.headers.get('host') || ''
     const isC2C = host.startsWith('c2c.')
+    const isChat = host.startsWith('chat.')
 
     if (pathname.startsWith('/api')) {
         if (request.method === 'OPTIONS') {
@@ -165,6 +166,18 @@ export default async function proxy(request: NextRequest) {
             rewriteUrl.pathname = pathParts.join('/')
             intlResponse.headers.set('x-middleware-rewrite', rewriteUrl.toString())
             console.log(`[Proxy Root] C2C Rewrote URL to: ${rewriteUrl.pathname}`)
+        }
+    }
+
+    if (isChat) {
+        const rewriteUrlString = intlResponse.headers.get('x-middleware-rewrite')
+        const rewriteUrl = rewriteUrlString ? new URL(rewriteUrlString) : new URL(request.url)
+        const pathParts = rewriteUrl.pathname.split('/')
+        const locale = pathParts[1]
+        if (routing.locales.includes(locale as any)) {
+            pathParts.splice(2, 0, 'chat-app')
+            rewriteUrl.pathname = pathParts.join('/')
+            intlResponse.headers.set('x-middleware-rewrite', rewriteUrl.toString())
         }
     }
 

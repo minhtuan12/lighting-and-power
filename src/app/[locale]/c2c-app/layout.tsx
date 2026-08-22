@@ -4,6 +4,7 @@ import dynamic from "next/dynamic"
 import React, { Suspense } from "react"
 import { Flex } from "antd"
 import Loading from "@/components/Loading"
+import MessengerBubble from "@/components/MessengerBubble"
 import "@/styles/theme-c2c.css"
 
 const Header = dynamic(() => import("@/components/layout/Header"))
@@ -31,6 +32,7 @@ export default async function C2CLayout({ children }: { children: React.ReactNod
                 <main className="flex-1 w-full max-w-[1200px] mx-auto py-8 px-4 lg:px-0 lg:mt-[174px] mt-[60px]">
                     {children}
                 </main>
+                <MessengerBubble />
             </div>
         </Suspense>
     )

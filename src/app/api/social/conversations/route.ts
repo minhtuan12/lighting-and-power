@@ -9,7 +9,19 @@ export const POST = withMiddleware(
     async (request: NextRequest) => {
         try {
             const user = getRequestUser(request)!
-            const { userId } = await request.json()
+            const { userId, name, memberIds } = await request.json()
+            if (Array.isArray(memberIds))
+                return NextResponse.json(
+                    {
+                        success: true,
+                        data: await SocialService.createGroup(
+                            user.userId!,
+                            name,
+                            memberIds,
+                        ),
+                    },
+                    { status: 201 },
+                )
             return NextResponse.json(
                 {
                     success: true,
@@ -32,7 +44,13 @@ export const POST = withMiddleware(
 )
 
 export const GET = withMiddleware(
-    async (request: NextRequest) => NextResponse.json({ success: true, data: await SocialService.listConversations(getRequestUser(request)!.userId!) }),
+    async (request: NextRequest) =>
+        NextResponse.json({
+            success: true,
+            data: await SocialService.listConversations(
+                getRequestUser(request)!.userId!,
+            ),
+        }),
     connectDbMiddleware,
     verifyToken,
 )
