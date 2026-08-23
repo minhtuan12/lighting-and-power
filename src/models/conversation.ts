@@ -7,6 +7,9 @@ const ConversationSchema = new Schema(
             ref: 'User',
             required: true,
         },
+        isGroup: { type: Boolean, default: false },
+        name: { type: String, trim: true, maxlength: 120 },
+        ownerId: { type: Schema.Types.ObjectId, ref: 'User' },
     },
     { timestamps: true },
 )

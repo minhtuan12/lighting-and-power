@@ -27,14 +27,14 @@ export const POST = withMiddleware(
     ) => {
         try {
             const user = getRequestUser(request)!
-            const { content } = await request.json()
+            const input = await request.json()
             return NextResponse.json(
                 {
                     success: true,
                     data: await SocialService.sendMessage(
                         user.userId!,
                         (await context!.params).id,
-                        content,
+                        input,
                     ),
                 },
                 { status: 201 },
@@ -51,8 +51,25 @@ export const POST = withMiddleware(
 )
 
 export const PATCH = withMiddleware(
-    async (request: NextRequest, context?: { params: Promise<{ id: string }> }) => {
-        try { return NextResponse.json({ success: true, data: await SocialService.markConversationRead(getRequestUser(request)!.userId!, (await context!.params).id) }) }
-        catch (error: any) { return NextResponse.json({ success: false, message: error.message }, { status: 400 }) }
-    }, connectDbMiddleware, verifyToken,
+    async (
+        request: NextRequest,
+        context?: { params: Promise<{ id: string }> },
+    ) => {
+        try {
+            return NextResponse.json({
+                success: true,
+                data: await SocialService.markConversationRead(
+                    getRequestUser(request)!.userId!,
+                    (await context!.params).id,
+                ),
+            })
+        } catch (error: any) {
+            return NextResponse.json(
+                { success: false, message: error.message },
+                { status: 400 },
+            )
+        }
+    },
+    connectDbMiddleware,
+    verifyToken,
 )
