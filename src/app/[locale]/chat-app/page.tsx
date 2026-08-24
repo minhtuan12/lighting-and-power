@@ -1,4 +1,4 @@
-import { MessengerPage } from '@/components/MessengerBubble'
+import { MessengerPage } from '@/components/chat/MessengerBubble'
 
 export default function ChatAppPage() {
     return <MessengerPage />

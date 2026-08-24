@@ -1,5 +1,5 @@
+import MessengerBubble from "@/components/chat/MessengerBubble"
 import GoToTopButton from "@/components/GoToTopButton"
-import MessengerBubble from "@/components/MessengerBubble"
 import Loading from "@/components/Loading"
 import { getCategories } from "@/fetch-data/categories"
 import { getConfig } from "@/fetch-data/config"

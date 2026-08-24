@@ -1,11 +1,11 @@
+import Loading from "@/components/Loading"
+import MessengerBubble from "@/components/chat/MessengerBubble"
 import { getCategories } from "@/fetch-data/categories"
 import { getConfig } from "@/fetch-data/config"
+import "@/styles/theme-c2c.css"
+import { Flex } from "antd"
 import dynamic from "next/dynamic"
 import React, { Suspense } from "react"
-import { Flex } from "antd"
-import Loading from "@/components/Loading"
-import MessengerBubble from "@/components/MessengerBubble"
-import "@/styles/theme-c2c.css"
 
 const Header = dynamic(() => import("@/components/layout/Header"))
 

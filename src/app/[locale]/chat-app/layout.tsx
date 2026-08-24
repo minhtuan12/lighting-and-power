@@ -5,5 +5,5 @@ export default function ChatAppLayout({
 }: {
     children: React.ReactNode
 }) {
-    return <div className="min-h-screen bg-[#f5f8fa] px-1 py-1">{children}</div>
+    return <div className="min-h-screen max-h-screen w-screen">{children}</div>
 }

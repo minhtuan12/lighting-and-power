@@ -8,7 +8,9 @@ const MessageSchema = new Schema(
             required: true,
         },
         senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        content: { type: String, required: true, trim: true, maxlength: 5000 },
+        // Attachment-only messages intentionally use an empty content string.
+        // SocialService.sendMessage validates that either content or an attachment exists.
+        content: { type: String, default: '', trim: true, maxlength: 5000 },
         attachmentUrl: { type: String, trim: true, maxlength: 2000 },
         attachmentName: { type: String, trim: true, maxlength: 255 },
         attachmentMimeType: { type: String, trim: true, maxlength: 150 },
