@@ -1,8 +1,8 @@
 import { withMiddleware } from "@/lib/api-handler"
 import { getRequestUser } from "@/lib/context"
+import { getCookieDomain } from "@/lib/cookie"
 import { connectDbMiddleware } from "@/lib/middleware/connect-db"
 import { messages } from "@/messages/server"
-import { revalidateTag } from "next/cache"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { AuthService } from "../../(services)/auth.service"
@@ -56,10 +56,6 @@ async function login(request: NextRequest) {
         const cookieStore = await cookies()
         const host = request.headers.get('host') || request.nextUrl.hostname
         const hostname = host.split(':')[0]
-        const cookieDomain = hostname.endsWith('localhost') ? undefined : `.${hostname.replace(/^www\./, '')}`
-        
-        console.log(`[Login API] Hostname: ${hostname} | Setting cookieDomain: ${cookieDomain || 'undefined (host-only)'}`)
-        
         const isSecure = process.env.NODE_ENV === "production"
 
         cookieStore.set("accessToken", accessToken, {
@@ -68,16 +64,16 @@ async function login(request: NextRequest) {
             sameSite: "lax",
             maxAge: 3600 * 24 * 7 * 4 * 12,
             path: "/",
-            domain: cookieDomain
+            domain: getCookieDomain(hostname)
         })
-        
+
         cookieStore.set("refreshToken", refreshToken, {
             httpOnly: true,
             secure: isSecure,
             sameSite: "lax",
             maxAge: 3600 * 24 * 7 * 4 * 12,
             path: "/",
-            domain: cookieDomain
+            domain: getCookieDomain(hostname)
         })
 
         const response = NextResponse.json({

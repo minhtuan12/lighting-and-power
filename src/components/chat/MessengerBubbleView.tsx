@@ -253,7 +253,9 @@ export default function MessengerBubbleView() {
 											</strong>
 											<small className="block truncate text-gray-500">
 												{conversation.latest?.content ||
-													'Bắt đầu trò chuyện'}
+													conversation.latest?.attachmentUrl
+													? <i>Đã gửi 1 file đính kèm</i>
+													: 'Bắt đầu trò chuyện'}
 											</small>
 										</span>
 										<small className="self-start pt-1 text-xs text-gray-500">

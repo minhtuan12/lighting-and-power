@@ -2,15 +2,16 @@
 import { useLogin } from '@/hooks/use-me'
 import { showMessage } from '@/hooks/use-message'
 import { EUserRole } from '@/types/user'
-import { Button, Form, Input, Modal, Tabs } from 'antd'
+import { Button, Flex, Form, Input, Modal, Tabs } from 'antd'
 import { LogIn } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { useAtom } from 'jotai'
-import { loginModalAtom, authModalTabAtom } from '@/stores/ui'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Icon } from '@/components/Icon'
 import { useRegister } from '@/hooks/user/use-register'
+import { authModalTabAtom, loginModalAtom } from '@/stores/ui'
+import { useAtom } from 'jotai'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     const t = useTranslations()
@@ -32,7 +33,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     }
 
     return (
-        <Form form={form} layout="vertical" onFinish={submit} className="pt-3">
+        <Form form={form} layout="vertical" onFinish={submit} className="!pt-3">
             <Form.Item
                 name="emailOrPhone"
                 label={t('auth.emailOrPhone')}
@@ -45,7 +46,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
                     },
                 ]}
             >
-                <Input size="large" />
+                <Input size="large" placeholder='Nhập email hoặc số điện thoại' />
             </Form.Item>
             <Form.Item
                 name="password"
@@ -66,7 +67,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
                     },
                 ]}
             >
-                <Input.Password size="large" />
+                <Input.Password size="large" placeholder='Nhập mật khẩu' />
             </Form.Item>
             <Button
                 type="primary"
@@ -258,6 +259,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                 htmlType="submit"
                 loading={isRegistering}
                 block
+                icon={<Icon src={"/images/logo-only.png"} size={20} />}
             >
                 {t("common.register")}
             </Button>
@@ -298,7 +300,7 @@ export default function LoginModal() {
             setActiveTab('login')
             return
         }
-        
+
         setOpen(false)
         const redirectUrl = searchParams.get('redirect')
         if (redirectUrl) {
@@ -329,6 +331,7 @@ export default function LoginModal() {
             centered
             width={450}
         >
+            <Flex justify='center' className='!mb-4'><Icon src={"/images/logo-vertical.png"} size={300} /></Flex>
             <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'login' | 'register')} items={items} centered />
         </Modal>
     )

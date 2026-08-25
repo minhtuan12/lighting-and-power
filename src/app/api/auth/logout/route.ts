@@ -1,26 +1,26 @@
-import { revalidateTag } from "next/cache"
-import { cookies } from "next/headers"
-import { NextRequest, NextResponse } from "next/server"
+import { getCookieDomain } from "@/lib/cookie"; // hàm dùng chung với login
+import { revalidateTag } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-    const cookieStore = await cookies()
     const host = request.headers.get('host') || request.nextUrl.hostname
-    const hostname = host.split(':')[0]
-    const cookieDomain = hostname.endsWith('localhost') ? undefined : `.${hostname.replace(/^www\./, '')}`
-    const rootDomain = hostname.endsWith('localhost') ? undefined : `.${hostname.replace(/^(c2c|www)\./, '')}`
-    
+    const cookieDomain = getCookieDomain(host) // '.domain.com' hoặc undefined (dev)
+
     const response = NextResponse.json({ success: true })
 
-    const domainsToClear = [cookieDomain]
-    if (rootDomain !== cookieDomain) {
-        domainsToClear.push(rootDomain)
-    }
-    domainsToClear.push(undefined) // fallback host-only
+    // Chỉ cần xoá đúng domain thật + host-only (phòng cookie cũ set trước khi fix)
+    const domainsToClear = [cookieDomain, undefined]
 
     domainsToClear.forEach(domain => {
         const domainStr = domain ? `; Domain=${domain}` : ''
-        response.headers.append('Set-Cookie', `accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT${domainStr}`)
-        response.headers.append('Set-Cookie', `refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT${domainStr}`)
+        response.headers.append(
+            'Set-Cookie',
+            `accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT${domainStr}`,
+        )
+        response.headers.append(
+            'Set-Cookie',
+            `refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT${domainStr}`,
+        )
     })
 
     revalidateTag("user", { expire: 0 })
