@@ -100,18 +100,10 @@ export default async function Header({
         {
             label: (
                 <Link href={routes.trangChu.url}>
-                    HOME
+                    {t(routes.trangChu.key).toUpperCase()}
                 </Link>
             ),
             key: routes.trangChu.url,
-        },
-        {
-            label: (
-                <Link href="/dang-ban">
-                    {tC2c('postAd').toUpperCase()}
-                </Link>
-            ),
-            key: "/dang-ban",
         },
         {
             label: (
@@ -130,7 +122,7 @@ export default async function Header({
             <Flex
                 justify="space-between"
                 align="end"
-                className="!bg-white !text-gray-100 !h-[120px] !gap-34 !py-4 !mx-auto xl:max-w-[1140px] lg:!w-full lg:!px-6 xl:!px-0 max-lg:!hidden"
+                className="!bg-white !text-gray-100 !h-[95px] !gap-34 !py-4 !mx-auto xl:max-w-[1140px] lg:!w-full lg:!px-6 xl:!px-0 max-lg:!hidden"
             >
                 <Row
                     className="w-full"
@@ -146,11 +138,13 @@ export default async function Header({
                         span={8}
                         style={{ display: 'flex', justifyContent: 'center' }}
                     >
-                        <Icon
-                            src="/images/logo-vertical.png"
-                            alt="Vertical Logo"
-                            size={200}
-                        />
+                        <Link href={'/'}>
+                            <Icon
+                                src="/images/logo-vertical.png"
+                                alt="Vertical Logo"
+                                size={130}
+                            />
+                        </Link>
                     </Col>
                     <Col
                         span={8}

@@ -331,7 +331,7 @@ export default function LoginModal() {
             centered
             width={450}
         >
-            <Flex justify='center' className='!mb-4'><Icon src={"/images/logo-vertical.png"} size={300} /></Flex>
+            <Flex justify='center' className='!mb-4'><Icon src={"/images/logo-vertical.png"} size={150} /></Flex>
             <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'login' | 'register')} items={items} centered />
         </Modal>
     )

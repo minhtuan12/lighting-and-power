@@ -1,8 +1,8 @@
 'use client'
 
+import { Avatar, Button, message, Modal, Space, Table, Tabs, Tag } from "antd"
+import { Check, Eye, User, X } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Table, Tag, Space, Button, message, Tabs, Modal, Avatar } from "antd"
-import { Check, X, Eye, User } from "lucide-react"
 
 export default function AdminC2CProductsPage() {
     const [products, setProducts] = useState<any[]>([])
@@ -114,26 +114,26 @@ export default function AdminC2CProductsPage() {
             key: "action",
             render: (_: any, record: any) => (
                 <Space>
-                    <Button 
-                        size="small" 
-                        icon={<Eye size={14} />} 
+                    <Button
+                        size="small"
+                        icon={<Eye size={14} />}
                         onClick={() => setSelectedProduct(record)}
                     >
                         Xem
                     </Button>
                     {record.status === "pending" && (
                         <>
-                            <Button 
-                                size="small" 
-                                type="primary" 
-                                className="bg-green-600 hover:bg-green-700" 
+                            <Button
+                                size="small"
+                                type="primary"
+                                className="bg-green-600 hover:bg-green-700"
                                 icon={<Check size={14} />}
                                 onClick={() => updateStatus(record._id, "active")}
                             >
                                 Duyệt
                             </Button>
-                            <Button 
-                                size="small" 
+                            <Button
+                                size="small"
                                 danger
                                 icon={<X size={14} />}
                                 onClick={() => updateStatus(record._id, "rejected")}
@@ -143,10 +143,10 @@ export default function AdminC2CProductsPage() {
                         </>
                     )}
                     {record.status === "rejected" && (
-                        <Button 
-                            size="small" 
-                            type="primary" 
-                            className="bg-green-600 hover:bg-green-700" 
+                        <Button
+                            size="small"
+                            type="primary"
+                            className="bg-green-600 hover:bg-green-700"
                             icon={<Check size={14} />}
                             onClick={() => updateStatus(record._id, "active")}
                         >
@@ -161,21 +161,21 @@ export default function AdminC2CProductsPage() {
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Duyệt tin chợ C2C</h2>
+                <h2 className="text-2xl font-bold">Duyệt đăng bán sản phẩm</h2>
             </div>
-            
-            <Tabs 
-                activeKey={statusFilter} 
+
+            <Tabs
+                activeKey={statusFilter}
                 onChange={(k) => setStatusFilter(k)}
                 items={[
                     { key: 'pending', label: 'Chờ duyệt' },
                     { key: 'active', label: 'Đang hiển thị' },
                     { key: 'rejected', label: 'Bị từ chối' },
                     { key: 'all', label: 'Tất cả' }
-                ]} 
+                ]}
             />
 
-            <Table 
+            <Table
                 columns={columns}
                 dataSource={products}
                 rowKey="_id"
@@ -208,7 +208,7 @@ export default function AdminC2CProductsPage() {
                                 <p><strong>Trạng thái:</strong> {selectedProduct.status}</p>
                             </div>
                         </div>
-                        
+
                         {selectedProduct.images?.length > 0 && (
                             <div>
                                 <p><strong>Hình ảnh:</strong></p>
@@ -223,16 +223,16 @@ export default function AdminC2CProductsPage() {
                         {selectedProduct.description && (
                             <div>
                                 <p><strong>Mô tả:</strong></p>
-                                <div 
+                                <div
                                     className="p-4 bg-gray-50 rounded border mt-2 max-h-64 overflow-y-auto"
-                                    dangerouslySetInnerHTML={{ __html: selectedProduct.description }} 
+                                    dangerouslySetInnerHTML={{ __html: selectedProduct.description }}
                                 />
                             </div>
                         )}
-                        
+
                         {selectedProduct.status === "pending" && (
                             <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-                                <Button 
+                                <Button
                                     danger
                                     onClick={() => {
                                         updateStatus(selectedProduct._id, "rejected")
@@ -241,9 +241,9 @@ export default function AdminC2CProductsPage() {
                                 >
                                     Từ chối
                                 </Button>
-                                <Button 
-                                    type="primary" 
-                                    className="bg-green-600 hover:bg-green-700" 
+                                <Button
+                                    type="primary"
+                                    className="bg-green-600 hover:bg-green-700"
                                     onClick={() => {
                                         updateStatus(selectedProduct._id, "active")
                                         setSelectedProduct(null)

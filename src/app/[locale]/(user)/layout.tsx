@@ -40,7 +40,7 @@ export default async function RootLayout({
         >
             <main className="min-h-screen w-full">
                 <Header config={config.data} categories={categories.data} />
-                <div className="min-h-[calc(100vh-403px)] lg:max-w-[1140px] max-w-full lg:mt-[174px] mt-[60px] mx-auto lg:py-5">
+                <div className="min-h-[calc(100vh-403px)] lg:max-w-[1140px] max-w-full lg:mt-[149px] mt-[60px] mx-auto lg:py-5">
                     {children}
                 </div>
                 <Footer config={config.data} categories={categories.data} />

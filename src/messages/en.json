@@ -259,7 +259,7 @@
         "uploadingImages": "Uploading images...",
         "uploadImagesSuccess": "Images uploaded successfully",
         "uploadImageError": "Error uploading images",
-        "postAdSuccess": "Ad posted successfully!",
+        "postAdSuccess": "Ad posted successfully, your post will be approved soon",
         "errorOccurred": "An error occurred",
         "postProductAd": "Post a Product for Sale",
         "title": "Title",
@@ -288,6 +288,10 @@
         "edit": "Edit",
         "editAd": "Edit Ad",
         "editAdSuccess": "Ad updated successfully!",
-        "fetchError": "Error fetching data"
+        "fetchError": "Error fetching data",
+        "sortNewest": "Posts: newst",
+        "sortOldest": "Posts: oldest",
+        "sortPriceAsc": "Price: low to high",
+        "sortPriceDesc": "Price: high to low"
     }
 }

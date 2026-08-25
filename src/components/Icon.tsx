@@ -22,7 +22,6 @@ export function Icon({
             height={size}
             alt={alt || src}
             className={`object-contain ${className}`}
-            style={{ width: "auto", height: "auto" }}
             {...divProps}
         />
     )

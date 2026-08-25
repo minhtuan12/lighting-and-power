@@ -181,9 +181,10 @@ interface IProps {
     onChange?: (value: string) => void
     placeholder?: string
     setUploading?: (loading: boolean) => void
+    className?: string;
 }
 
-export function SimpleEditor({ value, onChange, placeholder, setUploading, }: IProps) {
+export function SimpleEditor({ value, onChange, placeholder, setUploading, className }: IProps) {
     const isMobile = useIsBreakpoint()
     const { height } = useWindowSize()
     const [mobileView, setMobileView] = useState<
@@ -287,7 +288,7 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, }: IP
                 <EditorContent
                     editor={editor}
                     role="presentation"
-                    className="simple-editor-content"
+                    className={`simple-editor-content ${className}`}
                     placeholder={placeholder ?? ""}
                 />
             </EditorContext.Provider>

@@ -3,9 +3,11 @@
 import { routes } from '@/constants/routes'
 import { useLogout } from '@/hooks/use-me'
 import { useIsMobile, useIsTablet } from '@/hooks/use-media-query'
+import { authModalTabAtom, loginModalAtom } from '@/stores/ui'
 import { IUser } from '@/types/user'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Col, Drawer, Dropdown, Flex, Row, Space } from 'antd'
+import { useSetAtom } from 'jotai'
 import {
     BookText,
     ChevronDown,
@@ -23,8 +25,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Loading from '../Loading'
-import { useSetAtom } from 'jotai'
-import { loginModalAtom, authModalTabAtom } from '@/stores/ui'
 
 interface IProps {
     user?: IUser
@@ -64,7 +64,7 @@ export default function UserMenu({ user }: IProps) {
                     key: routes.trangCaNhan.url,
                     label: (
                         <Link
-                            href={routes.trangCaNhan.url}
+                            href={`${process.env.NEXT_PUBLIC_API_URL}/${routes.trangCaNhan.url}`}
                             className={`gap-1 !text-black ${styles.fontSize}`}
                         >
                             <Space className="pl-4 w-full py-3">

@@ -45,7 +45,7 @@ export const routes = {
         key: "comments",
     },
     c2cAdmin: {
-        title: "Duyệt tin chợ C2C",
+        title: "Duyệt đăng bán sản phẩm",
         url: "/admin/config/c2c-products",
         key: "c2c-products",
     },

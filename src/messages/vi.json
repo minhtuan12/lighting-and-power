@@ -260,7 +260,7 @@
         "uploadingImages": "Đang tải ảnh lên...",
         "uploadImagesSuccess": "Tải ảnh xong",
         "uploadImageError": "Lỗi upload ảnh",
-        "postAdSuccess": "Đăng tin thành công!",
+        "postAdSuccess": "Đăng tin thành công, tin của bạn sẽ được duyệt trong thời gian sớm nhất",
         "errorOccurred": "Có lỗi xảy ra",
         "postProductAd": "Đăng bán sản phẩm",
         "title": "Tiêu đề",
@@ -289,6 +289,10 @@
         "edit": "Sửa",
         "editAd": "Sửa tin",
         "editAdSuccess": "Cập nhật tin thành công!",
-        "fetchError": "Lỗi khi tải dữ liệu"
+        "fetchError": "Lỗi khi tải dữ liệu",
+        "sortNewest": "Bài đăng mới nhất",
+        "sortOldest": "Bài đăng cũ nhất",
+        "sortPriceAsc": "Giá tăng dần",
+        "sortPriceDesc": "Giá giảm dần"
     }
 }

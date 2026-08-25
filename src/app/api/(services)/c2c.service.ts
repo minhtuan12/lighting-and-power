@@ -1,5 +1,4 @@
 import C2CProduct from "@/models/c2c-product"
-import User from "@/models/user"
 import mongoose from "mongoose"
 
 const sellerFields = "fullName username avatar role"
@@ -13,20 +12,27 @@ function serialize(value: any) {
     return JSON.parse(JSON.stringify(value))
 }
 
+const sortMap: Record<string, Record<string, 1 | -1>> = {
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    price_asc: { price: 1 },
+    price_desc: { price: -1 },
+}
+
 export const C2CService = {
-    async listProducts(options: { page: number; limit: number }) {
+    async listProducts(options: { page: number; limit: number; sort: string }) {
         const filter = { status: "active" }
         const skip = (options.page - 1) * options.limit
         const [products, total] = await Promise.all([
             C2CProduct.find(filter)
-                .sort({ createdAt: -1 })
+                .sort(sortMap[options.sort] || sortMap.newest)
                 .skip(skip)
                 .limit(options.limit)
                 .populate({ path: "sellerId", select: sellerFields })
                 .lean(),
             C2CProduct.countDocuments(filter),
         ])
-        
+
         const shaped = products.map((p: any) => ({ ...p, seller: p.sellerId, sellerId: undefined }))
         return { products: serialize(shaped), total, page: options.page, limit: options.limit }
     },
@@ -42,7 +48,7 @@ export const C2CService = {
                 .lean(),
             C2CProduct.countDocuments(filter),
         ])
-        
+
         return { products: serialize(products), total, page: options.page, limit: options.limit }
     },
 
@@ -58,7 +64,7 @@ export const C2CService = {
         const title = String(input.title || "").trim()
         const contactInfo = String(input.contactInfo || "").trim()
         const price = Number(input.price) || 0
-        
+
         if (!title || !contactInfo || price < 0) {
             throw new Error("Title, contact info, and valid price are required")
         }
@@ -73,7 +79,7 @@ export const C2CService = {
             contactInfo,
             status: "pending"
         })
-        
+
         return this.getProduct(created._id.toString())
     },
 
