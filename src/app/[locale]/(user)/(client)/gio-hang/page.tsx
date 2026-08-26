@@ -8,7 +8,13 @@ import Loading from '@/components/Loading'
 import useDebounce from '@/hooks/use-debounce'
 import { useCart } from '@/hooks/user/use-cart'
 import { useClientProducts } from '@/hooks/user/use-client-product'
-import { addToCartAtom, checkedOutItemsAtom } from '@/stores'
+import {
+    addToCartAtom,
+    checkedOutItemsAtom,
+    cartItemsAtom,
+    removeFromCartAtom,
+    updateCartQuantityAtom,
+} from '@/stores'
 import { ICartItem } from '@/types/cart'
 import { IProduct } from '@/types/product'
 import {
@@ -126,6 +132,9 @@ export default function () {
     const [selectedQty, setSelectedQty] = useState(null)
 
     const addToCart = useSetAtom(addToCartAtom)
+    const setCartItems = useSetAtom(cartItemsAtom)
+    const removeFromCart = useSetAtom(removeFromCartAtom)
+    const updateCartQuantity = useSetAtom(updateCartQuantityAtom)
     const setCheckedOutItems = useSetAtom(checkedOutItemsAtom)
     const { isLoading: loadingSearchProducts, products } = useClientProducts(
         {
@@ -184,10 +193,11 @@ export default function () {
         if (item._id) {
             updateItem({ itemId: item._id, data: { quantity: nextQty } })
         }
+        updateCartQuantity({ productId: item.productId, quantity: nextQty })
     }
 
     const handleRemoveItem = (productId: string) =>
-        setItems((prev) => prev.filter((i) => i.productId !== productId))
+        (setItems((prev) => prev.filter((i) => i.productId !== productId)), removeFromCart(productId))
 
     const clearAll = () =>
         setItems((prev) => prev.map((i) => ({ ...i, checked: false })))
@@ -225,6 +235,7 @@ export default function () {
     }, [selectedProduct, selectedQty, addToCart])
 
     useEffect(() => {
+        if (cart?.items) setCartItems(cart.items)
         setItems((prev) => {
             const previousChecked = new Map(
                 prev.map((item) => [item.productId, item.checked]),
@@ -234,7 +245,7 @@ export default function () {
                 checked: previousChecked.get(item.productId) ?? false,
             }))
         })
-    }, [cart])
+    }, [cart, setCartItems])
 
     return (
         <Suspense fallback={<Loading />}>
@@ -651,9 +662,7 @@ export default function () {
                                                                         handleRemoveItem(
                                                                             item.productId,
                                                                         )
-                                                                        removeItem(
-                                                                            item.productId,
-                                                                        )
+                                                                        removeItem(item.productId)
                                                                     }}
                                                                     className="flex-shrink-0 mt-1"
                                                                 />

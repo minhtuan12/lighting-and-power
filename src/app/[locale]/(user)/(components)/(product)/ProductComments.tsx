@@ -1,7 +1,5 @@
 'use client'
 
-import JotaiProvider from '@/app/[locale]/(providers)/jotai-provider'
-import QueryProvider from '@/app/[locale]/(providers)/query-provider'
 import DefaultImage from '@/components/DefaultImage'
 import { COMPANY_NAME, USER_ROLE } from '@/constants/common'
 import { showMessage } from '@/hooks/use-message'
@@ -250,13 +248,9 @@ export default function ProductComments({
 	comments: IComment[]
 }) {
 	return (
-		<JotaiProvider>
-			<QueryProvider>
-				<Content
-					productId={productId}
-					comments={comments}
-				/>
-			</QueryProvider>
-		</JotaiProvider>
+		<Content
+			productId={productId}
+			comments={comments}
+		/>
 	)
 }

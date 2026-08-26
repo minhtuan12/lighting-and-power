@@ -149,7 +149,7 @@
         "checkout": "Tiếp tục",
         "selectAll": "Chọn tất cả ({count})",
         "selected": "Đã chọn ({count})",
-        "clearAll": "Xóa tất cả",
+        "clearAll": "Bỏ chọn tất cả",
         "empty": "Trống"
     },
     "orders": {

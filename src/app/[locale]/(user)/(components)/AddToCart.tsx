@@ -8,8 +8,6 @@ import { Button, Col, Flex, InputNumber, Row } from 'antd'
 import { useSetAtom } from 'jotai'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
-import JotaiProvider from '../../(providers)/jotai-provider'
-import QueryProvider from '../../(providers)/query-provider'
 
 interface IProps {
     product: IProduct
@@ -126,16 +124,12 @@ export default function AddToCart({
     noCtaBtn = false,
 }: IProps) {
     return (
-        <JotaiProvider>
-            <QueryProvider>
-                <AddToCartContent
-                    product={product}
-                    minQuantity={minQuantity}
-                    maxQuantity={maxQuantity}
-                    size={size}
-                    noCtaBtn={noCtaBtn}
-                />
-            </QueryProvider>
-        </JotaiProvider>
+        <AddToCartContent
+            product={product}
+            minQuantity={minQuantity}
+            maxQuantity={maxQuantity}
+            size={size}
+            noCtaBtn={noCtaBtn}
+        />
     )
 }

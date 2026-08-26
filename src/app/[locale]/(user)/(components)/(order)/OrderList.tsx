@@ -1,13 +1,11 @@
 'use client'
 
-import DefaultImage from '@/components/DefaultImage'
 import Loading from '@/components/Loading'
 import { useCancelOrder, useOrders } from '@/hooks/user/use-orders'
 import { EOrderStatus, EPaymentStatus, IOrder } from '@/types/order'
 import {
     Button,
     Col,
-    Divider,
     Empty,
     Flex,
     Input,
@@ -18,7 +16,7 @@ import {
     Space,
     Table,
     Tag,
-    Typography,
+    Typography
 } from 'antd'
 import { Eye, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -317,173 +315,136 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
                 open={detailOpen}
                 onCancel={() => setDetailOpen(false)}
                 footer={null}
-                width={820}
-                title={t('detail.title')}
+                width={700}
+                title="Chi tiết đơn hàng"
             >
                 {selectedOrder && (
                     <div className="space-y-4">
-                        <Row gutter={20}>
+                        <Row gutter={24}>
+                            {/* Cột trái: thông tin khách hàng */}
                             <Col span={12}>
-                                <Title
-                                    level={5}
-                                    className="!mb-2"
-                                >
-                                    {t('detail.customer')}
+                                <Title level={5} className="!mb-3 !text-[var(--primary)]">
+                                    Thông tin khách hàng
                                 </Title>
-                                <div className="text-sm">
+
+                                <Space orientation="vertical" size={12} className="w-full text-sm">
                                     <div>
-                                        <b>{selectedOrder.customerInfo.name}</b>
+                                        <Text strong>Họ tên: </Text>
+                                        <Text>{selectedOrder.customerInfo.name}</Text>
                                     </div>
-                                    <div>{selectedOrder.customerInfo.phone}</div>
+                                    <div>
+                                        <Text strong>Số điện thoại: </Text>
+                                        <Text>{selectedOrder.customerInfo.phone}</Text>
+                                    </div>
                                     {selectedOrder.customerInfo.email && (
                                         <div>
-                                            {selectedOrder.customerInfo.email}
+                                            <Text strong>Email: </Text>
+                                            <Text>{selectedOrder.customerInfo.email}</Text>
                                         </div>
                                     )}
-                                </div>
+                                    <div>
+                                        <Text strong>Địa chỉ giao hàng: </Text>
+                                        <Text>
+                                            {[
+                                                selectedOrder.shippingAddress.address,
+                                                selectedOrder.shippingAddress.ward,
+                                                selectedOrder.shippingAddress.province,
+                                            ]
+                                                .filter(Boolean)
+                                                .join(', ')}
+                                        </Text>
+                                    </div>
+
+                                    <Flex align="center" gap={8}>
+                                        <Text strong>Trạng thái:</Text>
+                                        <Tag color={statusTagColor(selectedOrder.status)}>
+                                            {statusLabel(selectedOrder.status)}
+                                        </Tag>
+                                    </Flex>
+
+                                    <Flex align="center" gap={8}>
+                                        <Text strong>Thanh toán:</Text>
+                                        <Tag color={paymentTagColor(selectedOrder.paymentStatus)}>
+                                            {paymentLabel(selectedOrder.paymentStatus)}
+                                        </Tag>
+                                    </Flex>
+
+                                    {selectedOrder.note && (
+                                        <div>
+                                            <Text type="secondary" className="block !mb-1">
+                                                Ghi chú:
+                                            </Text>
+                                            <Text>{selectedOrder.note}</Text>
+                                        </div>
+                                    )}
+
+                                    {selectedOrder.cancelReason && (
+                                        <div>
+                                            <Text type="secondary" className="block !mb-1">
+                                                Lý do huỷ:
+                                            </Text>
+                                            <Text>{selectedOrder.cancelReason}</Text>
+                                        </div>
+                                    )}
+                                </Space>
                             </Col>
+
+                            {/* Cột phải: danh sách sản phẩm */}
                             <Col span={12}>
-                                <Title
-                                    level={5}
-                                    className="!mb-2"
-                                >
-                                    {t('detail.shipping')}
+                                <Title level={5} className="!mb-3 !text-[var(--primary)]">
+                                    Sản phẩm
                                 </Title>
-                                <div className="text-sm">
-                                    {[
-                                        selectedOrder.shippingAddress.address,
-                                        selectedOrder.shippingAddress.ward,
-                                        selectedOrder.shippingAddress.province,
-                                    ]
-                                        .filter(Boolean)
-                                        .join(', ')}
-                                </div>
-                            </Col>
-                        </Row>
 
-                        <Row gutter={20}>
-                            <Col span={12}>
-                                <Text type="secondary">{t('table.status')}</Text>
-                                <div className="mt-1">
-                                    <Tag color={statusTagColor(selectedOrder.status)}>
-                                        {t(`status.${selectedOrder.status}`)}
-                                    </Tag>
-                                </div>
-                            </Col>
-                            <Col span={12}>
-                                <Text type="secondary">{t('table.payment')}</Text>
-                                <div className="mt-1">
-                                    <Tag
-                                        color={paymentTagColor(
-                                            selectedOrder.paymentStatus,
-                                        )}
-                                    >
-                                        {t(
-                                            `paymentStatus.${selectedOrder.paymentStatus}`,
-                                        )}
-                                    </Tag>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        {selectedOrder.note && (
-                            <>
-                                <Divider className="!my-3" />
-                                <Text type="secondary">{t('detail.note')}</Text>
-                                <div className="text-sm mt-1">
-                                    {selectedOrder.note}
-                                </div>
-                            </>
-                        )}
-
-                        {selectedOrder.cancelReason && (
-                            <>
-                                <Divider className="!my-3" />
-                                <Text type="secondary">
-                                    {t('detail.cancelReason')}
-                                </Text>
-                                <div className="text-sm mt-1">
-                                    {selectedOrder.cancelReason}
-                                </div>
-                            </>
-                        )}
-
-                        <Divider className="!my-3" />
-
-                        <Title
-                            level={5}
-                            className="!mb-2"
-                        >
-                            {t('detail.itemsTitle')}
-                        </Title>
-                        <Table
-                            size="small"
-                            rowKey={(record) =>
-                                `${record.productId}-${record.productName}`
-                            }
-                            pagination={false}
-                            dataSource={selectedOrder.items}
-                            columns={[
-                                {
-                                    title: t('table.items'),
-                                    dataIndex: 'productName',
-                                    key: 'productName',
-                                    render: (value: string, record: any) => (
+                                <Space orientation="vertical" size={12} className="w-full">
+                                    {selectedOrder.items?.map((item: any) => (
                                         <Flex
+                                            key={`${item.productId}-${item.productName}`}
                                             align="center"
-                                            gap={10}
+                                            justify="space-between"
+                                            gap={12}
+                                            className="border border-gray-200 rounded-[10px] !pr-3 overflow-hidden"
                                         >
-                                            {record.productImage ? (
-                                                <DefaultImage
-                                                    src={record.productImage}
-                                                    title={record.productName}
-                                                    className="w-10 h-10"
-                                                />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-[8px] border border-gray-200 flex items-center justify-center text-[10px] text-gray-400">
-                                                    IMG
+                                            <Flex align="center" gap={10} className="min-w-0">
+                                                {item.productImage ? (
+                                                    <img
+                                                        src={item.productImage}
+                                                        title={item.productName}
+                                                        className="w-14 h-14 rounded-l-[10px] !rounded-r-none border-none"
+                                                    />
+                                                ) : (
+                                                    <div className="w-14 h-14 rounded-l-[10px] bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">
+                                                        IMG
+                                                    </div>
+                                                )}
+                                                <div className="min-w-0">
+                                                    <div className="text-sm font-semibold line-clamp-1">
+                                                        {item.productName}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        SL: {item.quantity}
+                                                    </div>
                                                 </div>
-                                            )}
-                                            <span className="text-sm">
-                                                {value}
-                                            </span>
+                                            </Flex>
+                                            <Text className="font-semibold whitespace-nowrap">
+                                                {formatCurrency(item.subtotal ?? item.price)}
+                                            </Text>
                                         </Flex>
-                                    ),
-                                },
-                                {
-                                    title: t('detail.quantity'),
-                                    dataIndex: 'quantity',
-                                    key: 'quantity',
-                                    width: 90,
-                                },
-                                {
-                                    title: t('detail.price'),
-                                    dataIndex: 'price',
-                                    key: 'price',
-                                    width: 120,
-                                    render: (value: number) =>
-                                        formatCurrency(value),
-                                },
-                                {
-                                    title: t('detail.subtotal'),
-                                    dataIndex: 'subtotal',
-                                    key: 'subtotal',
-                                    width: 120,
-                                    render: (value: number) =>
-                                        formatCurrency(value),
-                                },
-                            ]}
-                        />
+                                    ))}
+                                </Space>
 
-                        <Flex
-                            justify="space-between"
-                            className="!mt-4 border-t pt-4"
-                        >
-                            <Text type="secondary">{t('table.total')}</Text>
-                            <Text className="font-semibold text-[var(--primary)]">
-                                {formatCurrency(selectedOrder.total)}
-                            </Text>
-                        </Flex>
+                                <Flex
+                                    justify="end"
+                                    align="center"
+                                    gap={8}
+                                    className="!mt-4 pt-3"
+                                >
+                                    <Text type="secondary" className='!text-gray-600'>Tổng cộng:</Text>
+                                    <Text className="font-semibold text-[var(--primary)]">
+                                        {formatCurrency(selectedOrder.total)}
+                                    </Text>
+                                </Flex>
+                            </Col>
+                        </Row>
                     </div>
                 )}
             </Modal>
@@ -540,5 +501,41 @@ function paymentTagColor(status: EPaymentStatus) {
             return 'volcano'
         default:
             return 'default'
+    }
+}
+
+function statusLabel(status: EOrderStatus) {
+    switch (status) {
+        case EOrderStatus.pending:
+            return 'Chờ xác nhận'
+        case EOrderStatus.confirmed:
+            return 'Đã xác nhận'
+        case EOrderStatus.processing:
+            return 'Đang xử lý'
+        case EOrderStatus.shipping:
+            return 'Đang giao'
+        case EOrderStatus.delivered:
+            return 'Đã giao'
+        case EOrderStatus.cancelled:
+            return 'Đã huỷ'
+        case EOrderStatus.refunded:
+            return 'Đã hoàn tiền'
+        default:
+            return status
+    }
+}
+
+function paymentLabel(status: EPaymentStatus) {
+    switch (status) {
+        case EPaymentStatus.pending:
+            return 'Chờ thanh toán'
+        case EPaymentStatus.paid:
+            return 'Đã thanh toán'
+        case EPaymentStatus.failed:
+            return 'Thất bại'
+        case EPaymentStatus.refunded:
+            return 'Đã hoàn tiền'
+        default:
+            return status
     }
 }

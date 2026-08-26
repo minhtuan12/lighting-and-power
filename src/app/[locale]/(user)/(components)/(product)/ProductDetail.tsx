@@ -5,9 +5,11 @@ import { getProductDetail } from '@/fetch-data/products'
 import { IProduct } from '@/types/product'
 import { Col, Flex, Row, Table } from 'antd'
 import { getTranslations } from 'next-intl/server'
+import AddToCart from '../AddToCart'
 import AddToFavourite from '../AddToFavourite'
 import ProductComments from './ProductComments'
 import RelatedProducts from './RelatedProducts'
+import ZoomImage from './ZoomImage'
 
 export default async function ProductDetail({
     slug,
@@ -83,12 +85,12 @@ export default async function ProductDetail({
                             color="orange"
                             placement="start"
                         >
-                            <DefaultImage
+                            <ZoomImage
                                 src={product.images[0]}
                                 title={`${product.name}-${slug ?? id}`}
-                                className="w-full h-[265px] border-none"
+                                className="w-full h-[265px] !border-none object-cover"
                             />
-                            <div className="absolute top-0 right-0 z-10 bg-gray-600 rounded-bl-[6px] p-1.5">
+                            <div className="absolute top-0 right-0 z-10 bg-gray-600 rounded-bl-[6px] rounded-tr-[6px] p-1.5">
                                 <AddToFavourite product={product} />
                             </div>
                         </BadgeRibbon>
@@ -158,7 +160,7 @@ export default async function ProductDetail({
                                 )
                             })}
                         </Flex>
-                        <Row gutter={40}>
+                        <Row>
                             <Col span={12}>
                                 <Flex
                                     vertical
@@ -189,6 +191,12 @@ export default async function ProductDetail({
                                         </span>
                                         <span>{t('multiple')}: 1</span>
                                     </Flex>
+                                    <AddToCart
+                                        product={product}
+                                        size="large"
+                                        minQuantity={product.minOrderQuantity}
+                                        maxQuantity={product.stock}
+                                    />
                                 </Flex>
                             </Col>
                             {product.priceTiers &&

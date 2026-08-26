@@ -78,11 +78,17 @@ const shippingResults = {
         description: '',
         icon: <CircleX color="#fe2a2a" size={18} />,
     },
+    refunded: {
+        key: EOrderStatus.refunded,
+        title: 'Hoàn tiền',
+        description: '',
+        icon: <CircleX color="#d97706" size={18} />,
+    },
 }
 
-const getStepIndex = (status?: EOrderStatus) => {
+const getStepIndex = (status: EOrderStatus | undefined, steps: typeof statusSteps) => {
     if (!status) return 0
-    const index = statusSteps.findIndex((step) => step.key === status)
+    const index = steps.findIndex((step) => step.key === status)
     return index === -1 ? 0 : index
 }
 
@@ -257,6 +263,7 @@ export default function OrderSuccessPage() {
             }
             return statusSteps;
         }
+        return statusSteps;
     }, [order]);
 
     if (loading) {
@@ -287,8 +294,8 @@ export default function OrderSuccessPage() {
                 <Divider className="!my-4" />
 
                 <Steps
-                    current={getStepIndex(order.status)}
-                    items={statusSteps.map((step) => ({
+                    current={getStepIndex(order.status, steps)}
+                    items={steps.map((step) => ({
                         title: step.title,
                         content: step.description,
                         icon: step.icon,

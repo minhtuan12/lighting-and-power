@@ -12,7 +12,7 @@ export const checkedOutItemsAtom = atomWithStorage<ICartItem[]>(
 // Cart count
 export const cartCountAtom = atom((get) => {
     const items = get(cartItemsAtom)
-    return items.length ?? 0
+    return items.length
 })
 
 // Cart total

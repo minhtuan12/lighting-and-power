@@ -6,9 +6,8 @@ import { Card, Flex } from "antd"
 import { useTranslations } from "next-intl"
 import Image from "next/image"
 import Link from "next/link"
-import JotaiProvider from "../../(providers)/jotai-provider"
-import QueryProvider from "../../(providers)/query-provider"
 import RemainingStock from "./(product)/RemainingStock"
+import AddToCart from "./AddToCart"
 import AddToFavourite from "./AddToFavourite"
 
 interface IProps {
@@ -67,6 +66,13 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                             </Flex>
                         )}
                         {item.stock && <RemainingStock stock={item.stock} />}
+                        {enableAddToCart && (
+                            <AddToCart
+                                product={item}
+                                minQuantity={item.minOrderQuantity}
+                                maxQuantity={item.stock}
+                            />
+                        )}
                     </Flex>
                 </Flex>
             </Flex>
@@ -91,9 +97,7 @@ export default function ProductItem({
         <ItemContent item={item} className={className} enableAddToCart />
     </Link>
 
-    return <JotaiProvider>
-        <QueryProvider>
-            {content}
-        </QueryProvider>
-    </JotaiProvider>
+    return <>
+        {content}
+    </>
 }

@@ -1,7 +1,5 @@
 'use client'
 
-import JotaiProvider from "@/app/[locale]/(providers)/jotai-provider"
-import QueryProvider from "@/app/[locale]/(providers)/query-provider"
 import { showMessage } from "@/hooks/use-message"
 import { useContact } from "@/hooks/user/use-contact"
 import { Button, Col, Divider, Flex, Form, Input, Row } from "antd"
@@ -160,9 +158,5 @@ function ContactFormContent() {
 }
 
 export default function ContactForm() {
-	return <JotaiProvider>
-		<QueryProvider>
-			<ContactFormContent />
-		</QueryProvider>
-	</JotaiProvider>
+	return <ContactFormContent />
 }

@@ -147,7 +147,7 @@
         "total": "Total",
         "checkout": "Process to Checkout",
         "selectAll": "Select All ({count})",
-        "clearAll": "Clear All",
+        "clearAll": "Clear All Selected",
         "selected": "Selected Items ({count})",
         "empty": "Empty"
     },

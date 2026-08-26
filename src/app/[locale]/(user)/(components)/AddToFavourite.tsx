@@ -1,15 +1,12 @@
 'use client'
 import { useAuth } from '@/hooks/use-me'
 import { useFavourites } from '@/hooks/user/use-favourites'
+import { loginModalAtom } from '@/stores/ui'
 import { IProduct } from '@/types/product'
 import { Tooltip } from 'antd'
+import { useSetAtom } from 'jotai'
 import { Heart } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import JotaiProvider from '../../(providers)/jotai-provider'
-import QueryProvider from '../../(providers)/query-provider'
-import { useSetAtom } from 'jotai'
-import { loginModalAtom } from '@/stores/ui'
 
 function AddToFavouriteContent({
     product,
@@ -49,9 +46,5 @@ export default function AddToFavourite({
     product: IProduct
     size?: 'small' | 'large'
 }) {
-    return <JotaiProvider>
-        <QueryProvider>
-            <AddToFavouriteContent product={product} size={size} />
-        </QueryProvider>
-    </JotaiProvider>
+    return <AddToFavouriteContent product={product} size={size} />
 }

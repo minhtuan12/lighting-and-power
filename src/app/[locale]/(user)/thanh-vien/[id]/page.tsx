@@ -1,14 +1,13 @@
 'use client'
 
-import JotaiProvider from '@/app/[locale]/(providers)/jotai-provider'
-import QueryProvider from '@/app/[locale]/(providers)/query-provider'
 import RichTextContent from '@/components/RichTextContent'
 import { useAuth } from '@/hooks/use-me'
+import { getSocket } from '@/lib/socket-client'
 import { Avatar, Button, Flex, Skeleton, Tag, Typography } from 'antd'
 import {
     ArrowLeft,
-    MessageCircle,
     Mail,
+    MessageCircle,
     Phone,
     UserPlus,
     UserRound,
@@ -16,7 +15,6 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { getSocket } from '@/lib/socket-client'
 
 const api = async (url: string, options?: RequestInit) => {
     const response = await fetch(url, {
@@ -82,8 +80,8 @@ function MemberProfileContent({ params }: { params: Promise<{ id: string }> }) {
             : isIncomingRequest
                 ? t('accept')
                 : relation?.status === 'pending'
-                ? t('pending')
-                : t('addFriend')
+                    ? t('pending')
+                    : t('addFriend')
     const friend = async () => {
         if (!user || isSelf) return
         setBusy(true)
@@ -226,10 +224,6 @@ export default function MemberProfile({
     params: Promise<{ id: string }>
 }) {
     return (
-        <JotaiProvider>
-            <QueryProvider>
-                <MemberProfileContent params={params} />
-            </QueryProvider>
-        </JotaiProvider>
+        <MemberProfileContent params={params} />
     )
 }

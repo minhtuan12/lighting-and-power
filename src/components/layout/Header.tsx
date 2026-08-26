@@ -7,6 +7,7 @@ import { ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import Cart from '../Cart'
 import { Icon } from '../Icon'
 import C2CToggle from './C2CToggle'
 import HeaderAuthButtons from './HeaderAuthButtons'
@@ -187,12 +188,12 @@ export default async function Header({
                                 loginText={t(routes.dangNhap.key).toUpperCase()}
                             />
                         )}
-                        {/* <Link
+                        <Link
                             href={routes.gioHang.url}
-                            className="flex items-center gap-2"
+                            className="flex items-center -mr-5"
                         >
                             <Cart />
-                        </Link> */}
+                        </Link>
                         {success && data && (
                             <Flex
                                 align="center"

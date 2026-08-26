@@ -11,8 +11,9 @@ import { getProvinces } from "@/lib/utils"
 import { checkedOutItemsAtom } from "@/stores"
 import { ICartItem } from "@/types/cart"
 import { Province, Ward } from "@/types/general"
-import { Button, Card, Checkbox, Col, Divider, Form, Radio, Row, Typography } from "antd"
+import { Button, Card, Col, Divider, Form, Radio, Row, Typography } from "antd"
 import { useAtom } from "jotai"
+import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -40,6 +41,7 @@ export default function OrderCheckoutPage() {
     const router = useRouter()
     const { user, isAuthenticated, isLoading: loadingAuth } = useAuth()
     const [checkedOutItems, setCheckedOutItems] = useAtom(checkedOutItemsAtom)
+    const queryClient = useQueryClient()
     const [form] = Form.useForm()
     const [useVoucher, setUseVoucher] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -96,6 +98,17 @@ export default function OrderCheckoutPage() {
     }, [wardOptions, selectedWard])
     const discount = useVoucher ? Math.min(50000, subtotal) : 0
     const total = Math.max(subtotal + shippingFee - discount, 0)
+
+    const [debouncedAddress, setDebouncedAddress] = useState("")
+
+    // 2. Effect debounce riêng cho address
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedAddress((address || "").trim())
+        }, 1000) // 1s
+
+        return () => clearTimeout(handler)
+    }, [address])
 
     useEffect(() => {
         setIsHydrated(true)
@@ -178,7 +191,7 @@ export default function OrderCheckoutPage() {
         const province = selectedCityName.trim()
         const district = selectedWardName.trim()
         const ward = selectedWardName.trim()
-        const detailAddress = (address || "").trim()
+        const detailAddress = debouncedAddress
 
         if (!province || !district || !ward || !detailAddress || subtotal <= 0) {
             setShippingFee(0)
@@ -222,7 +235,7 @@ export default function OrderCheckoutPage() {
         isHydrated,
         selectedCityName,
         selectedWardName,
-        address,
+        debouncedAddress,
         subtotal,
     ])
 
@@ -255,6 +268,7 @@ export default function OrderCheckoutPage() {
 
             const createdOrderId =
                 result?.data?._id || result?.data?.id || ""
+            await queryClient.invalidateQueries({ queryKey: ["orders"] })
             showMessage.success("Đặt hàng thành công.")
             if (createdOrderId) {
                 router.push(`/dat-hang/thanh-cong?orderId=${createdOrderId}`)
@@ -416,7 +430,7 @@ export default function OrderCheckoutPage() {
                                         : formatPrice(shippingFee)}
                                 </Text>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
+                            {/* <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
                                 <Checkbox
                                     checked={useVoucher}
                                     onChange={(e) =>
@@ -428,7 +442,7 @@ export default function OrderCheckoutPage() {
                                 <Text className="text-red-500">
                                     -{formatPrice(discount)}
                                 </Text>
-                            </div>
+                            </div> */}
                             <div className="flex items-center justify-between px-4 py-2">
                                 <Text strong>Tổng tiền</Text>
                                 <Text strong className="text-red-600 text-lg">
@@ -472,8 +486,8 @@ export default function OrderCheckoutPage() {
                             block
                             className="!h-[44px]"
                             htmlType="submit"
-                            loading={isSubmitting}
-                            disabled={items.length === 0}
+                            loading={isSubmitting || isShippingFeeLoading}
+                            disabled={items.length === 0 || isShippingFeeLoading || isSubmitting}
                         >
                             Mua hàng
                         </Button>

@@ -65,11 +65,11 @@ export default function MessengerPageView() {
 				<Icon
 					src="/images/logo.png"
 					alt="Lighting & Power"
-					size={450}
+					size={150}
 				/>
 			</div>
 
-			<section className="grid min-h-[calc(100vh-51px)] w-full grid-cols-[280px_minmax(0,1fr)] overflow-hidden border border-[#d9e2e8] bg-white">
+			<section className="grid min-h-[calc(100vh-53px)] w-full grid-cols-[280px_minmax(0,1fr)] overflow-hidden border border-[#d9e2e8] bg-white">
 				{/* Left: conversation list */}
 				<div className="flex min-h-0 flex-col border-r border-[#e2e7eb] bg-[#f8fafb] user-none">
 					<div className="flex items-center justify-between px-4 py-4">

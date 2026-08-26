@@ -61,7 +61,7 @@ export class CartService {
             data.quantity < product.minOrderQuantity
         ) {
             throw new Error(
-                `Minimum order quantity is ${product.minOrderQuantity}`,
+                `Số lượng tối thiểu là ${product.minOrderQuantity}`,
             )
         }
 
@@ -148,7 +148,7 @@ export class CartService {
         // Check min order quantity
         if (product.minOrderQuantity && quantity < product.minOrderQuantity) {
             throw new Error(
-                `Minimum order quantity is ${product.minOrderQuantity}`,
+                `Số lượng tối thiểu là ${product.minOrderQuantity}`,
             )
         }
 

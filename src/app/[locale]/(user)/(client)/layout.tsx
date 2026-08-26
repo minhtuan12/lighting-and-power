@@ -1,6 +1,5 @@
 "use client"
 
-import JotaiProvider from "@/app/[locale]/(providers)/jotai-provider"
 import QueryProvider from "@/app/[locale]/(providers)/query-provider"
 import { safeLocalStorage } from "@/lib/utils"
 import { use, useEffect } from "react"
@@ -20,8 +19,6 @@ export default function ClientLayout({
     }, [])
 
     return (
-        <JotaiProvider>
-            <QueryProvider>{children}</QueryProvider>
-        </JotaiProvider>
+        <QueryProvider>{children}</QueryProvider>
     )
 }

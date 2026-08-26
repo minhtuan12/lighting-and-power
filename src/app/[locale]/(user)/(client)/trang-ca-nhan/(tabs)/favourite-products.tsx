@@ -27,12 +27,17 @@ export default function FavouriteProductsTab() {
     })
 
     if (isFavouritesLoading || isProductsLoading) return <Loading />
-    if (!products.length) return <Empty description={t('noFavourites')} />
+    if (!products.length)
+        return (
+            <Empty
+                className="!h-full flex items-center flex-col gap-2 justify-center !my-0"
+                image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                description={t('noFavourites')}
+            />
+        )
 
     return (
-        <Row
-            gutter={16}
-        >
+        <Row gutter={16}>
             {products.map((product) => (
                 <Col
                     key={product._id}
@@ -42,7 +47,10 @@ export default function FavouriteProductsTab() {
                     md={8}
                     lg={6}
                 >
-                    <ProductItem item={product} enableAddToCart />
+                    <ProductItem
+                        item={product}
+                        enableAddToCart
+                    />
                 </Col>
             ))}
         </Row>
