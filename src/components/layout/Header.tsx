@@ -188,17 +188,19 @@ export default async function Header({
                                 loginText={t(routes.dangNhap.key).toUpperCase()}
                             />
                         )}
-                        <Link
-                            href={routes.gioHang.url}
-                            className="flex items-center -mr-5"
-                        >
-                            <Cart />
-                        </Link>
                         {success && data && (
                             <Flex
                                 align="center"
                                 gap={12}
                             >
+                                {!isC2C &&
+                                    <Link
+                                        href={routes.gioHang.url}
+                                        className="flex items-center mr-5"
+                                    >
+                                        <Cart />
+                                    </Link>
+                                }
                                 <NotificationBell />
                                 <UserMenu user={data} />
                             </Flex>
