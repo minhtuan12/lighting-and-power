@@ -2,8 +2,11 @@
 
 import RichTextContent from '@/components/RichTextContent'
 import { useMe } from '@/hooks/use-me'
+import { showMessage } from '@/hooks/use-message'
+import { loginModalAtom } from '@/stores'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Skeleton, Tag } from 'antd'
+import { Avatar, Button, Skeleton, Tag } from 'antd'
+import { useSetAtom } from 'jotai'
 import { Clock, MessageCircle, Phone, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -62,7 +65,10 @@ export default function ProductDetailPage() {
     const [activeImage, setActiveImage] = useState(0)
     const zoomImageRef = useRef<HTMLImageElement>(null)
     const { user } = useMe()
-    const router = useRouter();
+    const setLoginOpen = useSetAtom(loginModalAtom)
+    const router = useRouter()
+    const [interestLoading, setInterestLoading] = useState(false)
+    const [interestStatus, setInterestStatus] = useState<string | null>(null)
 
     const handleZoomMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const img = zoomImageRef.current
@@ -90,11 +96,51 @@ export default function ProductDetailPage() {
             .finally(() => setLoading(false))
     }, [id])
 
+    useEffect(() => {
+        if (!id || !user?._id) {
+            setInterestStatus(null)
+            return
+        }
+        fetch(`/api/c2c/interests?productId=${id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) setInterestStatus(data.data?.status || null)
+            })
+    }, [id, user?._id])
+
     const openChatWithSeller = () => {
+        if (!user) {
+            setLoginOpen(true)
+            return
+        }
         if (!product?.seller) return
         window.dispatchEvent(
             new CustomEvent('messenger:open', { detail: product.seller }),
         )
+    }
+
+    const registerInterest = async () => {
+        if (!user) {
+            setLoginOpen(true)
+            return
+        }
+        setInterestLoading(true)
+        try {
+            const res = await fetch('/api/c2c/interests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: id }),
+            })
+            const data = await res.json()
+            if (data.success) setInterestStatus('pending')
+            data.success
+                ? showMessage.success(
+                    'Đã đăng ký mua, hãy chờ người bán xác nhận',
+                )
+                : showMessage.error(data.message)
+        } finally {
+            setInterestLoading(false)
+        }
     }
 
     if (loading) return <DetailSkeleton />
@@ -107,7 +153,11 @@ export default function ProductDetailPage() {
 
     const cond = conditionStyle[product.condition] || conditionStyle.used
     const images: string[] = product.images?.length ? product.images : []
-    const isOwner = Boolean(user?._id && product.seller?._id && String(user._id) === String(product.seller._id))
+    const isOwner = Boolean(
+        user?._id &&
+        product.seller?._id &&
+        String(user._id) === String(product.seller._id),
+    )
 
     return (
         <div className="mx-auto max-w-6xl px-16 pb-6">
@@ -121,7 +171,7 @@ export default function ProductDetailPage() {
             <div className="flex flex-col gap-6 md:flex-row">
                 {/* Left: gallery + info */}
                 <div className="min-w-0 flex-1">
-                    <div className='grid grid-cols-6 gap-5 w-full'>
+                    <div className="grid grid-cols-6 gap-5 w-full">
                         <div
                             className="group col-span-5 relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-[#e2e7eb] bg-[#f8fafb] md:aspect-auto"
                             onMouseMove={handleZoomMove}
@@ -134,11 +184,14 @@ export default function ProductDetailPage() {
                                     className="h-full w-full object-cover transition-transform duration-150 ease-out group-hover:scale-[2.2]"
                                 />
                             ) : (
-                                <span className="text-sm text-gray-400 h-[300px] flex items-center justify-center">Không có ảnh</span>
+                                <span className="text-sm text-gray-400 h-[300px] flex items-center justify-center">
+                                    Không có ảnh
+                                </span>
                             )}
                             {product.status && product.status !== 'active' && (
                                 <span className="absolute left-2.5 top-2.5 rounded-md bg-[#f4511e] px-2.5 py-1 text-[11px] font-semibold text-white">
-                                    {statusLabel[product.status] || product.status}
+                                    {statusLabel[product.status] ||
+                                        product.status}
                                 </span>
                             )}
                         </div>
@@ -180,7 +233,8 @@ export default function ProductDetailPage() {
                                     color: cond.text,
                                 }}
                             >
-                                Tình trạng: {conditionLabel[product.condition] ||
+                                Tình trạng:{' '}
+                                {conditionLabel[product.condition] ||
                                     conditionLabel.used}
                             </span>
                             <span className="flex items-center gap-1 text-xs text-gray-500">
@@ -217,7 +271,7 @@ export default function ProductDetailPage() {
                                 icon={<UserOutlined />}
                                 className="!shrink-0 !rounded-full overflow-hidden"
                             />
-                            <div className='flex items-center justify-between w-full'>
+                            <div className="flex items-center justify-between w-full">
                                 <div className="min-w-0">
                                     <div className="flex min-w-0 items-center gap-2 text-[13.5px] font-semibold text-[#082c40]">
                                         {product.seller?.fullName}
@@ -226,12 +280,26 @@ export default function ProductDetailPage() {
                                         Thành viên
                                     </div>
                                 </div>
-                                {isOwner && <Tag color="orange" variant='outlined' className="mr-0">Bạn</Tag>}
+                                {isOwner && (
+                                    <Tag
+                                        color="orange"
+                                        variant="outlined"
+                                        className="mr-0"
+                                    >
+                                        Bạn
+                                    </Tag>
+                                )}
                             </div>
                         </div>
 
                         <button
-                            onClick={() => setShowContact(true)}
+                            onClick={() => {
+                                if (!user) {
+                                    setLoginOpen(true)
+                                    return
+                                }
+                                setShowContact(true)
+                            }}
                             className="mb-2 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#f4511e] text-[13px] font-semibold text-white hover:opacity-90"
                         >
                             <Phone size={15} />
@@ -239,6 +307,23 @@ export default function ProductDetailPage() {
                                 ? product.contactInfo
                                 : 'Bấm để xem SĐT'}
                         </button>
+                        {!isOwner && (
+                            <Button
+                                loading={interestLoading}
+                                disabled={
+                                    interestStatus === 'pending' ||
+                                    interestStatus === 'confirmed'
+                                }
+                                onClick={registerInterest}
+                                className="!mb-2 !h-auto !min-h-10 !w-full !rounded-full !border-none !bg-[#2878d7] !px-3 !py-2 !font-semibold !leading-5 !text-white !whitespace-normal disabled:!bg-[#11335b] disabled:!text-gray-300"
+                            >
+                                {interestStatus == 'pending'
+                                    ? 'Đã đăng ký'
+                                    : interestStatus === 'confirmed'
+                                        ? 'Đã được xác nhận'
+                                        : 'Đăng ký mua'}
+                            </Button>
+                        )}
                         <button
                             onClick={openChatWithSeller}
                             disabled={isOwner}

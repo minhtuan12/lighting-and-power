@@ -1,8 +1,11 @@
 'use client'
 
 import { Icon } from '@/components/Icon'
+import { useMe } from '@/hooks/use-me'
+import { loginModalAtom } from '@/stores'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Col, Dropdown, Row, Skeleton } from 'antd'
+import { useSetAtom } from 'jotai'
 import {
     ArrowUpDown,
     Check,
@@ -128,6 +131,8 @@ function SortControl({
 
 export default function C2CFeedPage() {
     const t = useTranslations('c2c')
+    const { user } = useMe()
+    const setLoginOpen = useSetAtom(loginModalAtom)
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [sort, setSort] = useState('newest')
@@ -162,7 +167,13 @@ export default function C2CFeedPage() {
                     />
                     <Button
                         type="primary"
-                        onClick={() => setSellModalOpen(true)}
+                        onClick={() => {
+                            if (!user) {
+                                setLoginOpen(true)
+                                return
+                            }
+                            setSellModalOpen(true)
+                        }}
                         className='!rounded-full !h-[40px]'
                     >
                         <Plus size={18} />

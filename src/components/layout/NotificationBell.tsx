@@ -99,7 +99,7 @@ export default function NotificationBell() {
                                 <button
                                     key={item._id}
                                     onClick={() => click(item)}
-                                    className={`flex w-full gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-[#f7f8fc] ${item.readAt ? 'bg-white' : 'bg-[#eef2ff]'}`}
+                                    className={`cursor-pointer flex w-full gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-[#f7f8fc] ${item.readAt ? 'bg-white' : 'bg-[#eef2ff]'}`}
                                 >
                                     <span
                                         className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${item.readAt ? 'bg-slate-200' : 'bg-[#ff5a1f]'}`}

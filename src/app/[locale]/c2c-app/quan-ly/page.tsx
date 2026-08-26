@@ -1,20 +1,23 @@
 'use client'
 
+import { showMessage } from '@/hooks/use-message'
 import {
     CheckOutlined,
     DeleteOutlined,
     EditOutlined,
     PictureOutlined,
 } from '@ant-design/icons'
-import { App, Button, Card, Popconfirm, Table, Tabs, Tag, Tooltip } from 'antd'
+import { Button, Card, Popconfirm, Table, Tabs, Tag, Tooltip } from 'antd'
+import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import NguoiDangKyPage from '../(components)/NguoiDangKyPage'
+import SanPhamXacNhanPage from '../(components)/SanPhamXacNhanPage'
 import DangBanModal from '../DangBanModal'
 
 export default function QuanLyPage() {
     const t = useTranslations('c2c')
-    const { message } = App.useApp()
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [modalOpen, setModalOpen] = useState(false)
@@ -41,11 +44,11 @@ export default function QuanLyPage() {
             })
             const data = await res.json()
             if (data.success) {
-                message.success(t('deletedSuccessfully'))
+                showMessage.success(t('deletedSuccessfully'))
                 fetchMyProducts()
             } else throw new Error(data.message)
         } catch (error: any) {
-            message.error(error.message || t('deleteError'))
+            showMessage.error(error.message || t('deleteError'))
         }
     }
 
@@ -58,11 +61,11 @@ export default function QuanLyPage() {
             })
             const data = await res.json()
             if (data.success) {
-                message.success(t('markedAsSold'))
+                showMessage.success(t('markedAsSold'))
                 fetchMyProducts()
             } else throw new Error(data.message)
         } catch (error: any) {
-            message.error(error.message || t('error'))
+            showMessage.error(error.message || t('error'))
         }
     }
 
@@ -98,6 +101,7 @@ export default function QuanLyPage() {
             title: t('postDateColumn'),
             dataIndex: 'createdAt',
             key: 'createdAt',
+            align: 'center',
             render: (val: string) => (
                 <span className="text-gray-500">
                     {new Date(val).toLocaleDateString('vi-VN')}
@@ -108,6 +112,7 @@ export default function QuanLyPage() {
             title: t('price'),
             dataIndex: 'price',
             key: 'price',
+            align: 'right',
             render: (val: number) => (
                 <span className="font-bold text-red-500">
                     {val?.toLocaleString()} đ
@@ -118,6 +123,7 @@ export default function QuanLyPage() {
             title: t('condition'),
             dataIndex: 'condition',
             key: 'condition',
+            align: 'center',
             render: (val: string) => (
                 <Tag
                     className="!rounded-full !border-0 !px-3 !py-0.5 !font-medium"
@@ -141,6 +147,7 @@ export default function QuanLyPage() {
             title: t('status'),
             dataIndex: 'status',
             key: 'status',
+            align: 'center',
             render: (val: string) => (
                 <Tag
                     className="!rounded-full !border-0 !px-3 !py-0.5 !font-medium"
@@ -171,8 +178,9 @@ export default function QuanLyPage() {
         {
             title: t('action'),
             key: 'action',
+            align: 'center',
             render: (_: any, record: any) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                     {record.status === 'active' && (
                         <>
                             <Tooltip title={t('edit')}>
@@ -229,23 +237,26 @@ export default function QuanLyPage() {
             title: t('purchaseDate'),
             dataIndex: 'date',
             key: 'date',
+            align: 'center',
         },
         {
             title: t('totalAmount'),
             dataIndex: 'total',
             key: 'total',
+            align: 'right',
         },
         {
             title: t('status'),
             dataIndex: 'status',
             key: 'status',
+            align: 'center',
         },
     ]
 
     return (
         <Card className="shadow-sm !rounded-2xl">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">{t('manageFleaMarket')}</h2>
+                <h2 className="text-xl font-bold">{t('manageFleaMarket')}</h2>
                 <Button
                     type="primary"
                     onClick={() => {
@@ -254,7 +265,7 @@ export default function QuanLyPage() {
                     }}
                     className="!bg-[var(--brand-btn-bg)] hover:!bg-[var(--brand-btn-hover)] !border-none !text-white !rounded-full !h-10 !px-5 !font-semibold transition-colors"
                 >
-                    + {t('postNewAd')}
+                    <Plus size={15} /> {t('postNewAd')}
                 </Button>
             </div>
 
@@ -267,7 +278,7 @@ export default function QuanLyPage() {
                         children: (
                             <Table
                                 className="custom-table"
-                                columns={columns}
+                                columns={columns as any}
                                 dataSource={products}
                                 rowKey="_id"
                                 loading={loading}
@@ -285,12 +296,30 @@ export default function QuanLyPage() {
                         children: (
                             <Table
                                 className="custom-table"
-                                columns={orderColumns}
+                                columns={orderColumns as any}
                                 dataSource={[]}
                                 locale={{ emptyText: t('noOrders') }}
                                 pagination={{ hideOnSinglePage: true }}
                             />
                         ),
+                    },
+                    {
+                        key: '3',
+                        label: 'Người đăng ký mua',
+                        children: (
+                            <div className="space-y-4">
+                                <NguoiDangKyPage
+                                    products={products.filter(
+                                        (p) => p.status === 'active',
+                                    )}
+                                />
+                            </div>
+                        ),
+                    },
+                    {
+                        key: '4',
+                        label: 'Sản phẩm đã được xác nhận',
+                        children: <SanPhamXacNhanPage />,
                     },
                 ]}
             />
