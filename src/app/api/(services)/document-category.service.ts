@@ -1,22 +1,23 @@
-import { SlugGenerator } from "@/lib/slug"
-import Document from "@/models/document"
-import DocumentCategory from "@/models/document-category"
-import { IDocumentCategory } from "@/types/document-category"
+import { SlugGenerator } from '@/lib/slug'
+import Document from '@/models/document'
+import DocumentCategory from '@/models/document-category'
+import { IDocumentCategory } from '@/types/document-category'
 
 export class DocumentCategoryService {
     static async create(
-        data: Omit<Partial<IDocumentCategory>, "_id">,
+        data: Omit<Partial<IDocumentCategory>, '_id'>,
     ): Promise<IDocumentCategory> {
         if (!data.name) {
-            throw new Error("Name is required")
+            throw new Error('Name is required')
         }
 
+        await DocumentCategory.updateMany({}, { $inc: { order: 1 } })
         const category = await DocumentCategory.create({
             name: data.name,
             description: data.description,
-            color: data.color || "blue",
+            color: data.color || 'blue',
             isPublished: data.isPublished ?? true,
-            order: data.order ?? 0,
+            order: 0,
             slug: await SlugGenerator.generateUniqueSlug(
                 data.name,
                 DocumentCategory,
@@ -38,8 +39,8 @@ export class DocumentCategoryService {
 
         if (filters?.search) {
             query.$or = [
-                { name: { $regex: filters.search, $options: "i" } },
-                { description: { $regex: filters.search, $options: "i" } },
+                { name: { $regex: filters.search, $options: 'i' } },
+                { description: { $regex: filters.search, $options: 'i' } },
             ]
         }
 
@@ -53,12 +54,12 @@ export class DocumentCategoryService {
         data: Partial<IDocumentCategory>,
     ): Promise<IDocumentCategory> {
         if (!data.name) {
-            throw new Error("Name is required")
+            throw new Error('Name is required')
         }
 
         const existing = await DocumentCategory.findById(id).lean()
         if (!existing) {
-            throw new Error("Category not found")
+            throw new Error('Category not found')
         }
 
         const nextSlug = await SlugGenerator.generateUniqueSlug(
@@ -78,7 +79,7 @@ export class DocumentCategoryService {
         ).lean()
 
         if (!category) {
-            throw new Error("Category not found")
+            throw new Error('Category not found')
         }
 
         if (existing.slug !== nextSlug) {
@@ -96,7 +97,7 @@ export class DocumentCategoryService {
     ): Promise<{ success: boolean; message: string }> {
         const category = await DocumentCategory.findById(id).lean()
         if (!category) {
-            throw new Error("Category not found")
+            throw new Error('Category not found')
         }
 
         const linkedDocuments = await Document.countDocuments({
@@ -104,12 +105,27 @@ export class DocumentCategoryService {
         })
 
         if (linkedDocuments > 0) {
-            throw new Error(
-                "Cannot delete category with existing sections",
-            )
+            throw new Error('Cannot delete category with existing sections')
         }
 
         await DocumentCategory.findByIdAndDelete(id)
-        return { success: true, message: "Category deleted successfully" }
+        await DocumentCategory.updateMany(
+            { order: { $gt: category.order } },
+            { $inc: { order: -1 } },
+        )
+        return { success: true, message: 'Category deleted successfully' }
+    }
+
+    static async reorder(orderedIds: string[]) {
+        if (!orderedIds.length) return { message: 'No categories to reorder' }
+        await DocumentCategory.bulkWrite(
+            orderedIds.map((id, index) => ({
+                updateOne: {
+                    filter: { _id: id },
+                    update: { $set: { order: index } },
+                },
+            })),
+        )
+        return { message: 'Categories reordered successfully' }
     }
 }

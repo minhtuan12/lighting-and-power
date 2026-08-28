@@ -57,7 +57,15 @@ import {
     Upload,
 } from 'antd'
 import { useAtom, useSetAtom } from 'jotai'
-import { Download, Edit2, FileText, Filter, GripVertical, Plus, Trash2 } from 'lucide-react'
+import {
+    Download,
+    Edit2,
+    FileText,
+    Filter,
+    GripVertical,
+    Plus,
+    Trash2,
+} from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 interface SortableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
@@ -79,11 +87,18 @@ const SortableRow = (props: SortableRowProps) => {
         ...props.style,
         transform: CSS.Translate.toString(transform),
         transition,
-        ...(isDragging ? { position: 'relative', zIndex: 999, background: '#fafafa' } : {}),
+        ...(isDragging
+            ? { position: 'relative', zIndex: 999, background: '#fafafa' }
+            : {}),
     }
 
     return (
-        <tr {...props} ref={setNodeRef} style={style} {...attributes}>
+        <tr
+            {...props}
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+        >
             {React.Children.map(props.children, (child: any) => {
                 if (child?.key === 'sort') {
                     return React.cloneElement(child, {
@@ -134,6 +149,8 @@ export const Documents = () => {
         createCategoryAsync,
         updateCategoryAsync,
         deleteCategoryAsync,
+        reorderCategoryAsync,
+        isReorderingCategory,
     } = useDocumentCategories()
 
     const {
@@ -151,10 +168,15 @@ export const Documents = () => {
     } = useDocuments({ ...filter })
 
     const [orderedDocuments, setOrderedDocuments] = useState<IDocument[]>([])
+    const [orderedCategories, setOrderedCategories] = useState<
+        IDocumentCategory[]
+    >([])
 
     useEffect(() => {
         setOrderedDocuments(data?.documents || [])
     }, [data?.documents])
+
+    useEffect(() => setOrderedCategories(categories), [categories])
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -165,7 +187,9 @@ export const Documents = () => {
         if (!over || active.id === over.id) return
 
         if (!filter.type) {
-            showMessage.warning('Vui lòng lọc theo 1 danh mục để sắp xếp thứ tự')
+            showMessage.warning(
+                'Vui lòng lọc theo 1 danh mục để sắp xếp thứ tự',
+            )
             return
         }
 
@@ -184,6 +208,28 @@ export const Documents = () => {
         } catch (error: any) {
             showMessage.error(error.message || 'Sắp xếp thất bại')
             setOrderedDocuments(data?.documents || []) // revert on failure
+        }
+    }
+
+    const handleCategoryDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event
+        if (!over || active.id === over.id) return
+        const oldIndex = orderedCategories.findIndex(
+            (category) => category._id === active.id,
+        )
+        const newIndex = orderedCategories.findIndex(
+            (category) => category._id === over.id,
+        )
+        if (oldIndex === -1 || newIndex === -1) return
+        const newList = arrayMove(orderedCategories, oldIndex, newIndex)
+        setOrderedCategories(newList)
+        try {
+            await reorderCategoryAsync(
+                newList.map((category) => category._id!) as string[],
+            )
+        } catch (error: any) {
+            showMessage.error(error.message || 'Sáº¯p xáº¿p tháº¥t báº¡i')
+            setOrderedCategories(categories)
         }
     }
 
@@ -244,7 +290,7 @@ export const Documents = () => {
                 contentType,
                 isPublished: true,
                 thumbnail:
-                    uploadedImageUrl || (editingDocument?.thumbnail || null),
+                    uploadedImageUrl || editingDocument?.thumbnail || null,
             }
 
             if (contentType === 'text') {
@@ -516,6 +562,13 @@ export const Documents = () => {
     const categoryColumns = useMemo(
         () => [
             {
+                title: '',
+                key: 'sort',
+                width: 40,
+                align: 'center' as const,
+                render: () => null,
+            },
+            {
                 title: 'Danh mục',
                 dataIndex: 'name',
                 key: 'name',
@@ -530,7 +583,10 @@ export const Documents = () => {
                 width: 120,
                 align: 'center' as const,
                 render: (color: string) => (
-                    <Tag color={color} variant="outlined">
+                    <Tag
+                        color={color}
+                        variant="outlined"
+                    >
                         {color}
                     </Tag>
                 ),
@@ -607,10 +663,7 @@ export const Documents = () => {
     const categoryMap = useMemo<Map<string, IDocumentCategory>>(
         () =>
             new Map(
-                categories.map((cat: IDocumentCategory) => [
-                    cat.slug,
-                    cat,
-                ]),
+                categories.map((cat: IDocumentCategory) => [cat.slug, cat]),
             ),
         [categories],
     )
@@ -762,9 +815,7 @@ export const Documents = () => {
             <Modal
                 title={
                     <div className="mb-6 text-lg">
-                        {editingDocument
-                            ? 'Chỉnh sửa mục'
-                            : 'Thêm mục mới'}
+                        {editingDocument ? 'Chỉnh sửa mục' : 'Thêm mục mới'}
                     </div>
                 }
                 open={isModalOpen}
@@ -966,29 +1017,44 @@ export const Documents = () => {
                         Thêm danh mục
                     </Button>
                 </div>
-                <Table
-                    rowKey="_id"
-                    columns={categoryColumns as any}
-                    dataSource={categories}
-                    pagination={false}
-                    loading={{
-                        indicator: <LoadingOutlined />,
-                        spinning:
-                            isCreatingCategory ||
-                            isUpdatingCategory ||
-                            isDeletingCategory,
-                    }}
-                    className="custom-table rounded-lg"
-                />
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleCategoryDragEnd}
+                >
+                    <SortableContext
+                        items={
+                            orderedCategories.map(
+                                (category) => category._id!,
+                            ) as string[]
+                        }
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <Table
+                            rowKey="_id"
+                            columns={categoryColumns as any}
+                            dataSource={orderedCategories}
+                            components={{ body: { row: SortableRow } }}
+                            pagination={false}
+                            loading={{
+                                indicator: <LoadingOutlined />,
+                                spinning:
+                                    isCreatingCategory ||
+                                    isUpdatingCategory ||
+                                    isDeletingCategory ||
+                                    isReorderingCategory,
+                            }}
+                            className="custom-table rounded-lg"
+                        />
+                    </SortableContext>
+                </DndContext>
             </Modal>
 
             <Modal
                 open={isCategoryFormOpen}
                 onCancel={() => setIsCategoryFormOpen(false)}
                 footer={null}
-                title={
-                    editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục'
-                }
+                title={editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục'}
                 width={560}
             >
                 <Form
@@ -1052,13 +1118,17 @@ export const Documents = () => {
 
                     <Form.Item>
                         <Space className="justify-end w-full mt-6">
-                            <Button onClick={() => setIsCategoryFormOpen(false)}>
+                            <Button
+                                onClick={() => setIsCategoryFormOpen(false)}
+                            >
                                 Hủy
                             </Button>
                             <Button
                                 type="primary"
                                 htmlType="submit"
-                                loading={isCreatingCategory || isUpdatingCategory}
+                                loading={
+                                    isCreatingCategory || isUpdatingCategory
+                                }
                             >
                                 {editingCategory ? 'Cập nhật' : 'Tạo mới'}
                             </Button>

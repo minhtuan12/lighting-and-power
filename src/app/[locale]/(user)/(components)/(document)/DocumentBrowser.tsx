@@ -1,13 +1,21 @@
 'use client'
 
-import DefaultImage from '@/components/DefaultImage'
 import FileViewer from '@/components/FileViewer'
 import Loading from '@/components/Loading'
 import RichTextContent from '@/components/RichTextContent'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
-import { Card, Empty, Flex, Menu, Typography, Watermark, WatermarkProps } from 'antd'
+import {
+    Card,
+    Empty,
+    Flex,
+    Menu,
+    Typography,
+    Watermark,
+    WatermarkProps,
+} from 'antd'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -22,25 +30,29 @@ async function fetchSections(type: string): Promise<IDocument[]> {
 }
 
 interface WatermarkConfig {
-    content: string;
-    color: any;
-    fontSize: number;
-    zIndex: number;
-    rotate: number;
-    gap: [number, number];
-    offset?: [number, number];
+    content: string
+    color: any
+    fontSize: number
+    zIndex: number
+    rotate: number
+    gap: [number, number]
+    offset?: [number, number]
 }
 
-export default function DocumentBrowser({ categories }: { categories: IDocumentCategory[] }) {
+export default function DocumentBrowser({
+    categories,
+}: {
+    categories: IDocumentCategory[]
+}) {
     const [activeCategory, setActiveCategory] =
         useState<IDocumentCategory | null>(categories?.[0] ?? null)
     const [sections, setSections] = useState<IDocument[]>([])
     const [activeSection, setActiveSection] = useState<IDocument | null>(null)
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
     const [isLoadingSections, setIsLoadingSections] = useState(false)
-    const t = useTranslations('common');
+    const t = useTranslations('common')
 
-    const [config, setConfig] = useState<WatermarkConfig>({
+    const [config] = useState<WatermarkConfig>({
         content: 'Lighting & Power',
         color: 'rgba(0, 0, 0, 0.15)',
         fontSize: 16,
@@ -48,8 +60,8 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
         rotate: -22,
         gap: [100, 100],
         offset: undefined,
-    });
-    const { content, color, fontSize, zIndex, rotate, gap, offset } = config;
+    })
+    const { content, color, fontSize, zIndex, rotate, gap, offset } = config
 
     const watermarkProps: WatermarkProps = {
         content,
@@ -57,8 +69,11 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
         rotate,
         gap,
         offset,
-        font: { color: typeof color === 'string' ? color : color.toRgbString(), fontSize },
-    };
+        font: {
+            color: typeof color === 'string' ? color : color.toRgbString(),
+            fontSize,
+        },
+    }
 
     useEffect(() => {
         if (!activeCategory?.slug) return
@@ -97,72 +112,89 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
                 <Loading />
             ) : (
                 <Flex
-                    className="justify-center w-full overflow-x-auto py-2 scrollbar-thin"
+                    className="justify-center w-full overflow-x-auto py-2 scrollbar-thin sticky top-40 z-1000"
                     gap={10}
                 >
                     {categories.map((cat) => {
-                        const isActive = activeCategory?.slug === cat.slug;
-                        return <div
-                            key={cat.slug}
-                            className={`min-w-30 cursor-pointer p-3 rounded-md text-center 
-                                ${isActive ? 'bg-[var(--primary)] text-white'
-                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                            onClick={() => setActiveCategory(cat)}
-                        >
-                            {cat.name}
-                        </div>
+                        const isActive = activeCategory?.slug === cat.slug
+                        return (
+                            <div
+                                key={cat.slug}
+                                className={`min-w-30 cursor-pointer p-3 rounded-md text-center 
+                                ${isActive
+                                        ? 'bg-[var(--primary)] text-white'
+                                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                    }`}
+                                onClick={() => {
+                                    setActiveCategory(cat)
+                                    window.scrollTo({
+                                        top: 0,
+                                        behavior: 'instant',
+                                    })
+                                }}
+                            >
+                                {cat.name}
+                            </div>
+                        )
                     })}
                 </Flex>
             )}
 
-            <Watermark {...watermarkProps}>
+            <Card className="w-[280px] h-fit shadow-md border border-gray-100 [&_.ant-card]:bg-white z-[111] !sticky top-57">
+                <Title
+                    level={5}
+                    className="!mb-3"
+                >
+                    {activeCategory?.name || 'Danh mục'}
+                </Title>
+                {isLoadingSections ? (
+                    <Loading />
+                ) : sections.length === 0 ? (
+                    <Empty
+                        description="Chưa có mục nội dung"
+                        image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                        className="flex items-center flex-col"
+                    />
+                ) : (
+                    <Menu
+                        mode="inline"
+                        items={sectionMenuItems}
+                        selectedKeys={[
+                            activeSection?._id || activeSection?.slug || '',
+                        ]}
+                        onClick={(e) => {
+                            const found = sections.find(
+                                (s) => (s._id || s.slug) === e.key,
+                            )
+                            setActiveSection(found || null)
+                            window.scrollTo({ top: 0, behavior: 'instant' })
+                        }}
+                    />
+                )}
+            </Card>
+
+            <Watermark
+                {...watermarkProps}
+                className="-top-38"
+            >
                 <Flex
                     gap={20}
-                    className="w-full flex-1 relative"
+                    className="w-[calc(100%-280px)] flex-1 relative !ml-[280px] min-h-[300px]"
                 >
-                    <Card className="w-[280px] h-fit shadow-md border border-gray-100 [&_.ant-card]:bg-white z-[111]">
-                        <Title
-                            level={5}
-                            className="!mb-3"
-                        >
-                            {activeCategory?.name || 'Danh mục'}
-                        </Title>
-                        {isLoadingSections ? (
-                            <Loading />
-                        ) : sections.length === 0 ? (
-                            <Empty description="Chưa có mục nội dung" />
-                        ) : (
-                            <Menu
-                                mode="inline"
-                                items={sectionMenuItems}
-                                selectedKeys={[
-                                    activeSection?._id || activeSection?.slug || '',
-                                ]}
-                                onClick={(e) => {
-                                    const found = sections.find(
-                                        (s) =>
-                                            (s._id || s.slug) === e.key,
-                                    )
-                                    setActiveSection(found || null)
-                                }}
-                            />
-                        )}
-                    </Card>
-
                     <div className="relative rounded-lg flex-1">
-                        <div className="relative p-6 lg:p-8">
+                        <div className="relative p-6 lg:p-8 !pt-0">
                             {activeSection ? (
                                 <div className="space-y-4">
-                                    <Title level={4} className="!mb-1 select-none">
-                                        {activeSection.title}
-                                    </Title>
                                     {activeSection.thumbnail && (
-                                        <DefaultImage
-                                            src={activeSection.thumbnail}
-                                            className="w-full h-[320px]"
-                                            title={activeSection.title}
-                                        />
+                                        <div className="relative aspect-17/10 rounded-sm">
+                                            <Image
+                                                alt={activeSection.title}
+                                                src={activeSection.thumbnail}
+                                                fill
+                                                title={activeSection.title}
+                                                objectFit="cover"
+                                            />
+                                        </div>
                                     )}
                                     {activeSection.description && (
                                         <Text className="text-base select-none">
@@ -173,20 +205,26 @@ export default function DocumentBrowser({ categories }: { categories: IDocumentC
                                         activeSection.content && (
                                             <RichTextContent
                                                 html={activeSection.content}
-                                                className='select-none'
+                                                className="select-none"
                                             />
                                         )}
                                     {activeSection.contentType === 'file' &&
                                         activeSection.fileUrl && (
                                             <FileViewer
                                                 documents={[
-                                                    { uri: activeSection.fileUrl },
+                                                    {
+                                                        uri: activeSection.fileUrl,
+                                                    },
                                                 ]}
                                             />
                                         )}
                                 </div>
                             ) : (
-                                <Empty description="Chọn một mục nội dung" />
+                                <Empty
+                                    description="Chọn một mục nội dung"
+                                    image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                                    className="flex items-center flex-col"
+                                />
                             )}
                         </div>
                     </div>
