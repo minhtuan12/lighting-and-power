@@ -21,6 +21,10 @@ const api = async (url: string, options?: RequestInit) => {
     return body.data
 }
 
+function isC2CLink(link: string) {
+    return link === '/quan-ly' || link.startsWith('/quan-ly?')
+}
+
 export default function NotificationBell() {
     const t = useTranslations('notifications')
     const locale = useLocale()
@@ -65,7 +69,22 @@ export default function NotificationBell() {
                 ),
             }))
         }
-        if (item.link) router.push(`/${locale}${item.link}`)
+        if (item.link) {
+            const currentHost = window.location.host
+            const currentIsC2C = window.location.hostname.startsWith('c2c.')
+            const targetIsC2C = isC2CLink(item.link)
+            const targetPath = `/${locale}${item.link}`
+
+            if (currentIsC2C === targetIsC2C) {
+                router.push(targetPath)
+                return
+            }
+
+            const targetHost = targetIsC2C
+                ? `c2c.${currentHost}`
+                : currentHost.replace(/^c2c\./, '')
+            window.location.href = `${window.location.protocol}//${targetHost}${targetPath}`
+        }
     }
     return (
         <div ref={containerRef} className="relative">

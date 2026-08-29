@@ -144,7 +144,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                 key: routes.trangCaNhan.url,
                 label: (
                     <Link
-                        href={`${process.env.NEXT_PUBLIC_API_URL}/${routes.trangCaNhan.url}`}
+                        href={routes.trangCaNhan.url}
                         className={`gap-1 !text-black ${styles.fontSize}`}
                     >
                         <Space className="pl-4 w-full py-3">

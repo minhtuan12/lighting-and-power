@@ -84,7 +84,7 @@ export default async function ProductLayout({
                         </h4>
                     </Flex>
                 )}
-                <Flex gap={16} justify="space-between" className="max-md:!flex-col-reverse">
+                <Flex gap={16} justify="space-between" className="max-md:!flex-col">
                     {sidebar}
                     {content}
                 </Flex>
