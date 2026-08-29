@@ -105,7 +105,7 @@ export default function () {
         <Flex
             gap={10}
             vertical
-            className="custom-breadcrumb !mb-30"
+            className="custom-breadcrumb !mb-20 gap-6 lg:!mb-30 lg:gap-10 max-md:!px-4 max-md:!pt-4"
         >
             <Breadcrumb
                 items={[
@@ -116,10 +116,10 @@ export default function () {
             />
             <Flex
                 gap={30}
-                className="!mt-2"
+                className="!mt-2 !flex-col lg:!flex-row"
             >
                 <Card
-                    className="!sticky top-50 self-start w-[330px] h-fit backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl"
+                    className="self-start !h-fit w-full backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl lg:!sticky lg:top-50 lg:w-[330px]"
                     style={{
                         background: 'rgba(255, 255, 255, 0.21)',
                         backdropFilter: 'blur(3.5px)',
@@ -132,7 +132,7 @@ export default function () {
                     <Flex
                         gap={20}
                         align="center"
-                        className="!border-b !border-gray-200 !h-15 !pb-5"
+                        className="!h-auto !min-h-15 !border-b !border-gray-200 !pb-5"
                     >
                         <Avatar
                             src={user.avatar}
@@ -166,7 +166,7 @@ export default function () {
                                 <Row
                                     key={item.key}
                                     onClick={() => setActiveTab(item.key)}
-                                    className={`${isActive ? 'font-semibold' : ''} gap-4 h-13 px-4 py-3 cursor-pointer rounded-md items-center hover:!bg-[var(--light-primary)]`}
+                                    className={`${isActive ? 'font-semibold' : ''} !h-12 cursor-pointer items-center gap-4 rounded-md px-3 py-3 hover:!bg-[var(--light-primary)] sm:px-4`}
                                     style={{
                                         background:
                                             isActive
@@ -184,7 +184,7 @@ export default function () {
                     </Flex>
                 </Card>
                 <Card
-                    className="flex-1 backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl pt-5"
+                    className="min-w-0 w-full flex-1 backdrop-blur-lg bg-white/30 border border-white/20 shadow-xl !pt-2 sm:!pt-5"
                     style={{
                         background: 'rgba(255, 255, 255, 0.21)',
                         backdropFilter: 'blur(3.5px)',

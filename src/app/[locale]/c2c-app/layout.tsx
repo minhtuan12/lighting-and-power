@@ -31,7 +31,7 @@ export default async function C2CLayout({ children }: { children: React.ReactNod
         >
             <div className="min-h-screen bg-gray-50 flex flex-col theme-c2c">
                 <Header config={config.data} categories={categories.data} />
-                <main className="flex-1 w-full max-w-[1140px] mx-auto pt-5 pb-30 lg:px-0 lg:mt-[149px] mt-[60px]">
+                <main className="flex-1 w-full max-w-[1140px] mx-auto pt-5 pb-30 lg:px-0 lg:mt-[149px] mt-[60px] max-md:px-3">
                     {children}
                 </main>
                 <Footer config={config.data} categories={categories.data} />

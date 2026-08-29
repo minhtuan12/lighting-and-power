@@ -159,7 +159,7 @@ export default function Info() {
                 </Upload>
             </Row>
             <Row gutter={30}>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                     <Form.Item
                         name="fullName"
                         required
@@ -220,7 +220,7 @@ export default function Info() {
                     </Form.Item>
                 </Col>
 
-                <Col span={12}>
+                <Col xs={24} md={12}>
                     <Form.Item
                         name="city"
                         required

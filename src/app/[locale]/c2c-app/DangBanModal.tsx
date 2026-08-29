@@ -98,13 +98,14 @@ export default function DangBanModal({ open, onClose, onSuccess, product = null 
             footer={null}
             centered
             width={760}
+            height={300}
             destroyOnHidden
             title={<span className="text-xl font-bold text-[#082c40]">{product ? t('edit') : t('postProductAd')}</span>}
         >
             <Form layout="vertical" form={form} onFinish={onFinish} className="!mt-4">
-                <div className="flex gap-5">
+                <div className="flex gap-5 max-md:flex-col">
                     {/* Left: images */}
-                    <div className="w-[200px] flex-none">
+                    <div className="w-[200px] flex-none max-md:w-full">
                         <div className="mb-2 text-[13px] text-[#082c40]">
                             {t('imagesMax5')}
                         </div>
@@ -212,7 +213,7 @@ export default function DangBanModal({ open, onClose, onSuccess, product = null 
                     <SimpleEditor
                         placeholder={t('descriptionPlaceholder')}
                         setUploading={setLoading}
-                        className='!max-h-[200px] !min-h-[200px]'
+                        className='!max-h-[200px] !min-h-[200px] max-md:!mt-12'
                     />
                 </Form.Item>
 

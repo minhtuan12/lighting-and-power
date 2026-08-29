@@ -5,8 +5,10 @@ import Loading from '@/components/Loading'
 import RichTextContent from '@/components/RichTextContent'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
+import { DownOutlined } from '@ant-design/icons'
 import {
     Card,
+    Drawer,
     Empty,
     Flex,
     Menu,
@@ -50,6 +52,7 @@ export default function DocumentBrowser({
     const [activeSection, setActiveSection] = useState<IDocument | null>(null)
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
     const [isLoadingSections, setIsLoadingSections] = useState(false)
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const t = useTranslations('common')
 
     const [config] = useState<WatermarkConfig>({
@@ -96,6 +99,30 @@ export default function DocumentBrowser({
         [sections],
     )
 
+    const handleSelectSection = (key: string) => {
+        const found = sections.find((s) => (s._id || s.slug) === key)
+        setActiveSection(found || null)
+        setMobileMenuOpen(false)
+        window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+
+    const sectionMenu = (
+        <Menu
+            mode="inline"
+            items={sectionMenuItems}
+            selectedKeys={[activeSection?._id || activeSection?.slug || '']}
+            onClick={(e) => handleSelectSection(e.key)}
+        />
+    )
+
+    const sectionEmpty = (
+        <Empty
+            description="Chưa có mục nội dung"
+            image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+            className="flex items-center flex-col"
+        />
+    )
+
     return (
         <Flex
             vertical
@@ -112,7 +139,7 @@ export default function DocumentBrowser({
                 <Loading />
             ) : (
                 <Flex
-                    className="justify-center w-full overflow-x-auto py-2 scrollbar-thin sticky top-40 z-1000"
+                    className="justify-start lg:justify-center w-full overflow-x-auto scrollbar-thin sticky top-15 lg:!top-[149.5px] z-1000 px-4 bg-white !py-3 lg:px-0 max-md:bg-white max-md:!py-2 max-md:h-auto max-md:!px-3"
                     gap={10}
                 >
                     {categories.map((cat) => {
@@ -120,8 +147,9 @@ export default function DocumentBrowser({
                         return (
                             <div
                                 key={cat.slug}
-                                className={`min-w-30 cursor-pointer p-3 rounded-md text-center 
-                                ${isActive
+                                className={`min-w-fit lg:min-w-30 shrink-0 cursor-pointer px-4 py-2 lg:p-3 rounded-md text-center text-sm lg:text-base
+                                max-md:rounded-full !rounded-full
+                                    ${isActive
                                         ? 'bg-[var(--primary)] text-white'
                                         : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                     }`}
@@ -140,49 +168,60 @@ export default function DocumentBrowser({
                 </Flex>
             )}
 
-            <Card className="w-[280px] h-fit shadow-md border border-gray-100 [&_.ant-card]:bg-white z-[111] !sticky top-57">
-                <Title
-                    level={5}
-                    className="!mb-3"
-                >
+            {/* Sidebar gốc — chỉ hiện từ lg trở lên, giữ nguyên như code cũ */}
+            <Card className="!shadow-md hidden lg:block w-[280px] h-fit shadow-md border border-gray-100 [&_.ant-card]:bg-white z-[111] !sticky top-57">
+                <Title level={5} className="!mb-3">
                     {activeCategory?.name || 'Danh mục'}
                 </Title>
                 {isLoadingSections ? (
                     <Loading />
                 ) : sections.length === 0 ? (
-                    <Empty
-                        description="Chưa có mục nội dung"
-                        image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
-                        className="flex items-center flex-col"
-                    />
+                    sectionEmpty
                 ) : (
-                    <Menu
-                        mode="inline"
-                        items={sectionMenuItems}
-                        selectedKeys={[
-                            activeSection?._id || activeSection?.slug || '',
-                        ]}
-                        onClick={(e) => {
-                            const found = sections.find(
-                                (s) => (s._id || s.slug) === e.key,
-                            )
-                            setActiveSection(found || null)
-                            window.scrollTo({ top: 0, behavior: 'instant' })
-                        }}
-                    />
+                    sectionMenu
                 )}
             </Card>
 
-            <Watermark
-                {...watermarkProps}
-                className="-top-38"
+            {/* Thanh chọn mục cho mobile, thay thế sidebar */}
+            <div
+                className="lg:hidden sticky top-27 z-50 flex items-center justify-between bg-white border border-gray-200 px-4 py-3 shadow-sm -mt-5"
+                onClick={() => setMobileMenuOpen(true)}
             >
+                <Flex vertical>
+                    <Text className="!text-xs text-gray-400">
+                        {activeCategory?.name || 'Danh mục'}
+                    </Text>
+                    <Text className="!text-sm !font-medium">
+                        {activeSection?.title || 'Chọn mục nội dung'}
+                    </Text>
+                </Flex>
+                <DownOutlined className="text-gray-500" />
+            </div>
+
+            <Drawer
+                title={activeCategory?.name || 'Danh mục'}
+                placement="bottom"
+                height="60%"
+                open={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+                className="lg:hidden"
+            >
+                {isLoadingSections ? (
+                    <Loading />
+                ) : sections.length === 0 ? (
+                    sectionEmpty
+                ) : (
+                    sectionMenu
+                )}
+            </Drawer>
+
+            <Watermark {...watermarkProps} className="max-md:-top-0 -top-38">
                 <Flex
                     gap={20}
-                    className="w-[calc(100%-280px)] flex-1 relative !ml-[280px] min-h-[300px]"
+                    className="w-full lg:w-[calc(100%-280px)] flex-1 relative lg:!ml-[280px] min-h-[300px]"
                 >
                     <div className="relative rounded-lg flex-1">
-                        <div className="relative p-6 lg:p-8 !pt-0">
+                        <div className="relative p-4 lg:p-8 !pt-0">
                             {activeSection ? (
                                 <div className="space-y-4">
                                     {activeSection.thumbnail && (
@@ -197,7 +236,7 @@ export default function DocumentBrowser({
                                         </div>
                                     )}
                                     {activeSection.description && (
-                                        <Text className="text-base select-none">
+                                        <Text className="text-sm lg:text-base select-none">
                                             {activeSection.description}
                                         </Text>
                                     )}

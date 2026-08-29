@@ -12,12 +12,12 @@ const VIET_MAP_API_KEY = process.env.VIET_MAP_API_KEY!
 
 function Contact({ data }: { data: IConfig }) {
 	return <>
-		<h3 className="text-left font-semibold text-2xl mb-1">
+		<h3 className="mb-1 text-left text-xl font-semibold sm:text-2xl">
 			Thông tin liên hệ
 		</h3>
 		<p className='text-[15px] font-normal'>Nếu bạn có bất kỳ câu hỏi nào, hãy thoải mái liên hệ với chúng tôi</p>
 		<Divider />
-		<Flex gap={14} className='!mb-6' align="center">
+		<Flex gap={12} className='!mb-5 sm:!mb-6' align="center">
 			<MapPin
 				size={24}
 				color="#ffffff"
@@ -27,7 +27,7 @@ function Contact({ data }: { data: IConfig }) {
 			/>
 			<div className="font-semibold text-[15px]">{data.address}</div>
 		</Flex>
-		<Flex gap={14} className='!mb-6' align="center">
+		<Flex gap={12} className='!mb-5 sm:!mb-6' align="center">
 			<Mail
 				size={24}
 				color="#ffffff"
@@ -36,7 +36,7 @@ function Contact({ data }: { data: IConfig }) {
 			/>
 			<div className="font-semibold text-[15px]">{data.email}</div>
 		</Flex>
-		<Flex gap={14} className='!mb-6' align="center">
+		<Flex gap={12} className='!mb-5 sm:!mb-6' align="center">
 			<Phone
 				size={24}
 				color="#ffffff"
@@ -67,12 +67,12 @@ export default async function () {
 			<Flex
 				vertical
 				gap={40}
-				className="lg:!-mt-5 !mb-30"
+				className="!mb-20 gap-8 lg:!-mt-5 lg:!mb-30 lg:gap-10"
 			>
 				<Image
 					src={'/images/contact-banner.png'}
 					alt={`Banner L&P Contact Us`}
-					className="object-cover max-h-[372px]"
+					className="h-auto max-h-[372px] w-full object-cover"
 					priority
 					width={1140}
 					height={372}
@@ -89,10 +89,10 @@ export default async function () {
 				>
 					{/* Left Panel */}
 					<Row>
-						<Col span={10} style={{
+						<Col xs={24} md={10} className="!rounded-t-2xl !rounded-b-none md:!rounded-l-2xl md:!rounded-r-none" style={{
 							background: 'linear-gradient(135deg, #000F8F, #00C8FF)',
 							color: '#fff',
-							padding: '36px 80px 36px 36px',
+							padding: '28px 24px',
 							display: 'flex',
 							flexDirection: 'column',
 							justifyContent: 'space-between',
@@ -105,9 +105,9 @@ export default async function () {
 								<Contact data={data} />
 							</div>
 						</Col>
-						<Col span={14}>
+						<Col xs={24} md={14}>
 							{/* Right Panel */}
-							<div style={{ flex: 1, padding: '36px 40px 30px 50px' }}>
+							<div className="p-6 sm:p-8 md:py-9 md:pl-12 md:pr-10">
 								<ContactForm />
 							</div>
 						</Col>

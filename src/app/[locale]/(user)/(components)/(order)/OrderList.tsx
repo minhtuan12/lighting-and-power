@@ -308,6 +308,7 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
                             />
                         ),
                     }}
+                    scroll={{ x: 300 }}
                 />
             )}
 

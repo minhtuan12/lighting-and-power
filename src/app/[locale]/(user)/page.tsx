@@ -63,7 +63,7 @@ export default async function Home() {
             </Row>
             <Flex
                 className="max-md:!mt-4 !mt-[40px] max-lg:!px-10 max-md:!px-6"
-                gap={80}
+                gap={30}
                 vertical
             >
                 {categoriesWithChildren?.slice(0, 2).map((i, index) => (

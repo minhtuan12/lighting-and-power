@@ -33,7 +33,7 @@ function ContactFormContent() {
 		</h3>
 		<Form form={form} onFinish={handleSubmit} layout="vertical" className="!-mt-3">
 			<Row gutter={20}>
-				<Col span={12}>
+				<Col xs={24} md={12}>
 					<Form.Item
 						name="fullName"
 						required
@@ -61,7 +61,7 @@ function ContactFormContent() {
 						/>
 					</Form.Item>
 				</Col>
-				<Col span={12}>
+				<Col xs={24} md={12}>
 					<Form.Item
 						name="emailOrPhone"
 						label={

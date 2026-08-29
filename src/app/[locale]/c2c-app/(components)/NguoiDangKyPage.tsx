@@ -26,7 +26,7 @@ export default function NguoiDangKyPage({ products }: { products: any[] }) {
 			<Select
 				value={selectedProductId || undefined}
 				placeholder="Chọn sản phẩm"
-				className="mb-3 w-[380px] h-[38px] !border-[var(--brand-btn-bg)]"
+				className="mb-3 w-[380px] max-md:w-full h-[38px] !border-[var(--brand-btn-bg)]"
 				onChange={setSelectedProductId}
 				options={products.map((product) => ({ label: product.title, value: product._id }))}
 			/>

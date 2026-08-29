@@ -13,9 +13,9 @@ export default async function TopCategories({
     return (
         <Flex vertical gap={12} className="!ml-1">
             <div
-                className="w-full text-white h-10 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]"
+                className="py-2 px-1 w-full text-white min-h-10 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]"
             >
-                <h3 className="font-semibold text-[17px]">
+                <h3 className="font-semibold text-[14px] md:text-[17px] text-center">
                     {category.name.toUpperCase()}
                 </h3>
             </div>

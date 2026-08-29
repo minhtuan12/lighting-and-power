@@ -72,9 +72,9 @@ export default async function ProductDetail({
     ]
 
     return (
-        <div className="flex-1 ml-6 space-y-10">
-            <Row gutter={30}>
-                <Col span={8}>
+        <div className="flex-1 ml-6 max-md:ml-0 space-y-10">
+            <Row gutter={{ xs: 0, md: 30 }}>
+                <Col xs={24} md={8}>
                     <Flex
                         vertical
                         className="w-full"
@@ -110,7 +110,7 @@ export default async function ProductDetail({
                     </Flex>
                 </Col>
 
-                <Col span={16}>
+                <Col xs={24} md={16} className='max-md:mt-5'>
                     <Flex
                         vertical
                         gap={20}
@@ -161,7 +161,7 @@ export default async function ProductDetail({
                             })}
                         </Flex>
                         <Row>
-                            <Col span={12}>
+                            <Col xs={24} md={12}>
                                 <Flex
                                     vertical
                                     justify="space-between"
@@ -176,7 +176,7 @@ export default async function ProductDetail({
                                 <Flex
                                     vertical
                                     gap={12}
-                                    className="!mt-[15px] w-full"
+                                    className="!mt-[15px] w-full [&_.ant-col]:!h-[30px] [&_.ant-col]:!flex [&_.ant-col]:!justify-center [&_.ant-col]:!items-center"
                                     justify="space-between"
                                 >
                                     <Flex

@@ -2,7 +2,7 @@ import { routes } from '@/constants/routes'
 import { getCurrentUser } from '@/fetch-data/auth'
 import { ICategory } from '@/types/category'
 import { IConfig } from '@/types/config'
-import { Col, Flex, Input, Menu, MenuProps, Row } from 'antd'
+import { Col, Flex, Menu, MenuProps, Row } from 'antd'
 import { ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
@@ -202,31 +202,24 @@ export default async function Header({
                                     </Link>
                                 }
                                 <NotificationBell />
-                                <UserMenu user={data} />
+                                <UserMenu user={data} isC2C={isC2C} />
                             </Flex>
                         )}
                     </Flex>
                 </Flex>
             </div>
-            <Row className="h-[60px] px-10 max-md:!px-6 bg-[var(--primary)] lg:!hidden">
-                <Col
-                    span={2}
-                    className="!flex !items-center !justify-start"
-                >
-                    <Icon
-                        src="/images/logo-only.png"
-                        alt="Header Logo Only"
-                        size={40}
-                    />
-                </Col>
+            <Row className="h-[60px] px-10 max-md:!px-6 bg-[var(--primary)] lg:!hidden justify-between">
                 <Col
                     span={20}
-                    className="!flex !items-center !justify-center"
+                    className="!flex !items-center !justify-start"
                 >
-                    <Input
-                        placeholder={t('search')}
-                        className="!bg-[#E3E3E3] !rounded-[10px] !w-2/3 !h-[35px] !border-[#B4B4B4]"
-                    />
+                    <Link href={'/'}>
+                        <Icon
+                            src="/images/logo.png"
+                            alt="Header Logo Only"
+                            size={150}
+                        />
+                    </Link>
                 </Col>
                 <Col
                     span={2}
@@ -234,10 +227,17 @@ export default async function Header({
                 >
                     <Flex
                         align="center"
-                        gap={8}
+                        gap={24}
                     >
-                        {success && data && <NotificationBell />}
-                        <UserMenu user={data} />
+                        <Flex align="center" gap={24}>
+                            {success && data && !isC2C && (
+                                <Link href={routes.gioHang.url} className="flex items-center">
+                                    <Cart />
+                                </Link>
+                            )}
+                            {success && data && <NotificationBell />}
+                        </Flex>
+                        <UserMenu user={data} isC2C={isC2C} />
                     </Flex>
                 </Col>
             </Row>

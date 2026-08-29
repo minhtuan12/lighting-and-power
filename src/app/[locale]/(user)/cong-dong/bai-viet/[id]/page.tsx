@@ -1,9 +1,13 @@
 'use client'
 
 import RichTextContent from '@/components/RichTextContent'
+import { useMe } from '@/hooks/use-me'
+import { showMessage } from '@/hooks/use-message'
+import { loginModalAtom } from '@/stores'
 import { ICommunityComment, ICommunityPost } from '@/types/community'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Flex, Tag } from 'antd'
+import { useSetAtom } from 'jotai'
 import { ArrowLeft, MessageCircle, Send, Share2, Zap } from 'lucide-react'
 import { useLocale } from 'next-intl'
 import Link from 'next/link'
@@ -51,6 +55,8 @@ export default function PostDetail({
     const [comments, setComments] = useState<ICommunityComment[]>([])
     const [content, setContent] = useState('')
     const [id, setId] = useState('')
+    const { user } = useMe()
+    const setLoginOpen = useSetAtom(loginModalAtom)
     useEffect(() => {
         params.then(({ id }) => {
             setId(id)
@@ -67,6 +73,10 @@ export default function PostDetail({
     }, [params])
     if (!post) return <div className="feed-loading">Đang tải bài viết…</div>
     const comment = async () => {
+        if (!user) {
+            setLoginOpen(true)
+            return
+        }
         if (!content.trim()) return
         try {
             const item = await api(`/api/community/posts/${id}/comments`, {
@@ -76,7 +86,7 @@ export default function PostDetail({
             setComments([...comments, item])
             setContent('')
         } catch (error: any) {
-            alert(error.message)
+            showMessage.error(error.message)
         }
     }
     const like = async () => {
@@ -90,7 +100,7 @@ export default function PostDetail({
                 likesCount: result.likesCount,
             })
         } catch (error: any) {
-            alert(error.message)
+            showMessage.error(error.message)
         }
     }
     const share = async () => {
@@ -98,7 +108,7 @@ export default function PostDetail({
         await api(`/api/community/posts/${id}/share`, { method: 'POST' }).catch(
             () => null,
         )
-        alert('Đã sao chép liên kết bài viết')
+        showMessage.success('Đã sao chép liên kết bài viết')
     }
     return (
         <div className="community-shell">

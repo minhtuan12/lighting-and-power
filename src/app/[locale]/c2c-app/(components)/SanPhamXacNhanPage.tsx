@@ -78,7 +78,7 @@ export default function SanPhamXacNhanPage() {
                     )
                 })
             )}
-            <div className="flex items-center justify-between rounded-2xl border bg-white p-4">
+            <div className="flex items-center justify-between rounded-2xl border bg-white p-4 max-md:flex-col">
                 <span>
                     Đã chọn {chosen.length} sản phẩm ·{' '}
                     <b>{total.toLocaleString('vi-VN')} đ</b>

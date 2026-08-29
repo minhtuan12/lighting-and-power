@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
     )
 
     return (
-        <div className="mx-auto max-w-6xl px-16 pb-6">
+        <div className="mx-auto max-w-6xl px-16 pb-6 max-md:max-w-none max-md:px-3">
             <Link
                 href="/"
                 className="mb-4 inline-block text-[14px] !text-gray-600 hover:text-[#218daf]"

@@ -25,13 +25,13 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
             style={{
                 border: "1px solid #b0b0b0",
             }}
-            className={`overflow-hidden rounded-[5px] [&>.ant-card-body]:!px-0 [&>.ant-card-body]:!pt-0 [&>.ant-card-body]:!pb-3 w-full ${className}`}
+            className={`overflow-hidden rounded-[5px] [&>.ant-card-body]:!px-0 [&>.ant-card-body]:!pt-0 max-md:[&>.ant-card-body]:!pb-0 [&>.ant-card-body]:!pb-3 w-full ${className}`}
         >
             <div className="absolute top-0 right-0 z-10 bg-gray-600 rounded-bl-[6px] p-1.5">
                 <AddToFavourite product={item} />
             </div>
-            <Flex className="w-full h-full" vertical gap={7}>
-                <div className="relative w-full h-[173px] border-b-[#B7B7B7] border-b-[1px]">
+            <Flex className="w-full h-full max-md:flex-row flex-col" gap={7}>
+                <div className="relative w-full h-[173px]">
                     <Link
                         target="_blank"
                         href={`${routes.chiTietSanPham.url}/${item.slug}`}
@@ -45,7 +45,7 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                         />
                     </Link>
                 </div>
-                <Flex vertical className="!flex-1 !px-3" gap={8} justify="space-between">
+                <Flex vertical className="!flex-1 !px-3 max-md:!py-2" gap={8} justify="space-between">
                     <Flex align="center" justify="space-between" gap={8}>
                         <Link
                             target="_blank"

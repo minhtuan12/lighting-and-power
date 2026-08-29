@@ -84,7 +84,7 @@ export default function NotificationBell() {
                 </Badge>
             </button>
             {open && (
-                <div className="absolute right-0 top-12 z-[1000] w-[360px] overflow-hidden rounded-md border border-[#e2e6f0] bg-white text-slate-800 shadow-2xl">
+                <div className="absolute -right-15 md:right-0 top-12 z-[1000] w-[360px] overflow-hidden rounded-md border border-[#e2e6f0] bg-white text-slate-800 shadow-2xl">
                     <div className="flex items-center justify-between border-b px-4 py-3">
                         <strong>{t('title')}</strong>
                         {data.unread > 0 && (

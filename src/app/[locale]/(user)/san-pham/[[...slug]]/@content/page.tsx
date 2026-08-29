@@ -1,7 +1,6 @@
 import PaginationClient from "@/app/[locale]/(user)/(components)/(product)/filter/PaginationClient"
 import ProductDetail from "@/app/[locale]/(user)/(components)/(product)/ProductDetail"
 import ProductItem from "@/app/[locale]/(user)/(components)/ProductItem"
-import DefaultImage from "@/components/DefaultImage"
 import { PAGE_LIMIT } from "@/constants/common"
 import { routes } from "@/constants/routes"
 import { getCategories } from "@/fetch-data/categories"
@@ -33,14 +32,14 @@ function CategoriesContent({ categories, slugs }: ICategoryContent) {
                 return (
                     <Link
                         href={link}
-                        className="hover:shadow-md flex flex-col !w-full gap-3 border border-[#D6D6D6] rounded-[10px] !px-3 !pt-3 !pb-5 h-[218px]"
+                        className="hover:shadow-md flex flex-col !w-full gap-3 max-lg:border-none border border-[#D6D6D6] rounded-[10px] lg:!px-3 lg:!pt-3 lg:!pb-5 lg:h-[218px] h-[280px]"
                         key={c._id}
                     >
-                        <DefaultImage
+                        <img
                             src={"/images/electronic.jpg"}
-                            className="w-full h-[135px]"
+                            className="w-full h-[200px] lg:h-[135px] object-cover rounded-sm lg:rounded-t-md"
                         />
-                        <h3 className="line-clamp-2 w-full text-[13px] text-black px-1">
+                        <h3 className="lg:line-clamp-2 w-full text-[14px] lg:text-[14px] text-black px-2 lg:px-1 max-lg:text-center">
                             {c.name}
                         </h3>
                     </Link>

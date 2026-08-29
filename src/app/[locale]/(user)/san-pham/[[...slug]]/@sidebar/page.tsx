@@ -21,7 +21,7 @@ async function CategorySidebar({
     const t = await getTranslations();
     return (
         <Card title={t('common.category')} className="w-full card-custom">
-            <Flex className="lg:!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin">
+            <Flex className="!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin max-lg:max-h-[250px]">
                 {categories.map((c, index) => {
                     const link = routes.sanPham.url + `/${[...slugs, c.slug].join("/")}`
                     return <Link
@@ -31,13 +31,14 @@ async function CategorySidebar({
                             !text-[13px] !text-black !py-3 !px-4 !w-full
                             ${index === categories.length - 1 ? "" : "!border-b-[#CCCCCC] !border-b"}
                             hover:!bg-[#c0e8fe] last:hover:!rounded-b-[8px]
-                            max-lg:!text-[14px] max-lg:!line-clamp-1 max-lg:!min-w-30 max-lg:!text-center max-lg:!px-5 max-lg:!py-2 max-lg:!rounded-full max-lg:!border-[var(--primary)] max-lg:border-1
+                            max-lg:!text-[14px] max-lg:!min-w-30 max-lg:!text-center max-lg:!px-5 max-lg:!py-2 max-lg:!rounded-full max-lg:!border-[var(--primary)] max-lg:border-1
                         `}
                     >
                         {c.name}
                     </Link>
                 })}
             </Flex>
+            <div className="h-1.5" />
         </Card>
     )
 }
@@ -45,11 +46,8 @@ async function CategorySidebar({
 async function TopProductsSidebar({ products }: { products: IProduct[] }) {
     const t = await getTranslations();
     return (
-        <Flex vertical className="py-2 w-full" gap={13}>
-            <h4 className="text-white text-[15px] bg-[var(--primary)] py-[11px] px-[15px] font-bold w-full h-10">
-                {t('product.featuredProducts')}
-            </h4>
-            <div className="lg:max-h-[400px] lg:overflow-y-auto gap-3 flex lg:flex-col max-lg:max-h-[200px]">
+        <Card title={t('product.featuredProducts')} className="w-full card-custom">
+            <Flex className="!flex-col max-lg:!p-4 max-lg:!overflow-x-auto max-lg:!gap-4 scrollbar-thin max-lg:max-h-[250px]">
                 {products.length < 0 ? (
                     products.map((p) => (
                         <Flex
@@ -69,10 +67,11 @@ async function TopProductsSidebar({ products }: { products: IProduct[] }) {
                         </Flex>
                     ))
                 ) : (
-                    <i className="text-center text-gray-400">{t('common.NA')}</i>
+                    <i className="text-center text-gray-400 mt-3 mb-1">{t('common.NA')}</i>
                 )}
-            </div>
-        </Flex>
+            </Flex>
+            <div className="h-1.5" />
+        </Card>
     )
 }
 
@@ -83,10 +82,12 @@ interface SidebarProps {
 
 export default async function ({ params, searchParams }: SidebarProps) {
     const { slug: slugs } = await params
-    const { lastSlug, isLastChild } = await getCategoryChain(slugs || [])
+    const { lastSlug, isLastChild, isProductDetail } = await getCategoryChain(slugs || [])
 
     const [categoriesData, productsData] = await Promise.all([
-        ...(isLastChild
+        ...(isProductDetail
+            ? [Promise.resolve({ data: [] })]
+            : isLastChild
             ? [getProducts({ categorySlug: lastSlug })]
             : [getCategories(lastSlug ? { parentSlug: lastSlug } : {})]),
         getProducts({ isFeatured: true }),
@@ -94,14 +95,14 @@ export default async function ({ params, searchParams }: SidebarProps) {
 
     return (
         <Flex gap={30} className={`w-full lg:w-[260px]`} vertical>
-            {isLastChild ? (
+            {isLastChild && !isProductDetail ? (
                 <Filters searchParams={(await searchParams) as any} />
-            ) : (
+            ) : !isProductDetail ? (
                 <CategorySidebar
                     slugs={slugs || []}
                     categories={categoriesData.data as ICategory[]}
                 />
-            )}
+            ) : null}
             <TopProductsSidebar
                 products={(productsData as IProductResponse).data.products}
             />

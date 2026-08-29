@@ -87,11 +87,16 @@ function PostCard({
     const [busy, setBusy] = useState(false)
     const [friendRequested, setFriendRequested] = useState(false)
     const { user } = useMe()
+    const setLoginOpen = useSetAtom(loginModalAtom)
     const locale = useLocale()
     const isCurrentUser = user?._id === post.author._id
     const isFriend = friendIds.has(String(post.author._id))
     const authorTagColor = post.author.role === 'admin' ? 'blue' : isFriend ? 'orange' : 'green'
     const like = async () => {
+        if (!user) {
+            setLoginOpen(true)
+            return
+        }
         setBusy(true)
         try {
             await api(`/api/community/posts/${post._id}/like`, {
@@ -124,6 +129,10 @@ function PostCard({
 
     const addFriend = async () => {
         if (friendRequested || isFriend || post.author.role === 'admin') return
+        if (!user) {
+            setLoginOpen(true)
+            return
+        }
         setFriendRequested(true)
         try {
             await api('/api/social/friends', { method: 'POST', body: JSON.stringify({ userId: post.author._id, action: 'request' }) })
@@ -158,23 +167,25 @@ function PostCard({
                                 {post.author.fullName}
                             </Link>
                         )}
-                        {isCurrentUser ? (
-                            <Tag
-                                color="purple"
-                                className="!mt-0"
-                            >
-                                Tôi
-                            </Tag>
-                        ) : (
-                            !isFriend ? <Tag
-                                color={authorTagColor}
-                                className="!mt-0"
-                            >
-                                {post.author.role === 'admin'
-                                    ? 'Cửa hàng chính thức'
-                                    : 'Thành viên'}
-                            </Tag> : <Tag color="orange" className="!mt-0">Bạn bè</Tag>
-                        )}
+                        <div className='hidden md:block'>
+                            {isCurrentUser ? (
+                                <Tag
+                                    color="purple"
+                                    className="!mt-0"
+                                >
+                                    Tôi
+                                </Tag>
+                            ) : (
+                                !isFriend ? <Tag
+                                    color={authorTagColor}
+                                    className="!mt-0"
+                                >
+                                    {post.author.role === 'admin'
+                                        ? 'Cửa hàng chính thức'
+                                        : 'Thành viên'}
+                                </Tag> : <Tag color="orange" className="!mt-0">Bạn bè</Tag>
+                            )}
+                        </div>
                         {!isCurrentUser && !isFriend && post.author.role !== 'admin' && (
                             <button type="button" onClick={addFriend} disabled={friendRequested} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:underline disabled:cursor-default disabled:opacity-60">
                                 <Dot color='black' size={18} />{friendRequested ? 'Đang chờ phản hồi kết bạn' : 'Thêm bạn bè'}

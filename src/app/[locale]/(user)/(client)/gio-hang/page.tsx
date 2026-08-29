@@ -10,8 +10,8 @@ import { useCart } from '@/hooks/user/use-cart'
 import { useClientProducts } from '@/hooks/user/use-client-product'
 import {
     addToCartAtom,
-    checkedOutItemsAtom,
     cartItemsAtom,
+    checkedOutItemsAtom,
     removeFromCartAtom,
     updateCartQuantityAtom,
 } from '@/stores'
@@ -252,16 +252,18 @@ export default function () {
             <Flex
                 vertical
                 gap={20}
-                className="!mt-2"
+                className="!mt-2 !mb-20 max-md:!px-3 max-md:!pt-4"
             >
-                <Row gutter={20}>
+                <Row gutter={[20, 20]}>
                     <Col
-                        span={17}
+                        xs={24}
+                        lg={17}
                         className="space-y-4"
                     >
-                        <Row gutter={14}>
+                        <Row gutter={[14, 14]} className='max-md:!hidden'>
                             <Col
-                                span={12}
+                                xs={24}
+                                sm={12}
                                 className="relative"
                             >
                                 <FloatingInput
@@ -272,7 +274,7 @@ export default function () {
                                     value={searchText}
                                 />
                                 {searchText && (
-                                    <div className="scrollbar-thin overflow-y-auto absolute z-10 top-15 shadow-lg border border-gray-100 bg-white w-[calc(100%-14px)] min-h-[300px] max-h-[300px]">
+                                    <div className="scrollbar-thin absolute top-15 z-10 max-h-[300px] min-h-[300px] w-full overflow-y-auto border border-gray-100 bg-white shadow-lg sm:w-[calc(100%-14px)]">
                                         {loadingSearchProducts ? (
                                             <Flex className="!w-full !h-[300px] justify-center items-center">
                                                 <Loading />
@@ -294,7 +296,7 @@ export default function () {
                                     </div>
                                 )}
                             </Col>
-                            <Col span={6}>
+                            <Col xs={12} sm={6}>
                                 <FloatingInputNumber
                                     placeholder={t('cart.quantity')}
                                     label={t('cart.quantity')}
@@ -313,7 +315,7 @@ export default function () {
                                     }
                                 />
                             </Col>
-                            <Col span={6}>
+                            <Col xs={12} sm={6}>
                                 <Button
                                     type="primary"
                                     className="!h-[43px] w-full"
@@ -331,7 +333,7 @@ export default function () {
                                     <Flex
                                         align="center"
                                         justify="space-between"
-                                        className="!pb-2 border-b border-gray-300 !mb-5"
+                                        className="!mb-5 flex-wrap gap-2 border-b border-gray-300 !pb-2"
                                     >
                                         <Checkbox
                                             indeterminate={someChecked}
@@ -393,7 +395,7 @@ export default function () {
                                                     <Row gutter={6}>
                                                         <Flex
                                                             align="flex-start"
-                                                            className="px-4 py-4"
+                                                            className="flex-wrap px-2 py-4 sm:flex-nowrap sm:px-4"
                                                         >
                                                             <Col span={1}>
                                                                 {/* Checkbox */}
@@ -602,7 +604,7 @@ export default function () {
                                                                     vertical
                                                                     align="flex-end"
                                                                     gap={4}
-                                                                    className="flex-shrink-0 w-32 text-right"
+                                                                    className="w-auto flex-shrink-0 text-right md:w-32"
                                                                 >
                                                                     <Flex
                                                                         vertical
@@ -690,7 +692,7 @@ export default function () {
                             </Col>
                         </Row>
                     </Col>
-                    <Col span={7}>
+                    <Col xs={24} lg={7}>
                         <Card
                             className="shadow-md border border-gray-100"
                             title={t('cart.orderSummary')}

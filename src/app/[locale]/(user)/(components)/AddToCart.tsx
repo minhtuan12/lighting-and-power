@@ -65,14 +65,14 @@ function AddToCartContent({
             <Row className="w-full border border-[#BEBEBE] rounded-[5px]">
                 <Col
                     span={8}
-                    className="text-center pt-1 hover:bg-gray-200 cursor-pointer select-none"
+                    className="text-center pt-1 hover:bg-gray-200 cursor-pointer select-none max-md:pt-0 max-md:h-[20px]"
                     onClick={() => handleChangeQuantity('minus')}
                 >
                     -
                 </Col>
                 <Col
                     span={8}
-                    className="text-center border-x border-x-[#BEBEBE] custom-input-number"
+                    className="text-center border-x border-x-[#BEBEBE] custom-input-number max-md:h-[20px]"
                 >
                     <InputNumber
                         value={quantity}
@@ -83,12 +83,12 @@ function AddToCartContent({
                         onChange={(value) =>
                             setQuantity(value ?? minQuantity ?? 1)
                         }
-                        className="!w-full"
+                        className="!w-full !max-h-full"
                     />
                 </Col>
                 <Col
                     span={8}
-                    className="text-center pt-1 hover:bg-gray-200 cursor-pointer select-none"
+                    className="text-center pt-1 hover:bg-gray-200 cursor-pointer select-none max-md:pt-0 max-md:h-[20px]"
                     onClick={() => handleChangeQuantity('plus')}
                 >
                     +

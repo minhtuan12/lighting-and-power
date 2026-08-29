@@ -19,18 +19,21 @@ import {
     TextAlignJustify,
     User,
     UserPlus,
+    Users,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Loading from '../Loading'
+import C2CToggle from './C2CToggle'
 
 interface IProps {
     user?: IUser
+    isC2C?: boolean
 }
 
-export default function UserMenu({ user }: IProps) {
+export default function UserMenu({ user, isC2C = false }: IProps) {
     const [open, setOpen] = useState(false)
     const setLoginModal = useSetAtom(loginModalAtom)
     const setActiveTab = useSetAtom(authModalTabAtom)
@@ -43,7 +46,7 @@ export default function UserMenu({ user }: IProps) {
         fontSize: isMobile || isTablet ? 'text-[16px]' : '',
     }
     const pathname = usePathname()
-    const items = [
+    const navigationItems = [
         {
             key: routes.trangChu.url,
             label: (
@@ -51,43 +54,27 @@ export default function UserMenu({ user }: IProps) {
                     href={routes.trangChu.url}
                     className={`gap-1 !text-black ${styles.fontSize}`}
                 >
-                    <Space className="pl-4 w-full py-3">
+                    <Space className="pl-4 w-full py-4">
                         <Home size={styles.iconSize} />
                         {t('common.home')}
                     </Space>
                 </Link>
             ),
         },
-        ...(user
+        ...(isC2C
             ? [
                 {
-                    key: routes.trangCaNhan.url,
+                    key: '/quan-ly',
                     label: (
                         <Link
-                            href={`${process.env.NEXT_PUBLIC_API_URL}/${routes.trangCaNhan.url}`}
-                            className={`gap-1 !text-black ${styles.fontSize}`}
+                            href="/quan-ly"
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
                         >
-                            <Space className="pl-4 w-full py-3">
-                                <User size={styles.iconSize} />
-                                {t('common.profile')}
+                            <Space className="pl-4 w-full py-4">
+                                <Container size={styles.iconSize} />
+                                {t('c2c.manageTransactions')}
                             </Space>
                         </Link>
-                    ),
-                },
-                {
-                    key: 'logout',
-                    label: (
-                        <Flex
-                            gap={5}
-                            align="center"
-                            className={`!cursor-pointer ${styles.fontSize} !w-full`}
-                            onClick={() => logoutAsync()}
-                        >
-                            <Space className="pl-4 w-full py-3">
-                                <LogOut size={styles.iconSize} />
-                                {t('common.logout')}
-                            </Space>
-                        </Flex>
                     ),
                 },
             ]
@@ -97,9 +84,9 @@ export default function UserMenu({ user }: IProps) {
                     label: (
                         <Link
                             href={routes.sanPham.url}
-                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full -mt-4`}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
                         >
-                            <Space className="border-gray-200 w-full py-5 justify-center">
+                            <Space className="pl-4 w-full py-4">
                                 <Container size={styles.iconSize} />
                                 {t('common.product')}
                             </Space>
@@ -113,9 +100,23 @@ export default function UserMenu({ user }: IProps) {
                             href={routes.taiLieuDienTu.url}
                             className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
                         >
-                            <Space className="border-gray-200 w-full py-5 justify-center">
+                            <Space className="pl-4 w-full py-4">
                                 <BookText size={styles.iconSize} />
                                 {t('common.document')}
+                            </Space>
+                        </Link>
+                    ),
+                },
+                {
+                    key: routes.congDong.url,
+                    label: (
+                        <Link
+                            href={routes.congDong.url}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
+                        >
+                            <Space className="pl-4 w-full py-4">
+                                <Users size={styles.iconSize} />
+                                {t('common.community')}
                             </Space>
                         </Link>
                     ),
@@ -125,51 +126,114 @@ export default function UserMenu({ user }: IProps) {
                     label: (
                         <Link
                             href={routes.lienHe.url}
-                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full mb-8`}
+                            className={`flex gap-1 !text-black ${styles.fontSize} !w-full`}
                         >
-                            <Space className="border-gray-200 w-full py-5 justify-center">
+                            <Space className="pl-4 w-full py-4">
                                 <Mail size={styles.iconSize} />
                                 {t('common.contact')}
                             </Space>
                         </Link>
                     ),
                 },
-                {
-                    key: routes.dangKy.url,
-                    label: (
-                        <div onClick={() => { setActiveTab('register'); setLoginModal(true); setOpen(false); }}>
-                            <Button
-                                className="w-full !bg-[var(--light-primary)]"
-                                size="large"
-                            >
-                                <UserPlus
-                                    size={16}
-                                    className="-mt-0.5"
-                                />
-                                {t('common.register')}
-                            </Button>
-                        </div>
-                    ),
-                },
-                {
-                    key: routes.dangNhap.url,
-                    label: (
-                        <div onClick={() => { setActiveTab('login'); setLoginModal(true); setOpen(false); }}>
-                            <Button
-                                type="primary"
-                                className="w-full"
-                                size="large"
-                            >
-                                <LogIn
-                                    size={16}
-                                    className="-mt-0.5"
-                                />
-                                {t('common.login')}
-                            </Button>
-                        </div>
-                    ),
-                },
             ]),
+    ]
+
+    const items = user
+        ? [
+            {
+                key: routes.trangCaNhan.url,
+                label: (
+                    <Link
+                        href={`${process.env.NEXT_PUBLIC_API_URL}/${routes.trangCaNhan.url}`}
+                        className={`gap-1 !text-black ${styles.fontSize}`}
+                    >
+                        <Space className="pl-4 w-full py-3">
+                            <User size={styles.iconSize} />
+                            {t('common.profile')}
+                        </Space>
+                    </Link>
+                ),
+            },
+            {
+                key: 'logout',
+                label: (
+                    <Flex
+                        gap={5}
+                        align="center"
+                        className={`!cursor-pointer ${styles.fontSize} !w-full`}
+                        onClick={() => logoutAsync()}
+                    >
+                        <Space className="pl-4 w-full py-3">
+                            <LogOut size={styles.iconSize} />
+                            {t('common.logout')}
+                        </Space>
+                    </Flex>
+                ),
+            },
+        ]
+        : [
+            {
+                key: 'register',
+                label: (
+                    <div
+                        onClick={() => {
+                            setActiveTab('register')
+                            setLoginModal(true)
+                            setOpen(false)
+                        }}
+                        className='mt-5'
+                    >
+                        <Button
+                            className="w-full !bg-[var(--light-primary)]"
+                            size="large"
+                        >
+                            <UserPlus
+                                size={16}
+                                className="-mt-0.5"
+                            />
+                            {t('common.register')}
+                        </Button>
+                    </div>
+                ),
+            },
+            {
+                key: 'login',
+                label: (
+                    <div
+                        onClick={() => {
+                            setActiveTab('login')
+                            setLoginModal(true)
+                            setOpen(false)
+                        }}
+                        className='mt-5'
+                    >
+                        <Button
+                            type="primary"
+                            className="w-full"
+                            size="large"
+                        >
+                            <LogIn
+                                size={16}
+                                className="-mt-0.5"
+                            />
+                            {t('common.login')}
+                        </Button>
+                    </div>
+                ),
+            },
+        ]
+
+    const menuItems = [...navigationItems, ...items]
+    const mobileMenuItems = [
+        {
+            key: 'c2c-toggle',
+            label: (
+                <div className="px-4 py-3">
+                    <C2CToggle />
+                </div>
+            ),
+        },
+        ...menuItems,
     ]
 
     useEffect(() => {
@@ -187,7 +251,7 @@ export default function UserMenu({ user }: IProps) {
                     <Drawer
                         title={
                             user ? (
-                                <div className='w-full line-clamp-1 pl-2'>
+                                <div className="w-full line-clamp-1 pl-2">
                                     {t('auth.loginSuccess', {
                                         name: user.fullName,
                                     })}
@@ -196,7 +260,7 @@ export default function UserMenu({ user }: IProps) {
                                 ''
                             )
                         }
-                        className='custom-drawer'
+                        className="custom-drawer"
                         placement={'right'}
                         size={500}
                         onClose={() => setOpen(false)}
@@ -206,7 +270,7 @@ export default function UserMenu({ user }: IProps) {
                             gutter={8}
                             className="!-mt-2"
                         >
-                            {items.map((i) => (
+                            {mobileMenuItems.map((i) => (
                                 <Col
                                     span={
                                         i.key === 'login' ||
@@ -225,7 +289,7 @@ export default function UserMenu({ user }: IProps) {
                 </>
             ) : (
                 <Dropdown
-                    menu={{ items }}
+                    menu={{ items: menuItems }}
                     trigger={['click']}
                 >
                     <Flex

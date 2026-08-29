@@ -110,109 +110,111 @@ function MemberProfileContent({ params }: { params: Promise<{ id: string }> }) {
             </div>
         )
     return (
-        <main className="custom-breadcrumb !pt-3 !pb-20">
+        <main className="custom-breadcrumb !pt-3 !pb-20 max-md:!pt-0">
             <div className="mb-8 w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
                 <h1 className="text-center text-lg text-white font-semibold">
                     TRANG CÁ NHÂN
                 </h1>
             </div>
-            <Link
-                href={`/${locale}/cong-dong`}
-                className="inline-flex items-center gap-2 text-gray-500 hover:!text-[var(--primary)] !text-gray-500"
-            >
-                <ArrowLeft size={16} /> {t('back')}
-            </Link>
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#dbe3e8] bg-[#f4f7f8] shadow-sm">
-                <div className="flex flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:px-8">
-                    <Avatar size={92} src={profile.avatar} icon={<UserRound />} className="shrink-0 !bg-[#0b2b3d] !text-3xl !text-white" />
-                    <div className="min-w-0 flex-1">
-                        <Flex align="center" gap={10} wrap="wrap">
-                            <Typography.Title level={2} className="!m-0 !text-[#0b2b3d]">{profile.fullName}</Typography.Title>
-                            <Tag color="cyan" className="!m-0">{t('member')}</Tag>
-                        </Flex>
-                        <Typography.Text className="text-sm text-gray-500">{t('joined', { year: new Date(profile.createdAt).getFullYear() })}</Typography.Text>
-                        <Flex gap={30} className="!mt-5">
-                            {[[profile.posts?.length || 0, t('postsCount')], [profile.friendsCount || 0, t('friendsCount')], [(profile.likesCount || 0).toLocaleString('vi-VN'), t('likesCount')]].map(([value, label]) => <div key={String(label)}><div className="text-xl font-semibold leading-5 text-[#0b2b3d]">{value}</div><div className="mt-1 text-xs text-gray-500">{label}</div></div>)}
-                        </Flex>
-                    </div>
-                    {!isSelf && user && <Flex gap={10} className="shrink-0" wrap="wrap">
-                        <Button type="primary" icon={<UserPlus size={16} />} loading={busy} onClick={friend} className="!rounded-full !border-0 !bg-[#ff5a1f] !px-5 !font-semibold">{friendshipLabel}</Button>
-                        <Button icon={<MessageCircle size={16} />} onClick={() => window.dispatchEvent(new CustomEvent('messenger:open', { detail: profile }))} className="!rounded-full !px-5 !font-semibold">{t('message')}</Button>
-                    </Flex>}
-                </div>
-            </section>
-            <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-                <section>
-                    <Typography.Title
-                        level={3}
-                        className="!mb-4"
-                    >
-                        {t('posts')}
-                    </Typography.Title>
-                    <div className="space-y-4">
-                        {profile.posts?.length ? (
-                            profile.posts.map((post: any) => (
-                                <article
-                                    key={post._id}
-                                    className="rounded-2xl border border-[#e6e9f3] bg-white p-5 shadow-sm transition-transform hover:-translate-y-0.5"
-                                >
-                                    <Typography.Text className="text-xs uppercase text-gray-400">
-                                        {new Date(post.createdAt).toLocaleString('vi-VN', {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric',
-                                            hour12: false,
-                                        })}
-                                    </Typography.Text>
-                                    <Link
-                                        href={`/${locale}/cong-dong/bai-viet/${post._id}`}
-                                    >
-                                        <Typography.Title
-                                            level={4}
-                                            className="!mb-2 !mt-2 hover:!text-[var(--primary)]"
-                                        >
-                                            {post.title}
-                                        </Typography.Title>
-                                    </Link>
-                                    <RichTextContent
-                                        html={post.content}
-                                        className="line-clamp-3 text-gray-600"
-                                    />
-                                    <div className="mt-4 text-xs text-gray-400">
-                                        {post.likesCount} lượt thích ·{' '}
-                                        {post.commentsCount} bình luận
-                                    </div>
-                                </article>
-                            ))
-                        ) : (
-                            <div className="rounded-2xl border border-dashed border-[#cbd2e6] bg-white/60 p-10 text-center text-gray-500">
-                                {t('noPosts')}
-                            </div>
-                        )}
+            <div className='max-md:px-3'>
+                <Link
+                    href={`/${locale}/cong-dong`}
+                    className="inline-flex items-center gap-2 text-gray-500 hover:!text-[var(--primary)] !text-gray-500"
+                >
+                    <ArrowLeft size={16} /> {t('back')}
+                </Link>
+                <section className="mt-5 overflow-hidden rounded-2xl border border-[#dbe3e8] bg-[#f4f7f8] shadow-sm">
+                    <div className="flex flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:px-8">
+                        <Avatar size={92} src={profile.avatar} icon={<UserRound />} className="shrink-0 !bg-[#0b2b3d] !text-3xl !text-white" />
+                        <div className="min-w-0 flex-1">
+                            <Flex align="center" gap={10} wrap="wrap">
+                                <Typography.Title level={2} className="!m-0 !text-[#0b2b3d]">{profile.fullName}</Typography.Title>
+                                <Tag color="cyan" className="!m-0">{t('member')}</Tag>
+                            </Flex>
+                            <Typography.Text className="text-sm text-gray-500">{t('joined', { year: new Date(profile.createdAt).getFullYear() })}</Typography.Text>
+                            <Flex gap={30} className="!mt-5">
+                                {[[profile.posts?.length || 0, t('postsCount')], [profile.friendsCount || 0, t('friendsCount')], [(profile.likesCount || 0).toLocaleString('vi-VN'), t('likesCount')]].map(([value, label]) => <div key={String(label)}><div className="text-xl font-semibold leading-5 text-[#0b2b3d]">{value}</div><div className="mt-1 text-xs text-gray-500">{label}</div></div>)}
+                            </Flex>
+                        </div>
+                        {!isSelf && user && <Flex gap={10} className="shrink-0" wrap="wrap">
+                            <Button type="primary" icon={<UserPlus size={16} />} loading={busy} onClick={friend} className="!rounded-full !border-0 !bg-[#ff5a1f] !px-5 !font-semibold">{friendshipLabel}</Button>
+                            <Button icon={<MessageCircle size={16} />} onClick={() => window.dispatchEvent(new CustomEvent('messenger:open', { detail: profile }))} className="!rounded-full !px-5 !font-semibold">{t('message')}</Button>
+                        </Flex>}
                     </div>
                 </section>
-                <aside className="h-fit rounded-2xl border border-[#e6e9f3] bg-white p-5 shadow-sm">
-                    <Typography.Title
-                        level={5}
-                        className="!mt-0"
-                    >
-                        {t('about')}
-                    </Typography.Title>
-                    <Link href={`mailto:${profile.email}`}>
-                        <Typography.Text className="text-gray-500 flex items-center gap-2 underline">
-                            <Mail color='#ef5a22' className='text-[#ef5a22]' size={16} />{profile.email || t('member')}
-                        </Typography.Text>
-                    </Link>
-                    {profile.phone && (
-                        <Link href={`tel:${profile.phone}`}>
-                            <Typography.Text className="!mb-0 !mt-3 text-gray-500 flex items-center gap-2 underline">
-                                <Phone color='#ef5a22' className='text-[#ef5a22]' size={16} />{profile.phone}
+                <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+                    <section>
+                        <Typography.Title
+                            level={3}
+                            className="!mb-4"
+                        >
+                            {t('posts')}
+                        </Typography.Title>
+                        <div className="space-y-4">
+                            {profile.posts?.length ? (
+                                profile.posts.map((post: any) => (
+                                    <article
+                                        key={post._id}
+                                        className="rounded-2xl border border-[#e6e9f3] bg-white p-5 shadow-sm transition-transform hover:-translate-y-0.5"
+                                    >
+                                        <Typography.Text className="text-xs uppercase text-gray-400">
+                                            {new Date(post.createdAt).toLocaleString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour12: false,
+                                            })}
+                                        </Typography.Text>
+                                        <Link
+                                            href={`/${locale}/cong-dong/bai-viet/${post._id}`}
+                                        >
+                                            <Typography.Title
+                                                level={4}
+                                                className="!mb-2 !mt-2 hover:!text-[var(--primary)]"
+                                            >
+                                                {post.title}
+                                            </Typography.Title>
+                                        </Link>
+                                        <RichTextContent
+                                            html={post.content}
+                                            className="line-clamp-3 text-gray-600"
+                                        />
+                                        <div className="mt-4 text-xs text-gray-400">
+                                            {post.likesCount} lượt thích ·{' '}
+                                            {post.commentsCount} bình luận
+                                        </div>
+                                    </article>
+                                ))
+                            ) : (
+                                <div className="rounded-2xl border border-dashed border-[#cbd2e6] bg-white/60 p-10 text-center text-gray-500">
+                                    {t('noPosts')}
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                    <aside className="h-fit rounded-2xl border border-[#e6e9f3] bg-white p-5 shadow-sm">
+                        <Typography.Title
+                            level={5}
+                            className="!mt-0"
+                        >
+                            {t('about')}
+                        </Typography.Title>
+                        <Link href={`mailto:${profile.email}`}>
+                            <Typography.Text className="text-gray-500 flex items-center gap-2 underline">
+                                <Mail color='#ef5a22' className='text-[#ef5a22]' size={16} />{profile.email || t('member')}
                             </Typography.Text>
                         </Link>
-                    )}
-                </aside>
+                        {profile.phone && (
+                            <Link href={`tel:${profile.phone}`}>
+                                <Typography.Text className="!mb-0 !mt-3 text-gray-500 flex items-center gap-2 underline">
+                                    <Phone color='#ef5a22' className='text-[#ef5a22]' size={16} />{profile.phone}
+                                </Typography.Text>
+                            </Link>
+                        )}
+                    </aside>
+                </div>
             </div>
         </main>
     )

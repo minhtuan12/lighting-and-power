@@ -287,6 +287,7 @@ export default function QuanLyPage() {
                                     pageSize: 10,
                                     hideOnSinglePage: true,
                                 }}
+                                scroll={{ x: 300 }}
                             />
                         ),
                     },
@@ -300,6 +301,7 @@ export default function QuanLyPage() {
                                 dataSource={[]}
                                 locale={{ emptyText: t('noOrders') }}
                                 pagination={{ hideOnSinglePage: true }}
+                                scroll={{ x: 300 }}
                             />
                         ),
                     },
