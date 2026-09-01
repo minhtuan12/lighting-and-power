@@ -26,7 +26,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Loading from '../Loading'
-import C2CToggle from './C2CToggle'
 
 interface IProps {
     user?: IUser
@@ -60,6 +59,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                     </Space>
                 </Link>
             ),
+            disabledDesktop: true,
         },
         ...(isC2C
             ? [
@@ -92,6 +92,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                             </Space>
                         </Link>
                     ),
+                    disabledDesktop: true,
                 },
                 {
                     key: routes.taiLieuDienTu.url,
@@ -106,6 +107,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                             </Space>
                         </Link>
                     ),
+                    disabledDesktop: true,
                 },
                 {
                     key: routes.congDong.url,
@@ -120,6 +122,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                             </Space>
                         </Link>
                     ),
+                    disabledDesktop: true,
                 },
                 {
                     key: routes.lienHe.url,
@@ -134,6 +137,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                             </Space>
                         </Link>
                     ),
+                    disabledDesktop: true,
                 },
             ]),
     ]
@@ -223,16 +227,16 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
             },
         ]
 
-    const menuItems = [...navigationItems, ...items]
+    const menuItems: any = [...navigationItems, ...items]
     const mobileMenuItems = [
-        {
-            key: 'c2c-toggle',
-            label: (
-                <div className="px-4 py-3">
-                    <C2CToggle />
-                </div>
-            ),
-        },
+        // {
+        //     key: 'c2c-toggle',
+        //     label: (
+        //         <div className="px-4 py-3">
+        //             <C2CToggle />
+        //         </div>
+        //     ),
+        // },
         ...menuItems,
     ]
 
@@ -289,7 +293,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                 </>
             ) : (
                 <Dropdown
-                    menu={{ items: menuItems }}
+                    menu={{ items: menuItems.filter((i: any) => !i.disabledDesktop) }}
                     trigger={['click']}
                 >
                     <Flex

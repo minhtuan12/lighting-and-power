@@ -1,8 +1,8 @@
 'use client'
 
 import { Store } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 export default function C2CToggle() {
     const t = useTranslations('c2c')
@@ -22,10 +22,10 @@ export default function C2CToggle() {
             window.location.href = window.location.protocol + '//c2c.' + host
         }
     }
-    
+
     return (
-        <div 
-            onClick={handleToggle} 
+        <div
+            onClick={handleToggle}
             className="flex items-center gap-2 cursor-pointer font-bold text-[var(--primary)] hover:opacity-80 transition-opacity"
         >
             <Store size={22} />

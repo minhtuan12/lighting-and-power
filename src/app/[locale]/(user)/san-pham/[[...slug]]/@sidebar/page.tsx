@@ -3,7 +3,7 @@ import DefaultImage from "@/components/DefaultImage"
 import { routes } from "@/constants/routes"
 import { getCategories } from "@/fetch-data/categories"
 import { getProducts, IProductResponse } from "@/fetch-data/products"
-import { getCategoryChain } from "@/lib/utils"
+import { capitalizeFirstLetterEachWord, getCategoryChain } from "@/lib/utils"
 import { ICategory } from "@/types/category"
 import { SearchParams } from "@/types/general"
 import { IProduct } from "@/types/product"
@@ -82,30 +82,41 @@ interface SidebarProps {
 
 export default async function ({ params, searchParams }: SidebarProps) {
     const { slug: slugs } = await params
-    const { lastSlug, isLastChild, isProductDetail } = await getCategoryChain(slugs || [])
+    const { lastSlug, isLastChild, isProductDetail, categories } = await getCategoryChain(slugs || [])
 
     const [categoriesData, productsData] = await Promise.all([
         ...(isProductDetail
             ? [Promise.resolve({ data: [] })]
             : isLastChild
-            ? [getProducts({ categorySlug: lastSlug })]
-            : [getCategories(lastSlug ? { parentSlug: lastSlug } : {})]),
+                ? [getProducts({ categorySlug: lastSlug })]
+                : [getCategories(lastSlug ? { parentSlug: lastSlug } : {})]),
         getProducts({ isFeatured: true }),
     ])
 
     return (
-        <Flex gap={30} className={`w-full lg:w-[260px]`} vertical>
-            {isLastChild && !isProductDetail ? (
-                <Filters searchParams={(await searchParams) as any} />
-            ) : !isProductDetail ? (
-                <CategorySidebar
-                    slugs={slugs || []}
-                    categories={categoriesData.data as ICategory[]}
+        <Flex gap={6} className={`w-full lg:w-[260px] !h-fit lg:!sticky lg:!top-41`} vertical>
+            {isLastChild && (
+                <Flex className="!mb-2 lg:!sticky lg:!top-[160px]">
+                    <h4 className="text-lg font-semibold">
+                        {capitalizeFirstLetterEachWord(
+                            categories[categories.length - 1].name ?? "",
+                        )}
+                    </h4>
+                </Flex>
+            )}
+            <Flex gap={30} className={`w-full lg:w-[260px] !h-fit lg:!sticky lg:!top-50`} vertical>
+                {isLastChild && !isProductDetail ? (
+                    <Filters searchParams={(await searchParams) as any} />
+                ) : !isProductDetail ? (
+                    <CategorySidebar
+                        slugs={slugs || []}
+                        categories={categoriesData.data as ICategory[]}
+                    />
+                ) : null}
+                <TopProductsSidebar
+                    products={(productsData as IProductResponse).data.products}
                 />
-            ) : null}
-            <TopProductsSidebar
-                products={(productsData as IProductResponse).data.products}
-            />
+            </Flex>
         </Flex>
     )
 }

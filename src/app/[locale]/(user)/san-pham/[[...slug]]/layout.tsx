@@ -2,7 +2,6 @@ import { Icon } from "@/components/Icon"
 import Loading from "@/components/Loading"
 import { routes } from "@/constants/routes"
 import {
-    capitalizeFirstLetterEachWord,
     CategoryChainResult,
     getCategoryChain
 } from "@/lib/utils"
@@ -62,7 +61,7 @@ export default async function ProductLayout({
     params: Promise<{ slug?: string[] }>
 }>) {
     const { slug: slugs } = await params
-    const { categories, isLastChild } = await getCategoryChain(slugs || [])
+    const { categories } = await getCategoryChain(slugs || [])
     const breadcrumb = buildBreadcrumbFromChain(categories)
 
     return (
@@ -75,15 +74,6 @@ export default async function ProductLayout({
         >
             <Flex gap={10} vertical className="custom-breadcrumb max-xl:!px-6 max-lg:!mt-20 !mb-20">
                 <Breadcrumb items={breadcrumb} separator=">" />
-                {isLastChild && (
-                    <Flex className="!mb-2">
-                        <h4 className="text-lg">
-                            {capitalizeFirstLetterEachWord(
-                                categories[categories.length - 1].name ?? "",
-                            )}
-                        </h4>
-                    </Flex>
-                )}
                 <Flex gap={16} justify="space-between" className="max-md:!flex-col">
                     {sidebar}
                     {content}

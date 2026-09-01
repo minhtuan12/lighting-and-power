@@ -3,13 +3,11 @@ import { getCurrentUser } from '@/fetch-data/auth'
 import { ICategory } from '@/types/category'
 import { IConfig } from '@/types/config'
 import { Col, Flex, Menu, MenuProps, Row } from 'antd'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, MapPinHouse } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import Cart from '../Cart'
 import { Icon } from '../Icon'
-import C2CToggle from './C2CToggle'
 import HeaderAuthButtons from './HeaderAuthButtons'
 import NotificationBell from './NotificationBell'
 import UserMenu from './UserMenu'
@@ -133,7 +131,12 @@ export default async function Header({
                         span={8}
                         style={{ display: 'flex', justifyContent: 'left' }}
                     >
-                        <C2CToggle />
+                        {/* <C2CToggle /> */}
+                        <MapPinHouse size={25} color='#000f8f' />
+                        <span className="ml-2 text-[14px] text-[#000f8f] font-bold mt-1">
+                            {/* {config.address} */}
+                            2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP. HCM
+                        </span>
                     </Col>
                     <Col
                         span={8}
@@ -193,14 +196,14 @@ export default async function Header({
                                 align="center"
                                 gap={12}
                             >
-                                {!isC2C &&
+                                {/* {!isC2C &&
                                     <Link
                                         href={routes.gioHang.url}
-                                        className="flex items-center mr-5"
+                                        className="flex items-center mr-2"
                                     >
                                         <Cart />
                                     </Link>
-                                }
+                                } */}
                                 <NotificationBell />
                                 <UserMenu user={data} isC2C={isC2C} />
                             </Flex>
@@ -230,11 +233,11 @@ export default async function Header({
                         gap={24}
                     >
                         <Flex align="center" gap={24}>
-                            {success && data && !isC2C && (
+                            {/* {success && data && !isC2C && (
                                 <Link href={routes.gioHang.url} className="flex items-center">
                                     <Cart />
                                 </Link>
-                            )}
+                            )} */}
                             {success && data && <NotificationBell />}
                         </Flex>
                         <UserMenu user={data} isC2C={isC2C} />

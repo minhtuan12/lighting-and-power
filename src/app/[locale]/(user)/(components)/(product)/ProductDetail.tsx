@@ -5,7 +5,6 @@ import { getProductDetail } from '@/fetch-data/products'
 import { IProduct } from '@/types/product'
 import { Col, Flex, Row, Table } from 'antd'
 import { getTranslations } from 'next-intl/server'
-import AddToCart from '../AddToCart'
 import AddToFavourite from '../AddToFavourite'
 import ProductComments from './ProductComments'
 import RelatedProducts from './RelatedProducts'
@@ -191,12 +190,12 @@ export default async function ProductDetail({
                                         </span>
                                         <span>{t('multiple')}: 1</span>
                                     </Flex>
-                                    <AddToCart
+                                    {/* <AddToCart
                                         product={product}
                                         size="large"
                                         minQuantity={product.minOrderQuantity}
                                         maxQuantity={product.stock}
-                                    />
+                                    /> */}
                                 </Flex>
                             </Col>
                             {product.priceTiers &&

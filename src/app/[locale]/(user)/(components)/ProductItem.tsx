@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl"
 import Image from "next/image"
 import Link from "next/link"
 import RemainingStock from "./(product)/RemainingStock"
-import AddToCart from "./AddToCart"
 import AddToFavourite from "./AddToFavourite"
 
 interface IProps {
@@ -66,13 +65,13 @@ function ItemContent({ item, className, enableAddToCart }: IProps) {
                             </Flex>
                         )}
                         {item.stock && <RemainingStock stock={item.stock} />}
-                        {enableAddToCart && (
+                        {/* {enableAddToCart && (
                             <AddToCart
                                 product={item}
                                 minQuantity={item.minOrderQuantity}
                                 maxQuantity={item.stock}
                             />
-                        )}
+                        )} */}
                     </Flex>
                 </Flex>
             </Flex>

@@ -105,7 +105,7 @@ export default async function ({ params, searchParams }: SlugPageProps) {
 
     // ========= Product List or Category List ==========
     return (
-        <Flex vertical gap={24} className="flex-1 max-lg:!mt-3">
+        <Flex vertical gap={24} className="flex-1 max-lg:!mt-3 !mt-[42px]">
             <div className={`grid ${isLastChild ? 'max-[465px]:grid-cols-[repeat(auto-fill,100%)] grid-cols-[repeat(auto-fill,200px)]' : 'max-[465px]:grid-cols-[repeat(auto-fill,100%)] grid-cols-[repeat(auto-fill,190px)]'} gap-3 justify-end max-lg:justify-start h-fit`}>
                 {isLastChild ? (
                     <ProductsContent data={productsData} />
