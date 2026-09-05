@@ -24,6 +24,7 @@ const DocumentSchema = new Schema(
         },
         type: {
             type: String,
+            ref: "DocumentCategory",
             default: "other",
         },
         contentType: {
@@ -86,6 +87,14 @@ DocumentSchema.index({ type: 1 })
 DocumentSchema.index({ isPublished: 1 })
 DocumentSchema.index({ createdAt: -1 })
 DocumentSchema.index({ type: 1, order: 1 })
+
+// Documents store the category slug in `type`, so populate the category by slug.
+DocumentSchema.virtual('typeInfo', {
+    ref: 'DocumentCategory',
+    localField: 'type',
+    foreignField: 'slug',
+    justOne: true,
+})
 
 const Document =
     mongoose.models.Document ||

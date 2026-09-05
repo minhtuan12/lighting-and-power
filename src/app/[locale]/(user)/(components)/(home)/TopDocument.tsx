@@ -1,32 +1,53 @@
-import Carousel from "@/components/Carousel"
-import { IDocument } from "@/types/document"
-import { Flex } from "antd"
-import Image from "next/image"
-import Link from "next/link"
+import Carousel from '@/components/Carousel'
+import { IDocument, IDocumentType } from '@/types/document'
+import { Flex } from 'antd'
+import Image from 'next/image'
+import Link from 'next/link'
 
 function DocumentItem({ item }: { item: IDocument }) {
+    const type = typeof item.type === 'object' ? item.type : null
+    const categorySlug =
+        item.type && typeof item.type === 'string'
+            ? item.type
+            : ((item.type as IDocumentType).slug || '')
     return (
         <Link
-            href={`tai-lieu/${item._id}`}
+            href={`tai-lieu-dien-tu?loai=${encodeURIComponent(categorySlug)}&muc=${encodeURIComponent(item.slug || '')}`}
             style={{
-                textDecoration: "none",
+                textDecoration: 'none',
             }}
             aria-label={`Browse ${item.title}`}
             className="h-auto lg:!w-[321px] !w-full flex snap-start"
         >
-            <Flex vertical className="w-full h-auto" gap={16}>
+            <Flex
+                vertical
+                className="w-full h-auto"
+                gap={16}
+            >
                 <div className="relative w-full h-[173px] border-[#B7B7B7] border">
                     <Image
-                        alt={item.title ?? ""}
-                        src={"/images/electronic.jpg"}
+                        alt={item.title ?? ''}
+                        src={'/images/electronic.jpg'}
                         className="w-full h-full absolute object-cover"
                         fill
                         loading="lazy"
                     />
                 </div>
-                <h5 className="text-center text-black text-[14px] text-justify">
-                    {item.title}
-                </h5>
+                <Flex
+                    vertical
+                    justify="center"
+                    align="center"
+                    className="w-full"
+                >
+                    {(type?.name || type?.label) && (
+                        <h5 className="mb-2 text-center text-black text-[14px] text-justify font-semibold">
+                            ({type.name || type.label})
+                        </h5>
+                    )}
+                    <h5 className="px-3 !text-center text-black text-[14px] text-justify">
+                        {item.title}
+                    </h5>
+                </Flex>
             </Flex>
         </Link>
     )
@@ -38,10 +59,12 @@ export default function TopDocuments({
     documents: IDocument[]
 }) {
     return (
-        <Flex vertical gap={12} className="max-md:!px-6 max-lg:!px-10 !mb-20">
-            <h3
-                className="text-center text-white font-semibold w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]"
-            >
+        <Flex
+            vertical
+            gap={12}
+            className="max-md:!px-6 max-lg:!px-10 !mb-20"
+        >
+            <h3 className="text-center text-white font-semibold w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
                 SỔ TAY NGÀNH ĐIỆN TỬ
             </h3>
             <Carousel<IDocument>
@@ -49,7 +72,10 @@ export default function TopDocuments({
                 className="auto-cols-[100%] md:auto-cols-[calc(50%-16px)] lg:auto-cols-[321px] "
             >
                 {documents.map((item) => (
-                    <DocumentItem key={item._id} item={item} />
+                    <DocumentItem
+                        key={item._id}
+                        item={item}
+                    />
                 ))}
             </Carousel>
         </Flex>

@@ -7,3 +7,8 @@ export const filterDocumentAtom = atom({
     contentType: undefined as string | undefined,
     type: undefined as string | undefined,
 })
+
+export const selectedDocumentAtom = atom<{
+    categorySlug: string
+    sectionSlug: string
+} | null>(null)

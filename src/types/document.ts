@@ -2,7 +2,7 @@ export interface IDocument {
     _id?: string
     title: string
     description?: string
-    type: string
+    type: string | IDocumentType
     contentType: ContentType // file upload hoặc text content
     content?: string // Text content nếu contentType = 'text'
     fileUrl?: string // URL của file nếu contentType = 'file'
@@ -18,6 +18,8 @@ export interface IDocument {
 }
 
 export interface IDocumentType {
+    name?: string
+    slug?: string
     label: string
     value: string
     color: string

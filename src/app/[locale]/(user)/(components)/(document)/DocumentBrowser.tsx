@@ -3,6 +3,7 @@
 import FileViewer from '@/components/FileViewer'
 import Loading from '@/components/Loading'
 import RichTextContent from '@/components/RichTextContent'
+import { selectedDocumentAtom } from '@/stores/document'
 import { IDocument } from '@/types/document'
 import { IDocumentCategory } from '@/types/document-category'
 import { DownOutlined } from '@ant-design/icons'
@@ -16,6 +17,7 @@ import {
     Watermark,
     WatermarkProps,
 } from 'antd'
+import { useAtom } from 'jotai'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
@@ -46,14 +48,27 @@ export default function DocumentBrowser({
 }: {
     categories: IDocumentCategory[]
 }) {
-    const [activeCategory, setActiveCategory] =
-        useState<IDocumentCategory | null>(categories?.[0] ?? null)
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('loai');
+    const section = urlParams.get('muc');
+    const [selectedDocument, setSelectedDocument] = useAtom(selectedDocumentAtom)
+    const [activeCategory, setActiveCategory] = useState<IDocumentCategory | null>(() => {
+        const selectedCategory = selectedDocument
+            ? categories.find((category) => category.slug === selectedDocument.categorySlug)
+            : null
+        return (categories.find(c => c.slug === category)) || (selectedCategory ?? categories?.[0] ?? null)
+    })
     const [sections, setSections] = useState<IDocument[]>([])
     const [activeSection, setActiveSection] = useState<IDocument | null>(null)
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
     const [isLoadingSections, setIsLoadingSections] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const t = useTranslations('common')
+
+    useEffect(() => {
+        if (!activeCategory?.slug) return
+        setActiveSection(sections.find((s) => s.slug === section) || null)
+    }, [sections, activeCategory?.slug]);
 
     const [config] = useState<WatermarkConfig>({
         content: 'Lighting & Power',
@@ -81,14 +96,34 @@ export default function DocumentBrowser({
     useEffect(() => {
         if (!activeCategory?.slug) return
 
+        let cancelled = false
         setIsLoadingSections(true)
         fetchSections(activeCategory.slug)
             .then((data) => {
+                if (cancelled) return
                 setSections(data)
-                setActiveSection(data[0] || null)
+                const selected = selectedDocument?.categorySlug === activeCategory.slug
+                    ? data.find((section) => section.slug === selectedDocument.sectionSlug)
+                    : null
+                setActiveSection(selected || data[0] || null)
+                if (selected) setSelectedDocument(null)
             })
-            .finally(() => setIsLoadingSections(false))
+            .finally(() => {
+                if (!cancelled) setIsLoadingSections(false)
+            })
+        return () => {
+            cancelled = true
+        }
+        // Fetch only when the category changes. Clearing the selection atom after
+        // opening the requested section must not fetch again and reset to section 1.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeCategory?.slug])
+
+    useEffect(() => {
+        if (!selectedDocument) return
+        const category = categories.find((item) => item.slug === selectedDocument.categorySlug)
+        if (category && category.slug !== activeCategory?.slug) setActiveCategory(category)
+    }, [selectedDocument, categories, activeCategory?.slug])
 
     const sectionMenuItems = useMemo(
         () =>

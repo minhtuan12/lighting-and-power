@@ -1,6 +1,7 @@
 import { PAGE_LIMIT } from '@/constants/common'
 import { SlugGenerator } from '@/lib/slug'
 import Document from '@/models/document'
+import DocumentCategory from '@/models/document-category'
 import { IDocument } from '@/types/document'
 import { isValidObjectId } from 'mongoose'
 
@@ -63,6 +64,28 @@ export class DocumentService {
                 query.isPublished = filters.isPublished
             }
 
+            // Public document lists must also respect the publication state of
+            // the category stored in the document's `type` field.
+            if (filters?.isPublished === true) {
+                const unpublishedCategories = await DocumentCategory.find({
+                    isPublished: false,
+                })
+                    .select('slug')
+                    .lean()
+
+                const unpublishedSlugs = unpublishedCategories.map(
+                    (category) => category.slug,
+                )
+                if (unpublishedSlugs.length) {
+                    query.type = {
+                        ...(typeof query.type === 'string'
+                            ? { $eq: query.type }
+                            : query.type),
+                        $nin: unpublishedSlugs,
+                    }
+                }
+            }
+
             if (filters?.search) {
                 query.$or = [
                     { title: { $regex: filters.search, $options: 'i' } },
@@ -77,8 +100,22 @@ export class DocumentService {
                 .limit(PAGE_LIMIT)
                 .lean()
 
+            const categorySlugs = [...new Set(documents.map((document) => document.type))]
+            const categories = await DocumentCategory.find({
+                slug: { $in: categorySlugs },
+            })
+                .select('name slug color')
+                .lean()
+            const categoriesBySlug = new Map(
+                categories.map((category) => [category.slug, category]),
+            )
+
+            const documentsWithCategory = documents.map((document: any) => ({
+                ...document,
+                type: categoriesBySlug.get(document.type) || document.type,
+            }))
             return {
-                documents,
+                documents: documentsWithCategory,
                 total,
                 pages: Math.ceil(total / PAGE_LIMIT),
             }

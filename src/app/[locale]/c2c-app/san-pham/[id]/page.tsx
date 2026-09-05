@@ -85,7 +85,6 @@ export default function ProductDetailPage() {
             .then((res) => res.json())
             .then((data) => {
                 if (data.success) {
-                    console.log(data.data.status)
                     if (data.data.status !== 'active') {
                         router.replace('/')
                         return
