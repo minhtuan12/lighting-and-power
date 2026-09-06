@@ -95,27 +95,14 @@ export class DocumentService {
 
             const total = await Document.countDocuments(query)
             const documents = await Document.find(query)
+                .populate('type')
                 .sort({ type: 1, order: 1, createdAt: -1 })
                 .skip(skip)
                 .limit(PAGE_LIMIT)
                 .lean()
 
-            const categorySlugs = [...new Set(documents.map((document) => document.type))]
-            const categories = await DocumentCategory.find({
-                slug: { $in: categorySlugs },
-            })
-                .select('name slug color')
-                .lean()
-            const categoriesBySlug = new Map(
-                categories.map((category) => [category.slug, category]),
-            )
-
-            const documentsWithCategory = documents.map((document: any) => ({
-                ...document,
-                type: categoriesBySlug.get(document.type) || document.type,
-            }))
             return {
-                documents: documentsWithCategory,
+                documents,
                 total,
                 pages: Math.ceil(total / PAGE_LIMIT),
             }

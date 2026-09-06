@@ -447,6 +447,14 @@ export const Documents = () => {
         }
     }
 
+    const categoryMap = useMemo<Map<string, IDocumentCategory>>(
+        () =>
+            new Map(
+                categories.map((cat: IDocumentCategory) => [cat.slug, cat]),
+            ),
+        [categories],
+    )
+
     const columns = [
         {
             title: '',
@@ -470,8 +478,8 @@ export const Documents = () => {
             key: 'type',
             width: 150,
             align: 'center',
-            render: (type: string) => {
-                const typeConfig = categoryMap.get(type)
+            render: (type: string, record: IDocument) => {
+                const typeConfig = categoryMap.get((record.type as IDocumentCategory).slug)
                 return (
                     <Tag
                         color={typeConfig?.color}
@@ -654,17 +662,9 @@ export const Documents = () => {
         () =>
             categories.map((cat: IDocumentCategory) => ({
                 label: cat.name,
-                value: cat.slug,
+                value: String(cat._id),
                 color: cat.color,
             })),
-        [categories],
-    )
-
-    const categoryMap = useMemo<Map<string, IDocumentCategory>>(
-        () =>
-            new Map(
-                categories.map((cat: IDocumentCategory) => [cat.slug, cat]),
-            ),
         [categories],
     )
 
@@ -700,7 +700,7 @@ export const Documents = () => {
         if (!filter.type && categories.length > 0) {
             setFilter((prev) => ({
                 ...prev,
-                type: categories[0].slug,
+                type: String(categories[0]._id),
             }))
         }
     }, [categories, filter.type, setFilter])

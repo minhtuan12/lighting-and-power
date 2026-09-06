@@ -191,8 +191,6 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, class
         "main" | "highlighter" | "link"
     >("main")
     const toolbarRef = useRef<HTMLDivElement>(null)
-    const isInitialMount = useRef(true)
-
     const editor = useEditor({
         immediatelyRender: false,
         editorProps: {
@@ -240,11 +238,14 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, class
     })
 
     useEffect(() => {
-        if (editor && value !== undefined && isInitialMount.current) {
-            editor.commands.setContent(value)
-            isInitialMount.current = false
+        if (!editor || value === undefined) return
+
+        // Keep the editor in sync when the parent switches documents, while
+        // avoiding a reset on every keystroke from the controlled value.
+        if (JSON.stringify(editor.getJSON()) !== JSON.stringify(value)) {
+            editor.commands.setContent(value, { emitUpdate: false })
         }
-    }, [editor])
+    }, [editor, value])
 
     useEffect(() => {
         if (!isMobile && mobileView !== "main") {

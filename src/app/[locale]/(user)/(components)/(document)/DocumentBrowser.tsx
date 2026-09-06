@@ -98,7 +98,7 @@ export default function DocumentBrowser({
 
         let cancelled = false
         setIsLoadingSections(true)
-        fetchSections(activeCategory.slug)
+        fetchSections(String(activeCategory._id))
             .then((data) => {
                 if (cancelled) return
                 setSections(data)
