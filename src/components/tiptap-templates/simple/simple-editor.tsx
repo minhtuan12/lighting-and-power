@@ -182,9 +182,10 @@ interface IProps {
     placeholder?: string
     setUploading?: (loading: boolean) => void
     className?: string;
+    noBorder?: boolean;
 }
 
-export function SimpleEditor({ value, onChange, placeholder, setUploading, className }: IProps) {
+export function SimpleEditor({ value, onChange, placeholder, setUploading, className, noBorder }: IProps) {
     const isMobile = useIsBreakpoint()
     const { height } = useWindowSize()
     const [mobileView, setMobileView] = useState<
@@ -240,9 +241,21 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, class
     useEffect(() => {
         if (!editor || value === undefined) return
 
+        // The parent usually updates `value` on every keystroke. Never replace
+        // the document while the editor is focused, otherwise the browser
+        // loses the just-typed character and caret position (notably spaces).
+        if (editor.isFocused) return
+
         // Keep the editor in sync when the parent switches documents, while
         // avoiding a reset on every keystroke from the controlled value.
-        if (JSON.stringify(editor.getJSON()) !== JSON.stringify(value)) {
+        const currentContent =
+            typeof value === "string"
+                ? editor.getHTML()
+                : JSON.stringify(editor.getJSON())
+        const nextContent =
+            typeof value === "string" ? value : JSON.stringify(value)
+
+        if (currentContent !== nextContent) {
             editor.commands.setContent(value, { emitUpdate: false })
         }
     }, [editor, value])
@@ -282,7 +295,7 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, class
                 <EditorContent
                     editor={editor}
                     role="presentation"
-                    className={`simple-editor-content ${className}`}
+                    className={`simple-editor-content ${className} ${noBorder ? '[&_.simple-editor]:!border-none' : ''}`}
                     placeholder={placeholder ?? ""}
                 />
             </EditorContext.Provider>

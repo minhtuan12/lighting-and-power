@@ -821,7 +821,7 @@ export const Documents = () => {
                 open={isModalOpen}
                 onCancel={handleCloseModal}
                 footer={null}
-                width={1500}
+                width={1200}
             >
                 <Form
                     form={form}
@@ -948,6 +948,8 @@ export const Documents = () => {
                                 placeholder="Nhập nội dung mục"
                                 setUploading={setLoadingUploadImage}
                                 onChange={(value: any) => setContent(value)}
+                                className="!max-h-[300px]"
+                                noBorder
                             />
                         </>
                     ) : (
