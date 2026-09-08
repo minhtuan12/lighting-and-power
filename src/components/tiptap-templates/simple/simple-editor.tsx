@@ -212,7 +212,14 @@ export function SimpleEditor({ value, onChange, placeholder, setUploading, class
                 autolink: true,
                 linkOnPaste: true,
             }),
-            Image,
+            Image.configure({
+                resize: {
+                    enabled: true,
+                    directions: ["left", "right"],
+                    minWidth: 50,
+                    alwaysPreserveAspectRatio: true,
+                },
+            }),
             ImageUploadNode.configure({
                 accept: "image/*",
                 maxSize: MAX_FILE_SIZE,

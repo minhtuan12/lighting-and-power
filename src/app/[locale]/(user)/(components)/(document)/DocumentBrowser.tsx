@@ -162,7 +162,7 @@ export default function DocumentBrowser({
         <Flex
             vertical
             gap={20}
-            className="!mt-6 !mb-20 min-h-[calc(100vh-403px)]"
+            className="!mt-6 !mb-10 min-h-[calc(100vh-403px)]"
         >
             <div className="w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
                 <h1 className="text-center text-lg text-white font-semibold">

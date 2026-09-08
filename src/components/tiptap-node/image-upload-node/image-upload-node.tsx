@@ -1,12 +1,12 @@
 "use client"
 
-import { useRef, useState } from "react"
-import type { NodeViewProps } from "@tiptap/react"
-import { NodeViewWrapper } from "@tiptap/react"
-import { Button } from "@/components/tiptap-ui-primitive/button"
 import { CloseIcon } from "@/components/tiptap-icons/close-icon"
 import "@/components/tiptap-node/image-upload-node/image-upload-node.scss"
+import { Button } from "@/components/tiptap-ui-primitive/button"
 import { focusNextNode, isValidPosition } from "@/lib/tiptap-utils"
+import type { NodeViewProps } from "@tiptap/react"
+import { NodeViewWrapper } from "@tiptap/react"
+import { useRef, useState } from "react"
 
 export interface FileItem {
     /**
@@ -79,6 +79,21 @@ export interface UploadOptions {
     onError?: (error: Error) => void
 }
 
+function generateId(): string {
+    if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+    ) {
+        try {
+            return crypto.randomUUID()
+        } catch {
+            // rơi xuống fallback nếu vì lý do gì đó vẫn throw
+        }
+    }
+    // Fallback không phụ thuộc secure context, đủ dùng cho id tạm thời phía client
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 /**
  * Custom hook for managing multiple file uploads with progress tracking and cancellation
  */
@@ -95,7 +110,7 @@ function useFileUpload(options: UploadOptions) {
         }
 
         const abortController = new AbortController()
-        const fileId = crypto.randomUUID()
+        const fileId = generateId()
 
         const newFileItem: FileItem = {
             id: fileId,

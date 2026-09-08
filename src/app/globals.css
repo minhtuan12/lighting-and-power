@@ -86,8 +86,8 @@
 }
 
 :root {
-    --brand-btn-bg: #0063CD;
-    --brand-btn-hover: color-mix(in srgb, #0063CD 85%, black);
+    --brand-btn-bg: #0063cd;
+    --brand-btn-hover: color-mix(in srgb, #0063cd 85%, black);
     --ant-primary-color: #000f8f;
     --ant-primary-hover-color: #242e8a;
     --ant-success-color: #52c41a;
@@ -441,7 +441,10 @@ button[aria-label='Download'] {
 .rich-content-image {
     text-align: justify;
     img {
-        width: 100%;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-block: 12px;
     }
 }
 

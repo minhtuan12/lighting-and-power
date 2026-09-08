@@ -81,3 +81,50 @@ body,
         padding: 1rem 1.5rem 30vh;
     }
 }
+
+[data-resize-container] {
+    position: relative;
+}
+
+[data-resize-wrapper] {
+    display: inline-block;
+    max-width: 100%;
+}
+
+[data-resize-wrapper] img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+[data-resize-handle] {
+    width: 10px;
+    background: transparent;
+    z-index: 10;
+    cursor: ew-resize; // resize theo chiều ngang (left/right)
+
+    // để dễ bấm trúng và có phản hồi khi hover
+    &:hover {
+        background: rgba(
+            59,
+            130,
+            246,
+            0.35
+        ); // xanh mờ khi hover, tuỳ chỉnh theo theme
+    }
+}
+
+[data-resize-handle='left'] {
+    left: -4px; // đẩy ra ngoài mép ảnh một chút cho dễ bấm
+}
+
+[data-resize-handle='right'] {
+    right: -4px;
+}
+
+// (tuỳ chọn) nếu sau này bạn thêm directions: top/bottom
+[data-resize-handle='top'],
+[data-resize-handle='bottom'] {
+    height: 10px;
+    cursor: ns-resize;
+}
