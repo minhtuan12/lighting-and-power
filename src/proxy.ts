@@ -6,6 +6,7 @@ import { routes } from './constants/routes'
 import { getCurrentUser } from './fetch-data/auth'
 import { routing } from './i18n/routing'
 import { getCookieDomain } from './lib/cookie'
+import { getPublicOrigin, getPublicUrl } from './lib/utils'
 import { EUserRole } from './types/user'
 
 const ALLOWED_ORIGINS = [
@@ -64,6 +65,7 @@ function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
         const host = request.headers.get('host') || ''
         const isC2C = host.startsWith('c2c.')
 
+        console.log('[DEBUG headers]', JSON.stringify(Object.fromEntries(request.headers.entries())))
         console.log(`\n[Proxy Middleware] Request URL: ${request.url}`)
         console.log(
             `[Proxy Middleware] Host: ${host} | isC2C: ${isC2C} | locale: ${locale} | pathnameWithoutLocale: ${pathnameWithoutLocale}`,
@@ -124,9 +126,10 @@ function createAuthMiddleware(locale: string, pathnameWithoutLocale: string) {
         console.log(`[Proxy Middleware] isProtected: ${isProtected}`)
 
         if (isProtected && !accessToken) {
-            const loginUrl = new URL(`/${locale}`, request.url)
+            const origin = getPublicOrigin(request)
+            const loginUrl = new URL(`/${locale}`, origin)
             loginUrl.searchParams.set('login', 'true')
-            loginUrl.searchParams.set('redirect', request.url)
+            loginUrl.searchParams.set('redirect', getPublicUrl(request))
             console.log(
                 `[Proxy Middleware] Protected route redirecting to login: ${loginUrl.toString()}`,
             )

@@ -74,7 +74,7 @@ export default async function ProductLayout({
         >
             <Flex gap={10} vertical className="custom-breadcrumb max-xl:!px-6 max-lg:!mt-20 !mb-20">
                 <Breadcrumb items={breadcrumb} separator=">" />
-                <Flex gap={16} justify="space-between" className="max-md:!flex-col">
+                <Flex gap={16} justify="space-between" className="max-lg:!flex-col">
                     {sidebar}
                     {content}
                 </Flex>

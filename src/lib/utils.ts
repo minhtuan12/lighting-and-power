@@ -3,6 +3,7 @@ import { getProductDetail } from '@/fetch-data/products'
 import { ICategory } from '@/types/category'
 import { Province, SearchParams, Ward } from '@/types/general'
 import { IProductFilterParams } from '@/types/product'
+import { NextRequest } from 'next/server'
 import { cache } from 'react'
 
 export function convertNestedCategories(
@@ -464,4 +465,14 @@ export function formatPrice(
 			currency: currency,
 		},
 	).format(price / priceRate.rate)
+}
+
+export function getPublicOrigin(request: NextRequest) {
+	const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host')!
+	const proto = request.headers.get('x-forwarded-proto') ?? 'http'
+	return `${proto}://${host}`
+}
+
+export function getPublicUrl(request: NextRequest) {
+	return `${getPublicOrigin(request)}${request.nextUrl.pathname}${request.nextUrl.search}`
 }

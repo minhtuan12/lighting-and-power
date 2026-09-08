@@ -17,6 +17,10 @@ import { convertNestedCategories } from "@/lib/utils"
 import { breadcrumbAtom } from "@/stores"
 import { ICategory } from "@/types/category"
 import { EProductStatus, IProduct } from "@/types/product"
+import MathExtension from "@aarkue/tiptap-math-extension"
+import { generateJSON } from "@tiptap/core"
+import Image from "@tiptap/extension-image"
+import StarterKit from "@tiptap/starter-kit"
 import {
     Button,
     Card,
@@ -522,7 +526,11 @@ const ProductForm = () => {
                     </Row>
                     <div className="font-semibold">Mô tả chi tiết</div>
                     <SimpleEditor
-                        value={description}
+                        value={generateJSON(description, [
+                            StarterKit,
+                            Image,
+                            MathExtension.configure({ evaluation: true }),
+                        ])}
                         placeholder="Nhập mô tả chi tiết sản phẩm"
                         setUploading={setIsSubmitting}
                         onChange={(value: any) => setDescription(value)}
