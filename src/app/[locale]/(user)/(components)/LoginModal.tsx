@@ -2,7 +2,7 @@
 import { useLogin } from '@/hooks/use-me'
 import { showMessage } from '@/hooks/use-message'
 import { EUserRole } from '@/types/user'
-import { Button, Flex, Form, Input, Modal, Tabs } from 'antd'
+import { Button, Col, Flex, Form, Input, Modal, Row, Tabs } from 'antd'
 import { LogIn } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -107,151 +107,157 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
     return (
         <Form form={form} onFinish={handleSubmit} layout="vertical" className="pt-3">
-            <Form.Item
-                name="fullName"
-                required
-                label={<div className="font-semibold">{t("auth.fullName")}</div>}
-                rules={[
-                    {
-                        required: true,
-                        message: v("required", { field: t("auth.fullName") }),
-                    },
-                ]}
-            >
-                <Input
-                    className="!h-11"
-                    placeholder={t("form.enter", { field: t("auth.fullName") })}
-                    size="large"
-                />
-            </Form.Item>
+            <Row gutter={32}>
+                <Col span={12}>
+                    <Form.Item
+                        name="fullName"
+                        required
+                        label={<div className="font-semibold">{t("auth.fullName")}</div>}
+                        rules={[
+                            {
+                                required: true,
+                                message: v("required", { field: t("auth.fullName") }),
+                            },
+                        ]}
+                    >
+                        <Input
+                            className="!h-11"
+                            placeholder={t("form.enter", { field: t("auth.fullName") })}
+                            size="large"
+                        />
+                    </Form.Item>
 
-            <Form.Item
-                name="email"
-                label={<div className="font-semibold">{t("auth.email")}</div>}
-                rules={[
-                    {
-                        type: "email",
-                        message: v("invalid", { field: t("auth.email") }),
-                    },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const phone = getFieldValue("phone")
-                            if (!value && !phone) {
-                                return Promise.reject(
-                                    new Error(
-                                        v("requiredOne", {
-                                            field: t("auth.email"),
-                                            field2: t("auth.phone"),
-                                        })
-                                    )
-                                )
-                            }
-                            return Promise.resolve()
-                        },
-                    }),
-                ]}
-            >
-                <Input
-                    className="!h-11"
-                    placeholder={t("form.enter", { field: t("auth.email") })}
-                    size="large"
-                />
-            </Form.Item>
+                    <Form.Item
+                        name="email"
+                        label={<div className="font-semibold">{t("auth.email")}</div>}
+                        rules={[
+                            {
+                                type: "email",
+                                message: v("invalid", { field: t("auth.email") }),
+                            },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    const phone = getFieldValue("phone")
+                                    if (!value && !phone) {
+                                        return Promise.reject(
+                                            new Error(
+                                                v("requiredOne", {
+                                                    field: t("auth.email"),
+                                                    field2: t("auth.phone"),
+                                                })
+                                            )
+                                        )
+                                    }
+                                    return Promise.resolve()
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input
+                            className="!h-11"
+                            placeholder={t("form.enter", { field: t("auth.email") })}
+                            size="large"
+                        />
+                    </Form.Item>
 
-            <Form.Item
-                name="phone"
-                label={<div className="font-semibold">{t("auth.phone")}</div>}
-                rules={[
-                    {
-                        pattern: /^[0-9]{10,11}$/,
-                        message: v("invalid", { field: t("auth.phone") }),
-                    },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const email = getFieldValue("email")
-                            if (!value && !email) {
-                                return Promise.reject(
-                                    new Error(
-                                        v("requiredOne", {
-                                            field: t("auth.email"),
-                                            field2: t("auth.phone"),
-                                        })
-                                    )
-                                )
-                            }
-                            return Promise.resolve()
-                        },
-                    }),
-                ]}
-            >
-                <Input
-                    className="!h-11"
-                    placeholder={t("form.enter", { field: t("auth.phone") })}
-                    size="large"
-                />
-            </Form.Item>
+                    <Form.Item
+                        name="phone"
+                        label={<div className="font-semibold">{t("auth.phone")}</div>}
+                        rules={[
+                            {
+                                pattern: /^[0-9]{10,11}$/,
+                                message: v("invalid", { field: t("auth.phone") }),
+                            },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    const email = getFieldValue("email")
+                                    if (!value && !email) {
+                                        return Promise.reject(
+                                            new Error(
+                                                v("requiredOne", {
+                                                    field: t("auth.email"),
+                                                    field2: t("auth.phone"),
+                                                })
+                                            )
+                                        )
+                                    }
+                                    return Promise.resolve()
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input
+                            className="!h-11"
+                            placeholder={t("form.enter", { field: t("auth.phone") })}
+                            size="large"
+                        />
+                    </Form.Item>
+                </Col>
 
-            <Form.Item
-                name="password"
-                required
-                label={<div className="font-semibold">{t("auth.password")}</div>}
-                rules={[
-                    {
-                        required: true,
-                        message: v("required", { field: t("auth.password") }),
-                    },
-                    {
-                        min: 6,
-                        message: v("min", { field: t("auth.password"), min: 6 }),
-                    },
-                    {
-                        pattern: /[A-Z]/,
-                        message: v("uppercasePassword"),
-                    },
-                    {
-                        pattern: /[a-z]/,
-                        message: v("lowercasePassword"),
-                    },
-                    {
-                        pattern: /[0-9]/,
-                        message: v("oneDigitPassword"),
-                    },
-                    {
-                        pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
-                        message: v("specialCharacterPassword"),
-                    },
-                ]}
-            >
-                <Input.Password
-                    className="!h-11"
-                    placeholder={t("form.enter", { field: t("auth.password") })}
-                    size="large"
-                />
-            </Form.Item>
+                <Col span={12}>
+                    <Form.Item
+                        name="password"
+                        required
+                        label={<div className="font-semibold">{t("auth.password")}</div>}
+                        rules={[
+                            {
+                                required: true,
+                                message: v("required", { field: t("auth.password") }),
+                            },
+                            {
+                                min: 6,
+                                message: v("min", { field: t("auth.password"), min: 6 }),
+                            },
+                            {
+                                pattern: /[A-Z]/,
+                                message: v("uppercasePassword"),
+                            },
+                            {
+                                pattern: /[a-z]/,
+                                message: v("lowercasePassword"),
+                            },
+                            {
+                                pattern: /[0-9]/,
+                                message: v("oneDigitPassword"),
+                            },
+                            {
+                                pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+                                message: v("specialCharacterPassword"),
+                            },
+                        ]}
+                    >
+                        <Input.Password
+                            className="!h-11"
+                            placeholder={t("form.enter", { field: t("auth.password") })}
+                            size="large"
+                        />
+                    </Form.Item>
 
-            <Form.Item
-                required
-                name="confirmPassword"
-                label={<div className="font-semibold">{t("auth.confirmPassword")}</div>}
-                dependencies={["password"]}
-                rules={[
-                    { required: true, message: v("passwordNotMatch") },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            if (!value || getFieldValue("password") === value) {
-                                return Promise.resolve()
-                            }
-                            return Promise.reject(new Error(v("passwordNotMatch")))
-                        },
-                    }),
-                ]}
-            >
-                <Input.Password
-                    className="!h-11"
-                    placeholder={t("auth.confirmPassword")}
-                    size="large"
-                />
-            </Form.Item>
+                    <Form.Item
+                        required
+                        name="confirmPassword"
+                        label={<div className="font-semibold">{t("auth.confirmPassword")}</div>}
+                        dependencies={["password"]}
+                        rules={[
+                            { required: true, message: v("passwordNotMatch") },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue("password") === value) {
+                                        return Promise.resolve()
+                                    }
+                                    return Promise.reject(new Error(v("passwordNotMatch")))
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password
+                            className="!h-11"
+                            placeholder={t("auth.confirmPassword")}
+                            size="large"
+                        />
+                    </Form.Item>
+                </Col>
+            </Row>
 
             <Button
                 size="large"
@@ -329,7 +335,7 @@ export default function LoginModal() {
             onCancel={() => setOpen(false)}
             footer={null}
             centered
-            width={450}
+            width={activeTab === 'login' ? 450 : 600}
         >
             <Flex justify='center' className='!mb-4'><Icon src={"/images/logo-vertical.png"} size={150} /></Flex>
             <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'login' | 'register')} items={items} centered />

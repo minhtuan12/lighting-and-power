@@ -11,6 +11,7 @@ import {
     Phone,
     UserPlus,
     UserRound,
+    X,
 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -76,7 +77,7 @@ function MemberProfileContent({ params }: { params: Promise<{ id: string }> }) {
     const isIncomingRequest = relation?.status === 'pending' && String(relation.addresseeId) === String(user?._id)
     const friendshipLabel =
         relation?.status === 'accepted'
-            ? t('friends')
+            ? 'Hủy kết bạn'
             : isIncomingRequest
                 ? t('accept')
                 : relation?.status === 'pending'
@@ -136,9 +137,9 @@ function MemberProfileContent({ params }: { params: Promise<{ id: string }> }) {
                                 {[[profile.posts?.length || 0, t('postsCount')], [profile.friendsCount || 0, t('friendsCount')], [(profile.likesCount || 0).toLocaleString('vi-VN'), t('likesCount')]].map(([value, label]) => <div key={String(label)}><div className="text-xl font-semibold leading-5 text-[#0b2b3d]">{value}</div><div className="mt-1 text-xs text-gray-500">{label}</div></div>)}
                             </Flex>
                         </div>
-                        {!isSelf && user && <Flex gap={10} className="shrink-0" wrap="wrap">
-                            <Button type="primary" icon={<UserPlus size={16} />} loading={busy} onClick={friend} className="!rounded-full !border-0 !bg-[#ff5a1f] !px-5 !font-semibold">{friendshipLabel}</Button>
-                            <Button icon={<MessageCircle size={16} />} onClick={() => window.dispatchEvent(new CustomEvent('messenger:open', { detail: profile }))} className="!rounded-full !px-5 !font-semibold">{t('message')}</Button>
+                        {!isSelf && user && <Flex gap={10} className="shrink-0" wrap="wrap" align="center">
+                            <Button icon={relation?.status === 'accepted' ? <X size={16} className='mt-0.5' /> : <UserPlus size={16} />} loading={busy} onClick={friend} className={`!rounded-full !border-0 ${relation?.status === 'accepted' ? '!bg-[#ef5a22]' : '!bg-primary !text-white'} !px-5 !font-semibold`}>{friendshipLabel}</Button>
+                            <Button icon={<MessageCircle size={16} className='mt-0.5' />} onClick={() => window.dispatchEvent(new CustomEvent('messenger:open', { detail: profile }))} className="!rounded-full !px-5 !font-semibold">{t('message')}</Button>
                         </Flex>}
                     </div>
                 </section>

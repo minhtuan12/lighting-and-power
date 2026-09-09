@@ -72,8 +72,10 @@ export function useChat({
 	const [friends, setFriends] = useState<any[]>([])
 	const [groupMode, setGroupMode] = useState(false)
 	const [groupName, setGroupName] = useState('')
-	const [groupMemberIds, setGroupMemberIds] = useState<string[]>([])
+	const [groupMemberIds, setGroupMemberIds] = useState<string[]>([]) // giữ lại, chỉ dùng khi TẠO nhóm mới
 	const [groupAddMode, setGroupAddMode] = useState(false)
+	const [addMemberIds, setAddMemberIds] = useState<string[]>([])       // thêm mới: chọn bạn để THÊM
+	const [removeMemberIds, setRemoveMemberIds] = useState<string[]>([]) // thêm mới: chọn thành viên để XÓA
 	const [uploading, setUploading] = useState(false)
 	const [loadingMsg, setLoadingMsg] = useState(false)
 	const fileRef = useRef<HTMLInputElement>(null)
@@ -82,7 +84,18 @@ export function useChat({
 	const load = () =>
 		user &&
 		api('/api/social/conversations')
-			.then(setConversations)
+			.then((rows) => {
+				setConversations(rows)
+				setSelected((current: any) => {
+					if (!current) return current
+					const refreshed = rows.find(
+						(row: any) => row._id === current._id,
+					)
+					return refreshed
+						? { ...refreshed, other: refreshed.other ?? current.other }
+						: current
+				})
+			})
 			.catch(() => undefined)
 
 	useEffect(() => {
@@ -235,30 +248,33 @@ export function useChat({
 			...current,
 		])
 		setSelected({ ...conversation, other })
+		load()
 		setGroupMode(false)
 		setGroupName('')
 		setGroupMemberIds([])
 	}
 
 	const addGroupMembers = async () => {
-		if (!selected?.isGroup || !groupMemberIds.length) return
+		if (!selected?.isGroup || !addMemberIds.length) return
 		await api(`/api/social/conversations/${selected._id}/members`, {
 			method: 'POST',
-			body: JSON.stringify({ memberIds: groupMemberIds }),
+			body: JSON.stringify({ memberIds: addMemberIds }),
 		})
 		setGroupAddMode(false)
-		setGroupMemberIds([])
+		setAddMemberIds([])
+		setRemoveMemberIds([])
 		load()
 	}
 
 	const removeGroupMembers = async () => {
-		if (!selected?.isGroup || !groupMemberIds.length) return
+		if (!selected?.isGroup || !removeMemberIds.length) return
 		await api(`/api/social/conversations/${selected._id}/members`, {
 			method: 'DELETE',
-			body: JSON.stringify({ memberIds: groupMemberIds }),
+			body: JSON.stringify({ memberIds: removeMemberIds }),
 		})
 		setGroupAddMode(false)
-		setGroupMemberIds([])
+		setAddMemberIds([])
+		setRemoveMemberIds([])
 		load()
 	}
 
@@ -294,6 +310,10 @@ export function useChat({
 		groupMemberIds,
 		setGroupMemberIds,
 		groupAddMode,
+		addMemberIds,
+		setAddMemberIds,
+		removeMemberIds,
+		setRemoveMemberIds,
 		setGroupAddMode,
 		uploading,
 		loadingMsg,

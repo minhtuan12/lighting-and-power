@@ -163,14 +163,16 @@ export default async function proxy(request: NextRequest) {
     if (isChat) {
         const accessToken = request.cookies.get('accessToken')?.value
         if (!accessToken) {
-            const rootHost = host.replace(/^chat\./, '')
-            const redirectUrl = new URL(request.url)
-            redirectUrl.host = rootHost // giữ nguyên port (vd localhost:4000)
+            const origin = getPublicOrigin(request) // vd: https://chat.domain.com
+            const originUrl = new URL(origin)
+            const rootHost = originUrl.host.replace(/^chat\./, '')
+
+            const redirectUrl = new URL(origin)
+            redirectUrl.host = rootHost
             redirectUrl.pathname = '/'
             redirectUrl.search = ''
-            // để sau khi login xong có thể quay lại đúng chỗ đang định vào
             redirectUrl.searchParams.set('login', 'true')
-            redirectUrl.searchParams.set('redirect', request.url)
+            redirectUrl.searchParams.set('redirect', getPublicUrl(request))
             return NextResponse.redirect(redirectUrl)
         }
     }

@@ -174,6 +174,7 @@ export const SocialService = {
                     conversationId: conversation._id,
                 })
                     .sort({ createdAt: -1 })
+                    .populate('senderId', 'fullName avatar')
                     .lean()
                 const unread = await Message.countDocuments({
                     conversationId: conversation._id,
@@ -182,6 +183,9 @@ export const SocialService = {
                 })
                 return {
                     ...conversation,
+                    // The chat UI uses `members` for group-management actions.
+                    // Keep `participantIds` intact for the existing conversation contract.
+                    members: conversation.participantIds,
                     other,
                     latest,
                     unread,
@@ -323,6 +327,7 @@ export const SocialService = {
             await Message.find({ conversationId: conversation._id })
                 .sort({ createdAt: 1 })
                 .limit(100)
+                .populate('senderId', 'fullName avatar')
                 .lean(),
         )
     },

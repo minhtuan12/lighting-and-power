@@ -298,7 +298,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                 >
                     <Flex
                         align="center"
-                        gap={2}
+                        gap={4}
                         className="cursor-pointer"
                     >
                         <Avatar
@@ -306,6 +306,7 @@ export default function UserMenu({ user, isC2C = false }: IProps) {
                             src={user?.avatar}
                             icon={<UserOutlined />}
                         />
+                        <div className="max-w-[80px] text-ellipsis line-clamp-1">{user?.fullName?.split(' ')[user?.fullName?.split(' ').length - 1]}</div>
                         <ChevronDown size={18} />
                     </Flex>
                 </Dropdown>

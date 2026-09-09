@@ -2,20 +2,20 @@
 
 import { dateLabel, dayKey, timeLabel, useChat } from '@/hooks/use-chat'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Input, Skeleton } from 'antd'
+import { Avatar, Button, Empty, Input, Modal, Skeleton, Tooltip } from 'antd'
 import {
 	ArrowLeft,
 	Download,
 	FileText,
 	Paperclip,
-	Plus,
 	Send,
 	Trash2,
+	UserMinus,
 	Users,
-	X,
+	X
 } from 'lucide-react'
 import Link from 'next/link'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { Icon } from '../Icon'
 
 function ConversationAvatar({
@@ -48,7 +48,10 @@ function ConversationAvatar({
 
 export default function MessengerPageView() {
 	const m = useChat({ autoOpen: true })
+	const [memberSearch, setMemberSearch] = useState('')
+
 	if (!m.user) return null
+	console.log(m)
 
 	return (
 		<div className="overflow-hidden">
@@ -77,9 +80,9 @@ export default function MessengerPageView() {
 						<button
 							aria-label="Tạo hội thoại mới"
 							onClick={() => m.setGroupMode((v) => !v)}
-							className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#f4511e] text-white"
+							className="flex h-7 w-fit text-[12px] px-3 cursor-pointer items-center justify-center rounded-full bg-[#f4511e] text-white"
 						>
-							{m.groupMode ? <X size={15} /> : <Plus size={15} />}
+							{m.groupMode ? <X size={13} className='mr-1' /> : <Users size={13} className='mr-1' />} {m.groupMode ? 'Hủy' : 'Tạo nhóm'}
 						</button>
 					</div>
 
@@ -173,10 +176,10 @@ export default function MessengerPageView() {
 										<small
 											className={`block truncate text-xs text-gray-500 ${conversation.unread > 0 ? '!text-black font-semibold' : ''}`}
 										>
-											{conversation.latest?.content ||
+											{conversation.latest?.content ? (conversation.isGroup ? `${conversation.latest.senderId.fullName}: ${conversation.latest.content}` : conversation.latest?.content) :
 												conversation.latest?.attachmentUrl
-												? <i>Đã gửi 1 file đính kèm</i>
-												: 'Bắt đầu trò chuyện'}
+													? <i>{conversation.latest.senderId.fullName} đã gửi 1 file đính kèm</i>
+													: 'Bắt đầu trò chuyện'}
 										</small>
 									</span>
 								</button>
@@ -223,11 +226,12 @@ export default function MessengerPageView() {
 										m.selected.ownerId === m.user._id && (
 											<div className="flex items-center gap-3">
 												<button
-													onClick={() =>
-														m.setGroupAddMode(
-															(v) => !v,
-														)
-													}
+													onClick={() => {
+														m.setGroupAddMode((v) => !v)
+														m.setAddMemberIds([])
+														m.setRemoveMemberIds([])
+														// setMemberSearch('')
+													}}
 													className="cursor-pointer text-gray-500"
 													aria-label="Quản lý thành viên"
 												>
@@ -244,60 +248,177 @@ export default function MessengerPageView() {
 										)}
 								</div>
 
-								{m.groupAddMode && (
-									<div className="border-b border-[#e4e8ec] p-3">
-										<div className="mb-1 text-xs font-semibold text-[#082c40]">
-											Thêm / bớt thành viên
+								<Modal
+									open={m.groupAddMode}
+									onCancel={() => {
+										m.setGroupAddMode(false)
+										m.setAddMemberIds([])
+										m.setRemoveMemberIds([])
+										// setMemberSearch('')
+									}}
+									title={
+										<div className="flex items-center gap-2 text-[#082c40]">
+											<Users size={18} className="text-[#f4511e]" />
+											Quản lý thành viên nhóm
 										</div>
-										{m.friends.map((friend) => (
-											<label
-												key={friend._id}
-												className="mr-3 inline-flex items-center gap-1 text-xs"
+									}
+									footer={
+										<div className="flex justify-end gap-2">
+											<Button
+												onClick={() => {
+													m.setGroupAddMode(false)
+													m.setAddMemberIds([])
+													m.setRemoveMemberIds([])
+												}}
+												className="rounded-lg"
 											>
-												<input
-													type="checkbox"
-													checked={m.groupMemberIds.includes(
-														friend._id,
-													)}
-													onChange={() =>
-														m.setGroupMemberIds(
-															(ids) =>
-																ids.includes(
-																	friend._id,
-																)
-																	? ids.filter(
-																		(
-																			id,
-																		) =>
-																			id !==
-																			friend._id,
-																	)
-																	: [
-																		...ids,
-																		friend._id,
-																	],
-														)
-													}
-												/>
-												{friend.fullName}
-											</label>
-										))}
-										<div className="mt-2 flex gap-2">
-											<button
-												onClick={m.addGroupMembers}
-												className="cursor-pointer rounded bg-[#f4511e] px-2 py-1 text-xs text-white"
-											>
-												Thêm
-											</button>
-											<button
+												Đóng
+											</Button>
+											<Button
+												disabled={!m.removeMemberIds?.length}
 												onClick={m.removeGroupMembers}
-												className="cursor-pointer rounded border border-[#e4e8ec] px-2 py-1 text-xs text-[#082c40]"
+												className="!border-red-200 !text-red-500 rounded-lg"
 											>
-												Xóa khỏi nhóm
-											</button>
+												Xóa khỏi nhóm ({m.removeMemberIds?.length})
+											</Button>
+											<Button
+												type="primary"
+												disabled={!m.addMemberIds?.length}
+												onClick={m.addGroupMembers}
+												className="!bg-[#f4511e] rounded-lg"
+											>
+												Thêm vào nhóm ({m.addMemberIds?.length})
+											</Button>
+										</div>
+									}
+									// width={420}
+									styles={{ body: { paddingTop: 8 } }}
+								>
+									{/* Danh sách thành viên hiện tại */}
+									<div className="mb-4">
+										<div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+											Thành viên hiện tại ({m.selected?.members?.length ?? 0})
+										</div>
+										<div className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-[#edf0f2] p-1 scrollbar-thin">
+											{m.selected?.members?.length ? (
+												m.selected.members.map((member: any) => (
+													<div
+														key={member._id}
+														className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-[#f8fafb]"
+													>
+														<div className="flex items-center gap-2">
+															<Avatar
+																src={member.avatar}
+																icon={<UserOutlined />}
+																size={28}
+															/>
+															<span className="text-sm text-[#082c40]">
+																{member.fullName}
+																{member._id === m.selected.ownerId && (
+																	<span className="ml-1.5 rounded-full bg-[#fff1ea] px-1.5 py-1 text-[10px] font-medium text-[#f4511e]">
+																		Trưởng nhóm
+																	</span>
+																)}
+															</span>
+														</div>
+														{member._id !== m.selected.ownerId && (
+															<Tooltip title="Chọn để xóa">
+																<button
+																	onClick={() =>
+																		m.setRemoveMemberIds((ids: string[]) =>
+																			ids.includes(member._id)
+																				? ids.filter((id) => id !== member._id)
+																				: [...ids, member._id],
+																		)
+																	}
+																	className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-colors ${m.removeMemberIds.includes(member._id)
+																		? 'bg-red-500 text-white'
+																		: 'text-gray-400 hover:bg-red-50 hover:text-red-500'
+																		}`}
+																	aria-label={`Xóa ${member.fullName} khỏi nhóm`}
+																>
+																	<UserMinus size={16} />
+																</button>
+															</Tooltip>
+														)}
+													</div>
+												))
+											) : (
+												<Empty
+													image={Empty.PRESENTED_IMAGE_SIMPLE}
+													description="Chưa có thành viên"
+													className="py-3"
+												/>
+											)}
 										</div>
 									</div>
-								)}
+
+									{/* Thêm thành viên mới */}
+									<div>
+										<div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+											Thêm bạn bè vào nhóm
+										</div>
+										{/* <Input
+											value={memberSearch}
+											onChange={(e) => setMemberSearch(e.target.value)}
+											placeholder="Tìm bạn bè..."
+											prefix={<Search size={14} className="text-gray-400" />}
+											className="mb-2 !rounded-lg"
+										/> */}
+										<div className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-[#edf0f2] p-1">
+											{(() => {
+												const currentMemberIds = new Set(
+													(m.selected?.members ?? []).map((mem: any) => String(mem._id)),
+												)
+												const filteredFriends = m.friends.filter(
+													(friend: any) =>
+														!currentMemberIds.has(String(friend._id)) &&
+														friend.fullName
+															.toLowerCase()
+															.includes(memberSearch.trim().toLowerCase()),
+												)
+
+												if (!filteredFriends.length) {
+													return (
+														<Empty
+															image={Empty.PRESENTED_IMAGE_SIMPLE}
+															description="Không tìm thấy bạn bè phù hợp"
+															className="py-3"
+														/>
+													)
+												}
+
+												return filteredFriends.map((friend: any) => {
+													const checked = m.addMemberIds.includes(friend._id)
+													return (
+														<label
+															key={friend._id}
+															className={`flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 transition-colors ${checked ? 'bg-[#fff1ea]' : 'hover:bg-[#f8fafb]'
+																}`}
+														>
+															<div className="flex items-center gap-2">
+																<Avatar src={friend.avatar} icon={<UserOutlined />} size={28} />
+																<span className="text-sm text-[#082c40]">{friend.fullName}</span>
+															</div>
+															<input
+																type="checkbox"
+																checked={checked}
+																onChange={() =>
+																	m.setAddMemberIds((ids: string[]) =>
+																		ids.includes(friend._id)
+																			? ids.filter((id) => id !== friend._id)
+																			: [...ids, friend._id],
+																	)
+																}
+																className="h-4 w-4 accent-[#f4511e]"
+															/>
+														</label>
+													)
+												})
+											})()}
+										</div>
+									</div>
+								</Modal>
 
 								<div className="max-h-[calc(100vh-220px)] scrollbar-thin flex-1 space-y-3 overflow-y-auto p-4">
 									{m.loadingMsg ? (
@@ -306,90 +427,123 @@ export default function MessengerPageView() {
 										m.messages.map((message, index) => {
 											const showDate =
 												index === 0 ||
-												dayKey(
-													m.messages[index - 1]
-														.createdAt,
-												) !== dayKey(message.createdAt)
+												dayKey(m.messages[index - 1].createdAt) !==
+												dayKey(message.createdAt)
+
+											const senderObj =
+												message.senderId && typeof message.senderId === 'object'
+													? message.senderId
+													: null
+											const senderIdStr = senderObj ? senderObj._id : message.senderId
+											const isMe = senderIdStr === m.user?._id
+
+											// Lấy senderId dạng string của tin trước/sau để so sánh chuỗi liên tiếp
+											const getSenderId = (msg: any) =>
+												msg?.senderId && typeof msg.senderId === 'object'
+													? msg.senderId._id
+													: msg?.senderId
+
+											const prevMessage = m.messages[index - 1]
+											const nextMessage = m.messages[index + 1]
+
+											const isFirstInGroup =
+												index === 0 ||
+												getSenderId(prevMessage) !== senderIdStr ||
+												dayKey(prevMessage.createdAt) !== dayKey(message.createdAt)
+
+											const isLastInGroup =
+												index === m.messages.length - 1 ||
+												getSenderId(nextMessage) !== senderIdStr ||
+												dayKey(nextMessage.createdAt) !== dayKey(message.createdAt)
+
+											const showGroupInfo = m.selected.isGroup && !isMe
+											const showSenderName = showGroupInfo && isFirstInGroup
+											const showAvatar = showGroupInfo && isLastInGroup
+
 											return (
 												<Fragment key={message._id}>
 													{showDate && (
 														<div className="pt-2 text-center text-[11px] font-medium text-gray-400">
-															{dateLabel(
-																message.createdAt,
+															{dateLabel(message.createdAt)}
+														</div>
+													)}
+
+													<div
+														className={`flex w-fit max-w-[65%] items-end gap-2 ${isMe ? 'ml-auto flex-row-reverse' : ''
+															}`}
+													>
+														{showGroupInfo && (
+															<div className="w-[26px] flex-none">
+																{showAvatar && (
+																	<Avatar
+																		src={senderObj?.avatar}
+																		icon={<UserOutlined />}
+																		size={26}
+																	/>
+																)}
+															</div>
+														)}
+
+														<div className="flex min-w-0 flex-col">
+															{showSenderName && (
+																<small className="mb-0.5 ml-1 text-[11px] font-medium text-gray-500">
+																	{senderObj?.fullName}
+																</small>
+															)}
+
+															{message.attachmentUrl ? (
+																<div
+																	className={`flex flex-col ${isMe ? 'items-end' : 'items-start'
+																		}`}
+																>
+																	<a
+																		href={message.attachmentUrl}
+																		target="_blank"
+																		rel="noreferrer"
+																		className="flex w-full max-w-[220px] items-center gap-2 rounded-xl border border-[#e2e7eb] bg-white px-2.5 py-2 shadow-sm transition-colors hover:bg-[#f8fafb]"
+																	>
+																		<span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-[#f4511e]/10">
+																			<FileText
+																				size={16}
+																				className="text-[#f4511e]"
+																			/>
+																		</span>
+																		<span className="min-w-0 flex-1">
+																			<span className="block truncate text-xs font-medium text-[#082c40]">
+																				{message.attachmentName ||
+																					'Tệp đính kèm'}
+																			</span>
+																			<span className="block text-[10px] text-gray-400">
+																				Nhấn để xem
+																			</span>
+																		</span>
+																		<Download
+																			size={14}
+																			className="flex-none text-gray-400"
+																		/>
+																	</a>
+																	<small className="mt-1 text-[10px] text-gray-400">
+																		{timeLabel(message.createdAt)}
+																	</small>
+																</div>
+															) : (
+																<div
+																	className={`w-fit rounded-lg px-3 py-2 text-sm ${isMe
+																		? 'bg-[#f4511e] text-white rounded-br-[3px]'
+																		: 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'
+																		}`}
+																>
+																	<div>{message.content}</div>
+																	<small
+																		className={`flex ${isMe ? 'justify-end' : ''
+																			} mt-1 block text-[10px] opacity-70`}
+																	>
+																		{timeLabel(message.createdAt)}
+																	</small>
+																</div>
 															)}
 														</div>
-													)}
-													{message.attachmentUrl ? (
-														<div
-															className={`flex w-fit max-w-[60%] flex-col ${message.senderId ===
-																m.user?._id
-																? 'ml-auto items-end'
-																: 'items-start'
-																}`}
-														>
-															<a
-																href={
-																	message.attachmentUrl
-																}
-																target="_blank"
-																rel="noreferrer"
-																className="flex w-full max-w-[220px] items-center gap-2 rounded-xl border border-[#e2e7eb] bg-white px-2.5 py-2 shadow-sm transition-colors hover:bg-[#f8fafb]"
-															>
-																<span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-[#f4511e]/10">
-																	<FileText
-																		size={
-																			16
-																		}
-																		className="text-[#f4511e]"
-																	/>
-																</span>
-																<span className="min-w-0 flex-1">
-																	<span className="block truncate text-xs font-medium text-[#082c40]">
-																		{message.attachmentName ||
-																			'Tệp đính kèm'}
-																	</span>
-																	<span className="block text-[10px] text-gray-400">
-																		Nhấn để
-																		xem
-																	</span>
-																</span>
-																<Download
-																	size={14}
-																	className="flex-none text-gray-400"
-																/>
-															</a>
-															<small className="mt-1 text-[10px] text-gray-400">
-																{timeLabel(
-																	message.createdAt,
-																)}
-															</small>
-														</div>
-													) : (
-														<div
-															className={`w-fit max-w-[60%] rounded-2xl px-3 py-2 text-sm ${message.senderId ===
-																m.user?._id
-																? 'ml-auto bg-[#f4511e] text-white rounded-br-[3px]'
-																: 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'
-																}`}
-														>
-															<div>
-																{
-																	message.content
-																}
-															</div>
-															<small
-																className={`flex ${message.senderId ===
-																	m.user?._id
-																	? 'justify-end'
-																	: ''
-																	} mt-1 block text-[10px] opacity-70`}
-															>
-																{timeLabel(
-																	message.createdAt,
-																)}
-															</small>
-														</div>
-													)}
+													</div>
 												</Fragment>
 											)
 										})

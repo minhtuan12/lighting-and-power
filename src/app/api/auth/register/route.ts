@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Phone number is already registered",
+                    message: "Số điện thoại đã được sử dụng",
                 },
                 { status: 409 },
             )

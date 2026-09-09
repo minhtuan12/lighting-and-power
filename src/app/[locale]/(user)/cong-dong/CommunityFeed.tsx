@@ -78,11 +78,13 @@ function PostCard({
     refresh,
     friendIds,
     onFriendAdded,
+    pendingFriendIds,
 }: {
     post: ICommunityPost
     refresh: () => void
     friendIds: Set<string>
     onFriendAdded: (userId: string) => void
+    pendingFriendIds: Set<string>
 }) {
     const [busy, setBusy] = useState(false)
     const [friendRequested, setFriendRequested] = useState(false)
@@ -143,6 +145,8 @@ function PostCard({
         }
     }
     const Icon = labels[post.type].icon
+    const isPendingFriend = pendingFriendIds.has(String(post.author._id))
+
     return (
         <article className="community-post">
             <div className="post-author">
@@ -187,8 +191,8 @@ function PostCard({
                             )}
                         </div>
                         {!isCurrentUser && !isFriend && post.author.role !== 'admin' && (
-                            <button type="button" onClick={addFriend} disabled={friendRequested} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:underline disabled:cursor-default disabled:opacity-60">
-                                <Dot color='black' size={18} />{friendRequested ? 'Đang chờ phản hồi kết bạn' : 'Thêm bạn bè'}
+                            <button type="button" onClick={addFriend} disabled={isPendingFriend} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:underline disabled:cursor-default disabled:opacity-60">
+                                <Dot color='black' size={18} />{isPendingFriend ? 'Đang chờ phản hồi kết bạn' : 'Thêm bạn bè'}
                             </button>
                         )}
                     </Flex>
@@ -264,6 +268,7 @@ export default function CommunityFeed() {
     const { user } = useMe()
     const [posts, setPosts] = useState<ICommunityPost[]>([])
     const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+    const [pendingFriendIds, setPendingFriendIds] = useState<Set<string>>(new Set())
     const presenceReceived = useRef(false)
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
@@ -319,7 +324,13 @@ export default function CommunityFeed() {
                 const addressee = row.addresseeId?._id || row.addresseeId
                 return String(requester) === String(user._id) ? String(addressee) : String(requester)
             })
+            const requestedIds = rows.filter((row) => row.status === 'pending').map((row) => {
+                const requester = row.requesterId?._id || row.requesterId
+                const addressee = row.addresseeId?._id || row.addresseeId
+                return String(requester) === String(user._id) ? String(addressee) : String(requester)
+            })
             setFriendIds(new Set(ids))
+            setPendingFriendIds(new Set(requestedIds))
         }).catch(() => setFriendIds(new Set()))
     }, [user?._id])
     const handleFriendAdded = (friendId: string) => setFriendIds((current) => new Set(current).add(String(friendId)))
@@ -497,6 +508,7 @@ export default function CommunityFeed() {
                                 post={post}
                                 refresh={load}
                                 friendIds={friendIds}
+                                pendingFriendIds={pendingFriendIds}
                                 onFriendAdded={handleFriendAdded}
                             />
                         ))
