@@ -427,7 +427,7 @@ app.prepare().then(async () => {
             }
         })
     })
-    httpServer.listen(port, '0.0.0.0', () =>
+    httpServer.listen(port, () =>
         console.log(`> Ready on http://localhost:${port}`),
     )
 })
