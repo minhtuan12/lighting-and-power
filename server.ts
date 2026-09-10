@@ -3,7 +3,7 @@ import connectDb from '@/lib/db'
 import jwt from 'jsonwebtoken'
 import next from 'next'
 import { randomUUID } from 'node:crypto'
-import { createServer } from 'node:https'
+import { createServer } from 'node:http'
 import { Server } from 'socket.io'
 import { setRealtimeServer } from './src/lib/realtime'
 
