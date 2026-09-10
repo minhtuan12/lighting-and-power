@@ -1,17 +1,20 @@
 'use client'
 
+import { useCall } from '@/hooks/use-call'
 import { dateLabel, dayKey, timeLabel, useChat } from '@/hooks/use-chat'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Empty, Input, Modal, Skeleton, Tooltip } from 'antd'
+import { Avatar, Button, Empty, Flex, Input, Modal, Skeleton, Tooltip } from 'antd'
 import {
 	ArrowLeft,
 	Download,
 	FileText,
 	Paperclip,
+	Phone,
 	Send,
 	Trash2,
 	UserMinus,
 	Users,
+	Video,
 	X
 } from 'lucide-react'
 import Link from 'next/link'
@@ -49,9 +52,22 @@ function ConversationAvatar({
 export default function MessengerPageView() {
 	const m = useChat({ autoOpen: true })
 	const [memberSearch, setMemberSearch] = useState('')
+	const { startCall } = useCall()
 
-	if (!m.user) return null
-	console.log(m)
+	if (!m.user || !m.user._id) return null
+
+	const handleStartCall = (callType: 'audio' | 'video') => {
+		if (!m.selected) return
+		const members = m.selected.isGroup
+			? (m.selected.members ?? [])
+				.filter((member: any) => member._id !== m.user?._id)
+				.map((member: any) => ({ userId: member._id, fullName: member.fullName, avatar: member.avatar }))
+			: m.selected.other
+				? [{ userId: m.selected.other._id, fullName: m.selected.other.fullName, avatar: m.selected.other.avatar }]
+				: []
+		if (!members.length) return
+		startCall(m.selected._id, callType, members)
+	}
 
 	return (
 		<div className="overflow-hidden">
@@ -176,10 +192,24 @@ export default function MessengerPageView() {
 										<small
 											className={`block truncate text-xs text-gray-500 ${conversation.unread > 0 ? '!text-black font-semibold' : ''}`}
 										>
-											{conversation.latest?.content ? (conversation.isGroup ? `${conversation.latest.senderId.fullName}: ${conversation.latest.content}` : conversation.latest?.content) :
-												conversation.latest?.attachmentUrl
-													? <i>{conversation.latest.senderId.fullName} đã gửi 1 file đính kèm</i>
-													: 'Bắt đầu trò chuyện'}
+											{conversation.latest?.type === 'call' ? (
+												<i>
+													{conversation.isGroup ? `${conversation.latest.senderId.fullName}: ` : ''}
+													{conversation.latest.call?.status === 'missed'
+														? 'Cuộc gọi nhỡ'
+														: conversation.latest.call?.status === 'rejected'
+															? 'Cuộc gọi bị từ chối'
+															: conversation.latest.call?.status === 'cancelled'
+																? 'Cuộc gọi đã hủy'
+																: 'Cuộc gọi đã kết thúc'}
+												</i>
+											) : conversation.latest?.content ? (
+												conversation.isGroup ? `${conversation.latest.senderId.fullName}: ${conversation.latest.content}` : conversation.latest?.content
+											) : conversation.latest?.attachmentUrl ? (
+												<i>{conversation.latest.senderId.fullName} đã gửi 1 file đính kèm</i>
+											) : (
+												'Bắt đầu trò chuyện'
+											)}
 										</small>
 									</span>
 								</button>
@@ -222,30 +252,36 @@ export default function MessengerPageView() {
 										)} */}
 										</div>
 									</div>
-									{m.selected.isGroup &&
-										m.selected.ownerId === m.user._id && (
-											<div className="flex items-center gap-3">
-												<button
-													onClick={() => {
-														m.setGroupAddMode((v) => !v)
-														m.setAddMemberIds([])
-														m.setRemoveMemberIds([])
-														// setMemberSearch('')
-													}}
-													className="cursor-pointer text-gray-500"
-													aria-label="Quản lý thành viên"
-												>
-													<Users size={18} />
-												</button>
-												<button
-													onClick={m.deleteGroup}
-													className="cursor-pointer text-red-500"
-													aria-label="Xóa nhóm"
-												>
-													<Trash2 size={17} />
-												</button>
-											</div>
-										)}
+									<Flex align='center' gap={10}>
+										<div className={`flex ${m.selected.isGroup && m.selected.ownerId === m.user._id ? 'bg-gray-100 rounded-md' : ''}`}>
+											<Button className='!h-10' type='text' onClick={() => handleStartCall('audio')}><Phone size={18} color='#117bbd' fill="#117bbd" /></Button>
+											<Button className='!h-10' type='text' onClick={() => handleStartCall('video')}><Video size={20} color='#117bbd' fill="#117bbd" /></Button>
+										</div>
+										{m.selected.isGroup &&
+											m.selected.ownerId === m.user._id && (
+												<div className="flex items-center gap-4 bg-gray-100 px-3 py-2.5 rounded-md">
+													<button
+														onClick={() => {
+															m.setGroupAddMode((v) => !v)
+															m.setAddMemberIds([])
+															m.setRemoveMemberIds([])
+															// setMemberSearch('')
+														}}
+														className="cursor-pointer text-gray-500"
+														aria-label="Quản lý thành viên"
+													>
+														<Users size={18} />
+													</button>
+													<button
+														onClick={m.deleteGroup}
+														className="cursor-pointer text-red-500"
+														aria-label="Xóa nhóm"
+													>
+														<Trash2 size={17} />
+													</button>
+												</div>
+											)}
+									</Flex>
 								</div>
 
 								<Modal
@@ -491,7 +527,19 @@ export default function MessengerPageView() {
 																</small>
 															)}
 
-															{message.attachmentUrl ? (
+															{message.type === 'call' ? (
+																<div className="flex items-center gap-2 rounded-lg border border-[#e2e7eb] bg-[#f8fafb] px-3 py-2 text-xs text-gray-600">
+																	{message.call?.callType === 'video' ? <Video size={14} /> : <Phone size={14} />}
+																	<span>
+																		{message.call?.status === 'missed' && 'Cuộc gọi nhỡ'}
+																		{message.call?.status === 'rejected' && 'Cuộc gọi bị từ chối'}
+																		{message.call?.status === 'cancelled' && 'Cuộc gọi đã hủy'}
+																		{message.call?.status === 'completed' &&
+																			`Đã gọi • ${Math.floor((message.call.durationSec || 0) / 60)}:${String((message.call.durationSec || 0) % 60).padStart(2, '0')}`}
+																	</span>
+																	<small className="text-[10px] text-gray-400">{timeLabel(message.createdAt)}</small>
+																</div>
+															) : message.attachmentUrl ? (
 																<div
 																	className={`flex flex-col ${isMe ? 'items-end' : 'items-start'
 																		}`}

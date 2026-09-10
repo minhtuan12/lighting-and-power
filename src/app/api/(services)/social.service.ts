@@ -367,4 +367,37 @@ export const SocialService = {
         )
         return serialize(message)
     },
+    async logCallMessage(
+        conversationId: string,
+        callerId: string,
+        input: {
+            callType: 'audio' | 'video'
+            status: 'completed' | 'missed' | 'rejected' | 'cancelled'
+            durationSec?: number
+            participantIds: string[] // ai đã thực sự tham gia (không tính người gọi)
+        },
+    ) {
+        const conversation = await Conversation.findById(oid(conversationId))
+        if (!conversation) return null
+        const message = await Message.create({
+            conversationId: conversation._id,
+            senderId: oid(callerId),
+            type: 'call',
+            content: '',
+            call: {
+                callType: input.callType,
+                status: input.status,
+                durationSec: input.durationSec || 0,
+                participantIds: input.participantIds.map(oid),
+            },
+        })
+        const populated = await message.populate('senderId', 'fullName avatar')
+        // Không giống sendMessage (loại trừ người gửi vì họ nhận message qua response
+        // của POST), log cuộc gọi được server tự tạo nên phải bắn cho TẤT CẢ mọi
+        // người trong hội thoại, kể cả người gọi.
+        conversation.participantIds.forEach((participant: any) =>
+            emitToUser(participant.toString(), 'message:new', serialize(populated)),
+        )
+        return serialize(populated)
+    },
 }

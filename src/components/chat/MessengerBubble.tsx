@@ -1,5 +1,8 @@
 'use client'
 
+import { CallProvider } from '@/hooks/use-call'
+import { CallScreen } from '../call/CallScreen'
+import { IncomingCallModal } from '../call/IncomingCallModel'
 import MessengerBubbleView from './MessengerBubbleView'
 import MessengerPageView from './MessengerPageView'
 
@@ -11,6 +14,10 @@ export default function MessengerBubble() {
 
 export function MessengerPage() {
     return (
-        <MessengerPageView />
+        <CallProvider>
+            <MessengerPageView />
+            <IncomingCallModal />
+            <CallScreen />
+        </CallProvider>
     )
 }

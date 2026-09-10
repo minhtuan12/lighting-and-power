@@ -8,6 +8,7 @@ const MessageSchema = new Schema(
             required: true,
         },
         senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        type: { type: String, enum: ['text', 'call'], default: 'text' },
         // Attachment-only messages intentionally use an empty content string.
         // SocialService.sendMessage validates that either content or an attachment exists.
         content: { type: String, default: '', trim: true, maxlength: 5000 },
@@ -15,6 +16,17 @@ const MessageSchema = new Schema(
         attachmentName: { type: String, trim: true, maxlength: 255 },
         attachmentMimeType: { type: String, trim: true, maxlength: 150 },
         attachmentSize: { type: Number, min: 0 },
+        // Chỉ tồn tại khi type === 'call'
+        call: {
+            callType: { type: String, enum: ['audio', 'video'] },
+            status: {
+                type: String,
+                enum: ['completed', 'missed', 'rejected', 'cancelled'],
+            },
+            durationSec: { type: Number, min: 0, default: 0 },
+            // Những ai thực sự đã tham gia (bắt máy), không tính người gọi
+            participantIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+        },
         readAt: { type: Date, default: null },
     },
     { timestamps: true },
