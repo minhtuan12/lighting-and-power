@@ -207,13 +207,13 @@ export default function MessengerBubbleView() {
 													</div>
 												) : (
 													<div
-														className={`w-fit max-w-[70%] rounded-2xl px-3 py-2 text-sm ${message.senderId ===
+														className={`min-w-0 w-fit max-w-[70%] break-all rounded-2xl px-3 py-2 text-sm ${message.senderId ===
 															m.user?._id
 															? 'ml-auto bg-[#f4511e] text-white rounded-br-[3px]'
 															: 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'
 															}`}
 													>
-														<div>
+															<div className="min-w-0 max-w-full break-all [overflow-wrap:anywhere]">
 															{
 																message.content
 															}

@@ -105,9 +105,9 @@ export default function MessengerPageView() {
 				/>
 			</div>
 
-			<section className="grid min-h-[calc(100vh-53px)] w-full grid-cols-[280px_minmax(0,1fr)] overflow-hidden border border-[#d9e2e8] bg-white">
+			<section className="grid min-h-[calc(100vh-53px)] w-full grid-cols-1 overflow-hidden border border-[#d9e2e8] bg-white md:grid-cols-[280px_minmax(0,1fr)]">
 				{/* Left: conversation list */}
-				<div className="flex min-h-0 flex-col border-r border-[#e2e7eb] bg-[#f8fafb] user-none">
+				<div className={`min-h-0 flex-col border-r border-[#e2e7eb] bg-[#f8fafb] user-none ${m.selected ? 'hidden md:flex' : 'flex'}`}>
 					<div className="flex items-center justify-between px-4 py-4">
 						<strong className="text-[#082c40]">Tin nhắn</strong>
 						<button
@@ -254,7 +254,7 @@ export default function MessengerPageView() {
 				</div>
 
 				{/* Right: thread detail */}
-				<div className="min-h-0 p-3 bg-gray-100">
+				<div className={`min-h-0 bg-gray-100 p-3 ${m.selected ? 'block' : 'hidden md:block'}`}>
 					<div className="flex flex-col h-full rounded-lg bg-white border border-gray-200">
 						{m.error ? (
 							<div className="m-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
@@ -264,6 +264,13 @@ export default function MessengerPageView() {
 							<>
 								<div className="rounded-t-lg flex items-center justify-between border-b border-[#e2e7eb] px-5 py-3">
 									<div className="flex items-center gap-3">
+										<button
+											onClick={() => m.setSelected(null)}
+											className="cursor-pointer text-gray-500 md:hidden"
+											aria-label="Quay lại danh sách cuộc hội thoại"
+										>
+											<ArrowLeft size={18} />
+										</button>
 										<ConversationAvatar
 											conversation={m.selected}
 											online={m.onlineUserIds.includes(
@@ -536,7 +543,7 @@ export default function MessengerPageView() {
 													)}
 
 													<div
-														className={`flex w-fit max-w-[65%] items-end gap-2 ${isMe ? 'ml-auto flex-row-reverse' : ''
+															className={`min-w-0 flex w-fit max-w-[65%] items-end gap-2 [overflow-wrap:anywhere] ${isMe ? 'ml-auto flex-row-reverse' : ''
 															}`}
 													>
 														{showGroupInfo && (
@@ -614,12 +621,12 @@ export default function MessengerPageView() {
 																</div>
 															) : (
 																<div
-																	className={`w-fit rounded-lg px-3 py-2 text-sm ${isMe
+											className={`min-w-0 w-fit max-w-full break-all rounded-lg px-3 py-2 text-sm ${isMe
 																		? 'bg-[#f4511e] text-white rounded-br-[3px]'
 																		: 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'
 																		}`}
 																>
-																	<div>{message.content}</div>
+																		<div className="min-w-0 max-w-full break-all [overflow-wrap:anywhere]">{message.content}</div>
 																	<small
 																		className={`flex ${isMe ? 'justify-end' : ''
 																			} mt-1 block text-[10px] opacity-70`}
