@@ -103,6 +103,21 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 	const roomIdRef = useRef<string | null>(null)
 	stateRef.current = state
 
+	useEffect(() => {
+		if (state.status !== 'incoming') return
+
+		const ringtone = new Audio('/ringtone.mp3')
+		ringtone.loop = true
+		ringtone.play().catch(() => {
+			// Browsers may block autoplay until the user interacts with the page.
+		})
+
+		return () => {
+			ringtone.pause()
+			ringtone.currentTime = 0
+		}
+	}, [state.status])
+
 	const cleanup = useCallback(() => {
 		pcsRef.current.forEach((pc) => pc.close())
 		pcsRef.current.clear()

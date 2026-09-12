@@ -8,19 +8,16 @@ import { getSocket } from '@/lib/socket-client'
 import { loginModalAtom } from '@/stores'
 import { ECommunityPostType, ICommunityPost } from '@/types/community'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Divider, Flex, Form, Input, Tag } from 'antd'
+import { Avatar, Divider, Flex, Form, Input, Modal, Tag } from 'antd'
 import { useSetAtom } from 'jotai'
 import {
-    Book,
-    Dot,
-    MessageCircle,
-    PenLine,
-    Share2,
-    Sparkles,
-    Zap,
+    Book, Dot, MessageCircle, PenLine,
+    Search,
+    Share2, Sparkles, Zap
 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import './community.css'
 
@@ -355,108 +352,148 @@ export default function CommunityFeed() {
             showMessage.error(error.message)
         }
     }
+
+    const router = useRouter()
+    const [searchOpen, setSearchOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [searchResults, setSearchResults] = useState<any[]>([])
+    const [searching, setSearching] = useState(false)
+
+    useEffect(() => {
+        if (!searchOpen) return
+        const term = searchTerm.trim()
+        if (!term) {
+            setSearchResults([])
+            return
+        }
+        setSearching(true)
+        const timer = setTimeout(() => {
+            api(`/api/social/users?q=${encodeURIComponent(term)}`)
+                .then((data) => setSearchResults(data))
+                .catch(() => setSearchResults([]))
+                .finally(() => setSearching(false))
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [searchTerm, searchOpen])
+
+    const goToProfile = (userId: string) => {
+        setSearchOpen(false)
+        setSearchTerm('')
+        setSearchResults([])
+        router.push(`/thanh-vien/${userId}`)
+    }
+
     return (
-        <div className="!mt-3 !mb-20 min-h-[calc(100vh-403px)] flex flex-col gap-5">
-            <div className="w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
-                <h1 className="text-center text-lg text-white font-semibold">
-                    {t('community').toUpperCase()}
-                </h1>
-            </div>
-            <div className="community-shell">
-                <section className="community-main">
-                    {user ? (
-                        <div className="community-composer">
-                            <div className="p-4 gap-3 items-center flex">
-                                <Avatar
-                                    src={user?.avatar}
-                                    icon={<UserOutlined />}
-                                    className="!h-10 !w-11"
-                                />
-                                <button
-                                    className="composer-trigger"
-                                    onClick={() =>
-                                        setComposerOpen(!composerOpen)
-                                    }
-                                >
-                                    <span>
-                                        Bạn đang nghĩ gì, chia sẻ với cộng đồng…
-                                    </span>
-                                    <PenLine size={18} />
-                                </button>
-                            </div>
-                            {composerOpen && (
-                                <Form
-                                    form={form}
-                                    className="composer-form !p-3"
-                                    layout="vertical"
-                                    initialValues={{
-                                        type: ECommunityPostType.post,
-                                    }}
-                                    onFinish={submit}
-                                >
-                                    <div className="composer-types">
-                                        {Object.values(ECommunityPostType).map(
-                                            (type) => {
-                                                const Icon = labels[type].icon
-                                                return (
-                                                    <button
-                                                        key={type}
-                                                        className={`${selectedType ===
-                                                            type
-                                                            ? 'type-active'
-                                                            : ''
-                                                            } flex items-center gap-1.5`}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedType(
-                                                                type,
-                                                            )
-                                                            form.setFieldValue(
-                                                                'type',
-                                                                type,
-                                                            )
-                                                        }}
-                                                    >
-                                                        <Icon size={14} />
-                                                        {labels[type].label}
-                                                    </button>
-                                                )
-                                            },
-                                        )}
-                                    </div>
-                                    <Form.Item
-                                        name="title"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    'Vui lòng nhập tiêu đề bài viết',
-                                            },
-                                        ]}
+        <>
+            <div className="!mt-3 !mb-20 min-h-[calc(100vh-403px)] flex flex-col gap-5">
+                <div className="w-full h-9 flex items-center justify-center bg-[var(--primary)] lg:bg-[linear-gradient(90deg,_#FFFFFF_15%,_#0028BB_50%,_#0052FF_40%,_#0028BB_20%,_#FFFFFF_85%)]">
+                    <h1 className="text-center text-lg text-white font-semibold">
+                        {t('community').toUpperCase()}
+                    </h1>
+                </div>
+                <div className="community-shell">
+                    <section className="community-main">
+                        <button
+                            type="button"
+                            className="community-search-trigger"
+                            onClick={() => setSearchOpen(true)}
+                        >
+                            <Search size={16} />
+                            <span>Tìm kiếm thành viên…</span>
+                        </button>
+                        {user ? (
+                            <div className="community-composer">
+                                <div className="p-4 gap-3 items-center flex">
+                                    <Avatar
+                                        src={user?.avatar}
+                                        icon={<UserOutlined />}
+                                        className="!h-10 !w-11"
+                                    />
+                                    <button
+                                        className="composer-trigger"
+                                        onClick={() =>
+                                            setComposerOpen(!composerOpen)
+                                        }
                                     >
-                                        <Input placeholder="Tiêu đề bài viết" />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="content"
-                                        rules={[
-                                            {
-                                                validator: async (_, value) => {
-                                                    const text = String(
-                                                        value || '',
+                                        <span>
+                                            Bạn đang nghĩ gì, chia sẻ với cộng đồng…
+                                        </span>
+                                        <PenLine size={18} />
+                                    </button>
+                                </div>
+                                {composerOpen && (
+                                    <Form
+                                        form={form}
+                                        className="composer-form !p-3"
+                                        layout="vertical"
+                                        initialValues={{
+                                            type: ECommunityPostType.post,
+                                        }}
+                                        onFinish={submit}
+                                    >
+                                        <div className="composer-types">
+                                            {Object.values(ECommunityPostType).map(
+                                                (type) => {
+                                                    const Icon = labels[type].icon
+                                                    return (
+                                                        <button
+                                                            key={type}
+                                                            className={`${selectedType ===
+                                                                type
+                                                                ? 'type-active'
+                                                                : ''
+                                                                } flex items-center gap-1.5`}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSelectedType(
+                                                                    type,
+                                                                )
+                                                                form.setFieldValue(
+                                                                    'type',
+                                                                    type,
+                                                                )
+                                                            }}
+                                                        >
+                                                            <Icon size={14} />
+                                                            {labels[type].label}
+                                                        </button>
                                                     )
-                                                        .replace(/<[^>]*>/g, '')
-                                                        .trim()
-                                                    if (!text)
-                                                        throw new Error(
-                                                            'Vui lòng nhập nội dung bài viết',
-                                                        )
                                                 },
-                                            },
-                                        ]}
-                                    >
-                                        <SimpleEditor placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…" />
-                                    </Form.Item>
-                                    {/*
+                                            )}
+                                        </div>
+                                        <Form.Item
+                                            name="title"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message:
+                                                        'Vui lòng nhập tiêu đề bài viết',
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="Tiêu đề bài viết" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="content"
+                                            rules={[
+                                                {
+                                                    validator: async (_, value) => {
+                                                        const text = String(
+                                                            value || '',
+                                                        )
+                                                            .replace(/<[^>]*>/g, '')
+                                                            .trim()
+                                                        if (!text)
+                                                            throw new Error(
+                                                                'Vui lòng nhập nội dung bài viết',
+                                                            )
+                                                    },
+                                                },
+                                            ]}
+                                        >
+                                            <SimpleEditor placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…" />
+                                        </Form.Item>
+                                        {/*
                                 <textarea
                                     rows={5}
                                     placeholder="Chia sẻ điều bạn đang làm, đang học hoặc muốn hỏi…"
@@ -468,7 +505,7 @@ export default function CommunityFeed() {
                                         })
                                     }
                                 /> */}
-                                    {/* <input
+                                        {/* <input
                                     placeholder="URL hình ảnh (không bắt buộc)"
                                     value={form.mediaUrl}
                                     onChange={(e) =>
@@ -478,92 +515,141 @@ export default function CommunityFeed() {
                                         })
                                     }
                                 /> */}
-                                    <button
-                                        className="primary-button mt-2"
-                                        type="submit"
-                                    >
-                                        Đăng bài viết
-                                    </button>
-                                </Form>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="community-composer p-6 text-center">
-                            <div className="text-gray-600">Vui lòng đăng nhập để đăng bài</div>
-                            <button className="primary-button mt-3" onClick={() => setLoginOpen(true)}>
-                                {t('login')}
-                            </button>
-                        </div>)}
-                    <Divider
-                        variant="dashed"
-                        size="large"
-                        className="!border-blue-300"
-                    />
-                    {loading ? (
-                        <div className="feed-loading">Đang tải cộng đồng…</div>
-                    ) : posts.length ? (
-                        posts.map((post) => (
-                            <PostCard
-                                key={post._id}
-                                post={post}
-                                refresh={load}
-                                friendIds={friendIds}
-                                pendingFriendIds={pendingFriendIds}
-                                onFriendAdded={handleFriendAdded}
-                            />
-                        ))
-                    ) : (
-                        <div className="empty-community">
-                            Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ.
-                        </div>
-                    )}
-                </section>
-                <aside className="community-sidebar">
-                    <div className="side-panel stats-panel">
-                        <div className="panel-heading">Cộng đồng</div>
-                        <div className="stats-row">
-                            <span>Thành viên</span>
-                            <strong>
-                                1,000
-                            </strong>
-                        </div>
-                        <div className="stats-row">
-                            <span>Bài viết hôm nay</span>
-                            <strong>
-                                {stats.postsToday.toLocaleString('vi-VN')}
-                            </strong>
-                        </div>
-                        <div className="stats-row">
-                            <span>Đang hoạt động</span>
-                            <strong className="active-stat">
-                                <span className="signal-dot" />
-                                {stats.activeUsers.toLocaleString('vi-VN')}
-                            </strong>
-                        </div>
-                    </div>
-                    {stats.topics?.length > 0 && (
-                        <div className="side-panel">
-                            <div className="panel-heading">Chủ đề nổi bật</div>
-                            <div className="topic-list">
-                                {stats.topics.map((topic) => (
-                                    <span key={topic}>
-                                        #{topic.replace(/^#/, '')}
-                                    </span>
-                                ))}
+                                        <button
+                                            className="primary-button mt-2"
+                                            type="submit"
+                                        >
+                                            Đăng bài viết
+                                        </button>
+                                    </Form>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="community-composer p-6 text-center">
+                                <div className="text-gray-600">Vui lòng đăng nhập để đăng bài</div>
+                                <button className="primary-button mt-3" onClick={() => setLoginOpen(true)}>
+                                    {t('login')}
+                                </button>
+                            </div>)}
+                        <Divider
+                            variant="dashed"
+                            size="large"
+                            className="!border-blue-300"
+                        />
+                        {loading ? (
+                            <div className="feed-loading">Đang tải cộng đồng…</div>
+                        ) : posts.length ? (
+                            posts.map((post) => (
+                                <PostCard
+                                    key={post._id}
+                                    post={post}
+                                    refresh={load}
+                                    friendIds={friendIds}
+                                    pendingFriendIds={pendingFriendIds}
+                                    onFriendAdded={handleFriendAdded}
+                                />
+                            ))
+                        ) : (
+                            <div className="empty-community">
+                                Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ.
+                            </div>
+                        )}
+                    </section>
+                    <aside className="community-sidebar">
+                        <div className="side-panel stats-panel">
+                            <div className="panel-heading">Cộng đồng</div>
+                            <div className="stats-row">
+                                <span>Thành viên</span>
+                                <strong>
+                                    1,000
+                                </strong>
+                            </div>
+                            <div className="stats-row">
+                                <span>Bài viết hôm nay</span>
+                                <strong>
+                                    {stats.postsToday.toLocaleString('vi-VN')}
+                                </strong>
+                            </div>
+                            <div className="stats-row">
+                                <span>Đang hoạt động</span>
+                                <strong className="active-stat">
+                                    <span className="signal-dot" />
+                                    {stats.activeUsers.toLocaleString('vi-VN')}
+                                </strong>
                             </div>
                         </div>
-                    )}
-                    <div className="side-panel rules">
-                        <div className="panel-heading">Quy định cộng đồng</div>
-                        <ol>
-                            <li>Tôn trọng, không công kích cá nhân</li>
-                            <li>Đăng đúng chuyên mục kỹ thuật</li>
-                            <li>Không spam quảng cáo ngoài shop</li>
-                            <li>Luôn cảnh báo an toàn điện</li>
-                        </ol>
-                    </div>
-                </aside>
+                        {stats.topics?.length > 0 && (
+                            <div className="side-panel">
+                                <div className="panel-heading">Chủ đề nổi bật</div>
+                                <div className="topic-list">
+                                    {stats.topics.map((topic) => (
+                                        <span key={topic}>
+                                            #{topic.replace(/^#/, '')}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <div className="side-panel rules">
+                            <div className="panel-heading">Quy định cộng đồng</div>
+                            <ol>
+                                <li>Tôn trọng, không công kích cá nhân</li>
+                                <li>Đăng đúng chuyên mục kỹ thuật</li>
+                                <li>Không spam quảng cáo ngoài shop</li>
+                                <li>Luôn cảnh báo an toàn điện</li>
+                            </ol>
+                        </div>
+                    </aside>
+                </div>
             </div>
-        </div>
+            <Modal
+                open={searchOpen}
+                onCancel={() => {
+                    setSearchOpen(false)
+                    setSearchTerm('')
+                    setSearchResults([])
+                }}
+                footer={null}
+                title="Tìm kiếm thành viên"
+                destroyOnHidden
+            >
+                <Input
+                    autoFocus
+                    allowClear
+                    placeholder="Nhập tên, email hoặc số điện thoại…"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    prefix={<Search size={16} className="text-gray-400" />}
+                />
+                <div className="user-search-results">
+                    {searching ? (
+                        <div className="user-search-empty">Đang tìm…</div>
+                    ) : searchTerm && searchResults.length === 0 ? (
+                        <div className="user-search-empty">Không tìm thấy thành viên nào</div>
+                    ) : (
+                        searchResults.map((u) => (
+                            <div
+                                key={u._id}
+                                className="user-search-item"
+                                onClick={() => goToProfile(u._id)}
+                            >
+                                <Avatar src={u.avatar} icon={<UserOutlined />} />
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-medium truncate">{u.fullName}</div>
+                                    {/* {u.username && (
+                                        <div className="text-xs text-gray-400 truncate">@{u.username}</div>
+                                    )} */}
+                                </div>
+                                {u.role === 'admin' ? (
+                                    <Tag color="blue">Cửa hàng chính thức</Tag>
+                                ) : u.isFriend ? (
+                                    <Tag color="orange">Bạn bè</Tag>
+                                ) : null}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </Modal>
+        </>
     )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useCall } from '@/hooks/use-call'
 import {
 	chatUrl,
 	dateLabel,
@@ -8,7 +9,7 @@ import {
 	useChat,
 } from '@/hooks/use-chat'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Input, Skeleton } from 'antd'
+import { Avatar, Button, Input, Skeleton } from 'antd'
 import {
 	ArrowLeft,
 	Download,
@@ -16,13 +17,32 @@ import {
 	Maximize2,
 	MessageCircle,
 	Paperclip,
+	Phone,
 	Send,
+	Video,
 	X,
 } from 'lucide-react'
 import { Fragment } from 'react'
 
 export default function MessengerBubbleView() {
 	const m = useChat()
+	const { startCall } = useCall()
+
+	if (!m.user || !m.user._id) return null
+
+	const handleStartCall = (callType: 'audio' | 'video') => {
+		if (!m.selected) return
+		const members = m.selected.isGroup
+			? (m.selected.members ?? [])
+				.filter((member: any) => member._id !== m.user?._id)
+				.map((member: any) => ({ userId: member._id, fullName: member.fullName, avatar: member.avatar }))
+			: m.selected.other
+				? [{ userId: m.selected.other._id, fullName: m.selected.other.fullName, avatar: m.selected.other.avatar }]
+				: []
+		if (!members.length) return
+		startCall(m.selected._id, callType, members)
+	}
+
 	if (!m.user) return null
 
 	return (
@@ -31,9 +51,9 @@ export default function MessengerBubbleView() {
 				<button
 					aria-label="Mở tin nhắn"
 					onClick={() => m.setOpen(true)}
-					className="cursor-pointer fixed bottom-20 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#f4511e] text-white shadow-xl transition-transform hover:scale-105"
+					className="cursor-pointer fixed bottom-20 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e] text-white shadow-xl transition-transform hover:scale-105"
 				>
-					<MessageCircle size={24} />
+					<MessageCircle size={20} />
 					{m.unread > 0 && (
 						<span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-[#ff5a1f] px-1 text-xs font-bold">
 							{m.unread > 99 ? '99+' : m.unread}
@@ -42,32 +62,38 @@ export default function MessengerBubbleView() {
 				</button>
 			)}
 			{m.open && (
-				<section className="fixed bottom-25 right-5 z-50 flex h-[430px] w-[335px] flex-col overflow-hidden rounded-lg border border-[#d9e2e8] bg-white shadow-xl">
-					<header className="flex items-center justify-between border-b border-[#e2e7eb] bg-[#f8fafb] px-4 py-3 text-[#082c40]">
-						<strong>
+				<section className="fixed bottom-25 right-5 z-[9999999] flex h-[430px] w-[335px] flex-col overflow-hidden rounded-lg border border-[#d9e2e8] bg-white shadow-xl">
+					<header className="w-full flex items-center justify-between border-b border-[#e2e7eb] bg-[#f8fafb] px-4 py-3 text-[#082c40]">
+						<strong className='w-full'>
 							{m.selected ? (
-								<div className="flex items-center gap-3">
-									<button
-										onClick={() => m.setSelected(null)}
-										className="cursor-pointer flex items-center px-1 py-3 text-sm text-gray-500"
-									>
-										<ArrowLeft size={18} />
-									</button>
-									<div className="flex items-center gap-3">
-										<span className="relative inline-flex">
-											<Avatar
-												size={40}
-												src={m.selected.other.avatar}
-												icon={<UserOutlined />}
-											/>
-											{m.onlineUserIds.includes(
-												String(m.selected.other._id),
-											) && (
-													<span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#31a24c]" />
-												)}
-										</span>
-										{m.selected.displayName ||
-											m.selected.other.fullName}
+								<div className="flex items-center justify-between w-full">
+									<div className='flex items-center gap-3'>
+										<button
+											onClick={() => m.setSelected(null)}
+											className="cursor-pointer flex items-center px-1 py-3 text-sm text-gray-500"
+										>
+											<ArrowLeft size={18} />
+										</button>
+										<div className="flex items-center gap-3 text-[14px]">
+											<span className="relative inline-flex">
+												<Avatar
+													size={32}
+													src={m.selected.other.avatar}
+													icon={<UserOutlined />}
+												/>
+												{m.onlineUserIds.includes(
+													String(m.selected.other._id),
+												) && (
+														<span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#31a24c]" />
+													)}
+											</span>
+											{m.selected.displayName ||
+												m.selected.other.fullName}
+										</div>
+									</div>
+									<div className={`flex ${m.selected.isGroup && m.selected.ownerId === m.user._id ? 'bg-gray-100 rounded-md' : ''}`}>
+										<Button className='!h-10' type='text' onClick={() => handleStartCall('audio')}><Phone size={18} color='#117bbd' fill="#117bbd" /></Button>
+										<Button className='!h-10' type='text' onClick={() => handleStartCall('video')}><Video size={20} color='#117bbd' fill="#117bbd" /></Button>
 									</div>
 								</div>
 							) : (
@@ -110,7 +136,19 @@ export default function MessengerBubbleView() {
 														)}
 													</div>
 												)}
-												{message.attachmentUrl ? (
+												{message.type === 'call' ? (
+													<div className="flex items-center gap-2 rounded-lg border border-[#e2e7eb] bg-[#f8fafb] px-3 py-2 text-xs text-gray-600">
+														{message.call?.callType === 'video' ? <Video size={14} /> : <Phone size={14} />}
+														<span>
+															{message.call?.status === 'missed' && 'Cuộc gọi nhỡ'}
+															{message.call?.status === 'rejected' && 'Cuộc gọi bị từ chối'}
+															{message.call?.status === 'cancelled' && 'Cuộc gọi đã hủy'}
+															{message.call?.status === 'completed' &&
+																`Đã gọi • ${Math.floor((message.call.durationSec || 0) / 60)}:${String((message.call.durationSec || 0) % 60).padStart(2, '0')}`}
+														</span>
+														<small className="text-[10px] text-gray-400">{timeLabel(message.createdAt)}</small>
+													</div>
+												) : message.attachmentUrl ? (
 													<div
 														className={`flex w-fit max-w-[70%] flex-col ${message.senderId ===
 															m.user?._id
@@ -223,7 +261,7 @@ export default function MessengerBubbleView() {
 							</div>
 						</>
 					) : (
-						<div className="flex-1 overflow-y-auto bg-white p-2">
+						<div className="flex-1 overflow-y-auto bg-white p-2 ">
 							{m.conversations.length ? (
 								m.conversations.map((conversation) => (
 									<button
@@ -252,10 +290,24 @@ export default function MessengerBubbleView() {
 														?.fullName}
 											</strong>
 											<small className="block truncate text-gray-500">
-												{conversation.latest?.content ||
-													conversation.latest?.attachmentUrl
-													? <i>Đã gửi 1 file đính kèm</i>
-													: 'Bắt đầu trò chuyện'}
+												{conversation.latest?.type === 'call' ? (
+													<i>
+														{conversation.isGroup ? `${conversation.latest.senderId.fullName}: ` : ''}
+														{conversation.latest.call?.status === 'missed'
+															? 'Cuộc gọi nhỡ'
+															: conversation.latest.call?.status === 'rejected'
+																? 'Cuộc gọi bị từ chối'
+																: conversation.latest.call?.status === 'cancelled'
+																	? 'Cuộc gọi đã hủy'
+																	: 'Cuộc gọi đã kết thúc'}
+													</i>
+												) : conversation.latest?.content ? (
+													conversation.isGroup ? `${conversation.latest.senderId.fullName}: ${conversation.latest.content}` : conversation.latest?.content
+												) : conversation.latest?.attachmentUrl ? (
+													<i>{conversation.latest.senderId.fullName} đã gửi 1 file đính kèm</i>
+												) : (
+													'Bắt đầu trò chuyện'
+												)}
 											</small>
 										</span>
 										<small className="self-start pt-1 text-xs text-gray-500">
@@ -286,9 +338,9 @@ export default function MessengerBubbleView() {
 						m.setOpen(false)
 						m.setSelected(null)
 					}}
-					className="cursor-pointer fixed bottom-8 right-6 z-[51] flex h-14 w-14 items-center justify-center rounded-full bg-[#f4511e] text-white shadow-xl"
+					className="cursor-pointer fixed bottom-8 right-6 z-[51] flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e] text-white shadow-xl"
 				>
-					<X size={25} />
+					<X size={21} />
 				</button>
 			)}
 		</>

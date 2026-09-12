@@ -1,4 +1,5 @@
 import { PAGE_LIMIT } from "@/constants/common"
+import Friendship from "@/models/friendship"
 import User from "@/models/user"
 import { EUserRole, IAddress } from "@/types/user"
 
@@ -97,5 +98,56 @@ export class UserService {
 
         const { password: _, ...safeUser } = user.toObject()
         return safeUser
+    }
+
+    static async searchUsers(
+        query: string,
+        currentUserId?: string,
+        limit: number = 10
+    ) {
+        console.log(currentUserId)
+        const term = query.trim()
+        if (!term) return []
+
+        const regex = { $regex: term, $options: "i" }
+
+        const users = await User.find({
+            $or: [
+                { fullName: regex },
+                { username: regex },
+                { email: regex },
+                { phone: regex },
+            ],
+            ...(currentUserId ? { _id: { $ne: currentUserId } } : {}),
+        })
+            .select("fullName avatar username role")
+            .limit(limit)
+            .lean()
+
+        if (!currentUserId || users.length === 0) {
+            return users.map((u) => ({ ...u, isFriend: false }))
+        }
+
+        const userIds = users.map((u) => u._id)
+        const friendRows = await Friendship.find({
+            status: "accepted",
+            $or: [
+                { requesterId: currentUserId, addresseeId: { $in: userIds } },
+                { addresseeId: currentUserId, requesterId: { $in: userIds } },
+            ],
+        }).lean()
+
+        const friendIds = new Set(
+            friendRows.map((row) =>
+                String(row.requesterId) === String(currentUserId)
+                    ? String(row.addresseeId)
+                    : String(row.requesterId),
+            ),
+        )
+
+        return users.map((u) => ({
+            ...u,
+            isFriend: friendIds.has(String(u._id)),
+        }))
     }
 }

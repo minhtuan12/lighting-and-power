@@ -8,7 +8,11 @@ import MessengerPageView from './MessengerPageView'
 
 export default function MessengerBubble() {
     return (
-        <MessengerBubbleView />
+        <CallProvider>
+            <MessengerBubbleView />
+            <IncomingCallModal />
+            <CallScreen />
+        </CallProvider>
     )
 }
 

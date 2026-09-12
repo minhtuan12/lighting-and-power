@@ -10,6 +10,7 @@ import {
 	FileText,
 	Paperclip,
 	Phone,
+	Search,
 	Send,
 	Trash2,
 	UserMinus,
@@ -53,6 +54,14 @@ export default function MessengerPageView() {
 	const m = useChat({ autoOpen: true })
 	const [memberSearch, setMemberSearch] = useState('')
 	const { startCall } = useCall()
+
+	const [conversationSearch, setConversationSearch] = useState('')
+	const filteredConversations = m.conversations.filter((conversation) => {
+		const name = (
+			conversation.displayName || conversation.other?.fullName || ''
+		).toLowerCase()
+		return name.includes(conversationSearch.trim().toLowerCase())
+	})
 
 	if (!m.user || !m.user._id) return null
 
@@ -151,9 +160,20 @@ export default function MessengerPageView() {
 						</div>
 					)}
 
+					<div className="px-4 pb-3">
+						<Input
+							allowClear
+							value={conversationSearch}
+							onChange={(e) => setConversationSearch(e.target.value)}
+							placeholder="Tìm kiếm cuộc trò chuyện..."
+							prefix={<Search size={14} className="text-gray-400" />}
+							className="!rounded-full"
+						/>
+					</div>
+
 					<div className="flex-1 overflow-y-auto p-1 !pt-0">
-						{m.conversations.length ? (
-							m.conversations.map((conversation) => (
+						{filteredConversations.length ? (
+							filteredConversations.map((conversation) => (
 								<button
 									key={conversation._id}
 									onClick={() => m.setSelected(conversation)}
@@ -216,7 +236,10 @@ export default function MessengerPageView() {
 							))
 						) : (
 							<p className="p-6 text-center text-sm text-gray-500">
-								Chưa có cuộc trò chuyện
+								{conversationSearch
+									? 'Không tìm thấy cuộc trò chuyện nào'
+									: 'Chưa có cuộc trò chuyện'
+								}
 							</p>
 						)}
 					</div>
