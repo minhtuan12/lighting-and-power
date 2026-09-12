@@ -30,7 +30,7 @@ export function CallScreen() {
 	if (status !== 'connecting' && status !== 'in-call') return null
 
 	return (
-		<div className="fixed inset-0 flex flex-col overflow-hidden bg-gray-900"> {/* + overflow-hidden */}
+		<div className="fixed inset-0 flex flex-col overflow-hidden bg-gray-900 z-[99999999999]"> {/* + overflow-hidden */}
 			{callType === 'audio' &&
 				peerList.map((peer) => (
 					<audio

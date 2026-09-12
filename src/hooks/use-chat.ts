@@ -58,6 +58,12 @@ export function chatUrl() {
 	return url.toString()
 }
 
+export const formatDuration = (totalSeconds: number) => {
+	const m = Math.floor(totalSeconds / 60)
+	const s = totalSeconds % 60
+	return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 export function useChat({
 	autoOpen = false,
 }: { autoOpen?: boolean } = {}) {
@@ -77,9 +83,15 @@ export function useChat({
 	const [addMemberIds, setAddMemberIds] = useState<string[]>([])       // thêm mới: chọn bạn để THÊM
 	const [removeMemberIds, setRemoveMemberIds] = useState<string[]>([]) // thêm mới: chọn thành viên để XÓA
 	const [uploading, setUploading] = useState(false)
+	const [isRecording, setIsRecording] = useState(false)
 	const [loadingMsg, setLoadingMsg] = useState(false)
 	const fileRef = useRef<HTMLInputElement>(null)
 	const messagesEndRef = useRef<HTMLDivElement>(null)
+	const recorderRef = useRef<MediaRecorder | null>(null)
+	const recordingStreamRef = useRef<MediaStream | null>(null)
+	const [recordingSeconds, setRecordingSeconds] = useState(0)
+	const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+	const cancelledRef = useRef(false)
 
 	const load = () =>
 		user &&
@@ -174,6 +186,12 @@ export function useChat({
 		})
 	}, [selected?._id, messages.length, loadingMsg])
 
+	useEffect(() => {
+		return () => {
+			if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current)
+		}
+	}, [])
+
 	const unread = useMemo(
 		() =>
 			conversations.reduce(
@@ -226,6 +244,71 @@ export function useChat({
 			setError(reason.message)
 		} finally {
 			setUploading(false)
+		}
+	}
+
+	const startRecording = async () => {
+		if (!selected || uploading || isRecording) return
+		if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+			setError('Trình duyệt không hỗ trợ ghi âm')
+			return
+		}
+
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+			const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find((type) =>
+				MediaRecorder.isTypeSupported(type),
+			)
+			const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+			const chunks: Blob[] = []
+			cancelledRef.current = false
+
+			recorder.ondataavailable = (event) => {
+				if (event.data.size > 0) chunks.push(event.data)
+			}
+			recorder.onstop = () => {
+				stream.getTracks().forEach((track) => track.stop())
+				recordingStreamRef.current = null
+				recorderRef.current = null
+				setIsRecording(false)
+				if (recordingIntervalRef.current) {
+					clearInterval(recordingIntervalRef.current)
+					recordingIntervalRef.current = null
+				}
+				setRecordingSeconds(0)
+
+				if (cancelledRef.current) {
+					cancelledRef.current = false
+					return
+				}
+
+				const audioFile = new File([new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })], `voice-message-${Date.now()}.webm`, {
+					type: recorder.mimeType || 'audio/webm',
+				})
+				void sendAttachment(audioFile)
+			}
+
+			recorderRef.current = recorder
+			recordingStreamRef.current = stream
+			recorder.start()
+			setIsRecording(true)
+			setRecordingSeconds(0)
+			recordingIntervalRef.current = setInterval(() => {
+				setRecordingSeconds((seconds) => seconds + 1)
+			}, 1000)
+		} catch (reason: any) {
+			setError(reason?.message || 'Không thể truy cập microphone')
+		}
+	}
+
+	const stopRecording = () => {
+		if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
+	}
+
+	const cancelRecording = () => {
+		if (recorderRef.current?.state === 'recording') {
+			cancelledRef.current = true
+			recorderRef.current.stop()
 		}
 	}
 
@@ -316,6 +399,8 @@ export function useChat({
 		setRemoveMemberIds,
 		setGroupAddMode,
 		uploading,
+		isRecording,
+		recordingSeconds,
 		loadingMsg,
 		fileRef,
 		messagesEndRef,
@@ -323,6 +408,9 @@ export function useChat({
 		load,
 		send,
 		sendAttachment,
+		startRecording,
+		stopRecording,
+		cancelRecording,
 		createGroup,
 		addGroupMembers,
 		removeGroupMembers,

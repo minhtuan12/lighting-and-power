@@ -5,6 +5,7 @@ import {
 	chatUrl,
 	dateLabel,
 	dayKey,
+	formatDuration,
 	timeLabel,
 	useChat,
 } from '@/hooks/use-chat'
@@ -16,6 +17,7 @@ import {
 	FileText,
 	Maximize2,
 	MessageCircle,
+	Mic,
 	Paperclip,
 	Phone,
 	Send,
@@ -23,6 +25,7 @@ import {
 	X,
 } from 'lucide-react'
 import { Fragment } from 'react'
+import VoiceMessageBubble from './VoiceMessageBubble'
 
 export default function MessengerBubbleView() {
 	const m = useChat()
@@ -148,6 +151,15 @@ export default function MessengerBubbleView() {
 														</span>
 														<small className="text-[10px] text-gray-400">{timeLabel(message.createdAt)}</small>
 													</div>
+												) : message.attachmentMimeType?.startsWith('audio/') ? (
+													<div className={`flex w-fit max-w-[70%] flex-col ${message.senderId === m.user?._id ? 'ml-auto items-end' : 'items-start'}`}>
+														<div className={`flex flex-col ${message.senderId === m.user?._id ? 'items-end' : 'items-start'}`}>
+															<VoiceMessageBubble src={message.attachmentUrl} isMe={message.senderId === m.user?._id} />
+															<small className="mt-1 text-[10px] text-gray-400">
+																{timeLabel(message.createdAt)}
+															</small>
+														</div>
+													</div>
 												) : message.attachmentUrl ? (
 													<div
 														className={`flex w-fit max-w-[70%] flex-col ${message.senderId ===
@@ -237,27 +249,67 @@ export default function MessengerBubbleView() {
 									}}
 								/>
 								<button
-									disabled={m.uploading}
+									disabled={m.uploading || m.isRecording}
 									onClick={() => m.fileRef.current?.click()}
-									className="cursor-pointer rounded-full px-2 text-gray-500"
+									className="cursor-pointer rounded-full px-2 text-gray-500 disabled:opacity-50"
 								>
 									<Paperclip size={18} />
 								</button>
-								<Input
-									value={m.content}
-									onChange={(event) =>
-										m.setContent(event.target.value)
-									}
-									onPressEnter={m.send}
-									placeholder="Nhập tin nhắn..."
-									className="!h-[44px] !rounded-full !border-[#d9e2e8] !px-4"
-								/>
 								<button
-									onClick={m.send}
-									className="cursor-pointer rounded-full bg-[#f4511e] px-3 text-white w-10 h-10 hover:opacity-90"
+									disabled={m.uploading}
+									onClick={m.isRecording ? m.stopRecording : m.startRecording}
+									className={`cursor-pointer rounded-full px-2 ${m.isRecording ? 'text-red-500' : 'text-gray-500'}`}
+									aria-label={m.isRecording ? 'Dừng ghi âm' : 'Ghi âm'}
+									title={m.isRecording ? 'Dừng ghi âm' : 'Ghi âm'}
 								>
-									<Send size={15} />
+									<Mic size={18} />
 								</button>
+
+								{m.isRecording ? (
+									<div className="flex h-[44px] flex-1 items-center gap-2.5 rounded-full bg-[#fff1ea] px-3.5">
+										<span className="h-2 w-2 flex-none rounded-full bg-red-500 animate-pulse" />
+										<div className="flex h-4 flex-1 items-end gap-[2.5px] overflow-hidden">
+											{Array.from({ length: 18 }).map((_, i) => (
+												<span
+													key={i}
+													className="bubble-recording-bar w-[2.5px] flex-none rounded-full bg-[#f4511e]"
+													style={{ animationDelay: `${i * 0.08}s` }}
+												/>
+											))}
+										</div>
+										<span className="flex-none text-[11px] font-semibold tabular-nums text-[#f4511e]">
+											{formatDuration(m.recordingSeconds)}
+										</span>
+									</div>
+								) : (
+									<Input
+										value={m.content}
+										onChange={(event) =>
+											m.setContent(event.target.value)
+										}
+										onPressEnter={m.send}
+										placeholder="Nhập tin nhắn..."
+										className="!h-[44px] !rounded-full !border-[#d9e2e8] !px-4"
+									/>
+								)}
+
+								{m.isRecording ? (
+									<button
+										onClick={m.cancelRecording}
+										className="cursor-pointer rounded-full bg-gray-200 px-3 text-gray-600 w-10 h-10 hover:bg-gray-300"
+										aria-label="Huỷ ghi âm"
+										title="Huỷ ghi âm"
+									>
+										<X size={16} />
+									</button>
+								) : (
+									<button
+										onClick={m.send}
+										className="cursor-pointer rounded-full bg-[#f4511e] px-3 text-white w-10 h-10 hover:opacity-90"
+									>
+										<Send size={15} />
+									</button>
+								)}
 							</div>
 						</>
 					) : (

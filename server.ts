@@ -3,7 +3,8 @@ import connectDb from '@/lib/db'
 import jwt from 'jsonwebtoken'
 import next from 'next'
 import { randomUUID } from 'node:crypto'
-import { createServer } from 'node:http'
+import fs from 'node:fs'
+import { createServer } from 'node:https'
 import { Server } from 'socket.io'
 import { setRealtimeServer } from './src/lib/realtime'
 
@@ -42,6 +43,10 @@ app.prepare().then(async () => {
     await connectDb()
 
     const httpServer = createServer(
+        {
+            key: fs.readFileSync('C:/Users/HP/192.168.100.113-key.pem'),
+            cert: fs.readFileSync('C:/Users/HP/192.168.100.113.pem'),
+        },
         (request, response) => handler(request, response),
     )
     const io = new Server(httpServer, {
@@ -427,7 +432,7 @@ app.prepare().then(async () => {
             }
         })
     })
-    httpServer.listen(port, () =>
+    httpServer.listen(port, '0.0.0.0', () =>
         console.log(`> Ready on http://localhost:${port}`),
     )
 })

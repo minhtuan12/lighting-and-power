@@ -1,13 +1,20 @@
 'use client'
 
 import { useCall } from '@/hooks/use-call'
-import { dateLabel, dayKey, timeLabel, useChat } from '@/hooks/use-chat'
+import {
+	dateLabel,
+	dayKey,
+	formatDuration,
+	timeLabel,
+	useChat
+} from '@/hooks/use-chat'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Empty, Flex, Input, Modal, Skeleton, Tooltip } from 'antd'
 import {
 	ArrowLeft,
 	Download,
 	FileText,
+	Mic,
 	Paperclip,
 	Phone,
 	Search,
@@ -21,6 +28,7 @@ import {
 import Link from 'next/link'
 import { Fragment, useState } from 'react'
 import { Icon } from '../Icon'
+import VoiceMessageBubble from './VoiceMessageBubble'
 
 function ConversationAvatar({
 	conversation,
@@ -562,6 +570,13 @@ export default function MessengerPageView() {
 																	</span>
 																	<small className="text-[10px] text-gray-400">{timeLabel(message.createdAt)}</small>
 																</div>
+															) : message.attachmentMimeType?.startsWith('audio/') ? (
+																<div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+																	<VoiceMessageBubble src={message.attachmentUrl} isMe={isMe} />
+																	<small className="mt-1 text-[10px] text-gray-400">
+																		{timeLabel(message.createdAt)}
+																	</small>
+																</div>
 															) : message.attachmentUrl ? (
 																<div
 																	className={`flex flex-col ${isMe ? 'items-end' : 'items-start'
@@ -643,21 +658,57 @@ export default function MessengerPageView() {
 									>
 										<Paperclip size={19} />
 									</button>
-									<Input
-										value={m.content}
-										onChange={(event) =>
-											m.setContent(event.target.value)
-										}
-										onPressEnter={m.send}
-										placeholder="Nhập tin nhắn..."
-										className="!h-[44px] !rounded-full !border-[#d9e2e8] !px-4 shadow-none"
-									/>
 									<button
-										onClick={m.send}
-										className="flex h-10 w-11 cursor-pointer items-center justify-center rounded-full bg-[#f4511e] text-white hover:opacity-90"
+										disabled={m.uploading}
+										onClick={m.isRecording ? m.stopRecording : m.startRecording}
+										className={`cursor-pointer ${m.isRecording ? 'text-red-500' : 'text-gray-500'}`}
+										aria-label={m.isRecording ? 'Dừng ghi âm' : 'Ghi âm'}
+										title={m.isRecording ? 'Dừng ghi âm' : 'Ghi âm'}
 									>
-										<Send size={15} />
+										<Mic size={19} />
 									</button>
+									{m.isRecording ? (
+										<div className="flex h-[44px] flex-1 items-center gap-3 rounded-full bg-[#fff1ea] px-4">
+											<span className="h-2.5 w-2.5 flex-none rounded-full bg-red-500 animate-pulse" />
+											<div className="flex h-5 flex-1 items-end gap-[3px] overflow-hidden">
+												{Array.from({ length: 24 }).map((_, i) => (
+													<span
+														key={i}
+														className="recording-bar w-[3px] flex-none rounded-full bg-[#f4511e]"
+														style={{ animationDelay: `${i * 0.08}s` }}
+													/>
+												))}
+											</div>
+											<span className="flex-none text-xs font-semibold tabular-nums text-[#f4511e]">
+												{formatDuration(m.recordingSeconds)}
+											</span>
+										</div>
+									) : (
+										<Input
+											value={m.content}
+											onChange={(event) => m.setContent(event.target.value)}
+											onPressEnter={m.send}
+											placeholder="Nhập tin nhắn..."
+											className="!h-[44px] !rounded-full !border-[#d9e2e8] !px-4 shadow-none"
+										/>
+									)}
+									{m.isRecording ? (
+										<button
+											onClick={m.cancelRecording}
+											className="flex h-10 w-11 cursor-pointer items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"
+											aria-label="Huỷ ghi âm"
+											title="Huỷ ghi âm"
+										>
+											<X size={17} />
+										</button>
+									) : (
+										<button
+											onClick={m.send}
+											className="flex h-10 w-11 cursor-pointer items-center justify-center rounded-full bg-[#f4511e] text-white hover:opacity-90"
+										>
+											<Send size={15} />
+										</button>
+									)}
 								</div>
 							</>
 						) : (
@@ -675,6 +726,15 @@ export default function MessengerPageView() {
 					</div>
 				</div>
 			</section>
+			<style jsx>{`
+				@keyframes recording-wave {
+					0%, 100% { height: 6px; }
+					50% { height: 18px; }
+				}
+				.recording-bar {
+					animation: recording-wave 0.9s ease-in-out infinite;
+				}
+			`}</style>
 		</div>
 	)
 }
