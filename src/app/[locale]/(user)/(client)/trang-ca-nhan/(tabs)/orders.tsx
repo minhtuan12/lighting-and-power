@@ -3,16 +3,20 @@
 import { EOrderStatus } from '@/types/order'
 import { Tabs, TabsProps } from 'antd'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import OrderList from '../../../(components)/(order)/OrderList'
 
-export default function Orders() {
+export default function Orders({ orderId }: { orderId?: string }) {
     const t = useTranslations('orders')
+    const searchParams = useSearchParams()
+    const [activeKey, setActiveKey] = useState(searchParams.get('orderTab') || 'all')
 
     const items: TabsProps['items'] = [
         {
             key: 'all',
             label: t('tabs.all'),
-            children: <OrderList />,
+            children: <OrderList initialOrderId={orderId} />,
         },
         {
             key: 'reception',
@@ -42,7 +46,8 @@ export default function Orders() {
 
     return (
         <Tabs
-            defaultActiveKey="all"
+            activeKey={activeKey}
+            onChange={setActiveKey}
             items={items}
             className="order-tabs"
         />

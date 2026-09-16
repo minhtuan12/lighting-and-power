@@ -5,6 +5,7 @@ import { EOrderStatus } from "@/types/order"
 import { EUserRole } from "@/types/user"
 import { NextRequest, NextResponse } from "next/server"
 import { OrderService } from "../../../(services)/order.service"
+import { getRequestUser } from "@/lib/context"
 
 // ===================== PATCH /api/admin/orders/[id] =====================
 async function updateOrderStatus(
@@ -34,6 +35,7 @@ async function updateOrderStatus(
             params.id,
             status as EOrderStatus,
             cancelReason,
+            getRequestUser(request)?.userId,
         )
 
         return NextResponse.json({

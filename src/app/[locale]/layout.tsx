@@ -49,6 +49,7 @@ export default async function RootLayout({
                     href="https://cdn.jsdelivr.net/npm/antd@5/dist/reset.css"
                     as="style"
                 />
+                <script src="https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js" />
             </head>
             <body
                 suppressHydrationWarning

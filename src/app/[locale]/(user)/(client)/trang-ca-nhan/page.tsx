@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-me'
 import { Avatar, Breadcrumb, Card, Flex, Row, Typography } from 'antd'
 import { Heart, Lock, Package, StickyNote, UserRound } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -19,8 +20,9 @@ const FavouriteProductsTab = lazy(() => import('./(tabs)/favourite-products'))
 export default function () {
     const t = useTranslations()
     const { user } = useAuth()
+    const searchParams = useSearchParams()
 
-    const [activeTab, setActiveTab] = useState('info')
+    const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'info')
 
     const getColor = useCallback(
         (key: string) => {
@@ -78,7 +80,7 @@ export default function () {
     const renderTab = useCallback(() => {
         switch (activeTab) {
             case 'orders':
-                return <LazyOrdersTab />
+                return <LazyOrdersTab orderId={searchParams.get('orderId') || undefined} />
             case 'info':
                 return <LazyInfoTab />
             case 'password':
@@ -90,7 +92,7 @@ export default function () {
             default:
                 return <LazyInfoTab />
         }
-    }, [activeTab])
+    }, [activeTab, searchParams])
 
     if (!user) {
         return (

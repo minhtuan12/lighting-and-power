@@ -17,6 +17,8 @@ const ALLOWED_ORIGINS = [
     'http://localhost:4000',
     'http://chat.localhost:4000',
     'http://c2c.localhost:4000',
+
+    'https://pay.payos.vn'
 ]
 
 function corsHeaders(origin: string | null) {

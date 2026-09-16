@@ -283,15 +283,6 @@ button[aria-label='Download'] {
     align-items: center !important;
 }
 
-.ant-pagination-item {
-    border-radius: 6px;
-}
-
-.ant-pagination-item-active {
-    background: #3b82f6;
-    border-color: #3b82f6;
-}
-
 .ant-pagination-item-active a {
     color: white;
 }
@@ -327,12 +318,6 @@ button[aria-label='Download'] {
     }
 }
 
-.ant-pagination-item {
-    a {
-        width: 100%;
-    }
-}
-
 .ant-card-body {
     height: 100%;
 }
@@ -359,7 +344,18 @@ button[aria-label='Download'] {
 
 .custom-pagination {
     a {
-        color: var(--primary) !important;
+        width: 100% !important;
+    }
+    .ant-pagination-item {
+        a {
+            color: #3b82f6 !important;
+        }
+    }
+    .ant-pagination-item-active {
+        background: #3b82f6 !important;
+        a {
+            color: white !important;
+        }
     }
 }
 

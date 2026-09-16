@@ -11,12 +11,13 @@ import { getProvinces } from "@/lib/utils"
 import { checkedOutItemsAtom } from "@/stores"
 import { ICartItem } from "@/types/cart"
 import { Province, Ward } from "@/types/general"
+import { CloseCircleFilled } from "@ant-design/icons"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button, Card, Col, Divider, Form, Radio, Row, Typography } from "antd"
 import { useAtom } from "jotai"
-import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 const { Text } = Typography
 
@@ -35,10 +36,23 @@ const getEffectivePrice = (
     return tier ? tier.price : (fallbackPrice ?? priceTiers[0].price)
 }
 
+// Thêm hằng số idempotency key riêng cho mỗi lần vào trang checkout
+function useClientRequestId() {
+    const ref = useRef<string>('');
+    if (!ref.current) {
+        ref.current =
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random()}`
+    }
+    return ref.current
+}
+
 export default function OrderCheckoutPage() {
     const t = useTranslations()
     const v = useTranslations('validation')
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { user, isAuthenticated, isLoading: loadingAuth } = useAuth()
     const [checkedOutItems, setCheckedOutItems] = useAtom(checkedOutItemsAtom)
     const queryClient = useQueryClient()
@@ -54,6 +68,143 @@ export default function OrderCheckoutPage() {
     >([])
     const [shippingFee, setShippingFee] = useState(0)
     const [isShippingFeeLoading, setIsShippingFeeLoading] = useState(false)
+    const clientRequestId = useClientRequestId()
+    const [payosState, setPayosState] = useState<{
+        orderId: string
+        checkoutUrl: string
+    } | null>(null)
+    const [verifyingPayment, setVerifyingPayment] = useState(false)
+    const [ordered, setOrdered] = useState<any>(null);
+    const [cancelReturnState, setCancelReturnState] = useState<{
+        orderId: string
+        orderCode: string | null
+        loading: boolean
+        error: boolean
+    } | null>(null)
+    const cancelReturn = searchParams.get("cancel") === "true" && Boolean(searchParams.get("orderId"))
+    const cancelOrderId = searchParams.get("orderId")
+    const cancelOrderCode = searchParams.get("orderCode")
+
+    useEffect(() => {
+        if (!isAuthenticated || !cancelReturn || !cancelOrderId) return
+
+        let active = true
+        setCancelReturnState({
+            orderId: cancelOrderId,
+            orderCode: cancelOrderCode,
+            loading: true,
+            error: false,
+        })
+
+        fetchAPI(`/orders/${cancelOrderId}/payment-cancelled`, {
+            method: "POST",
+        })
+            .then(async () => {
+                // The callback can be opened more than once; read the final order
+                // so an already-cancelled order still gets a useful result page.
+                try {
+                    await fetchAPI(`/orders/${cancelOrderId}`)
+                } catch {
+                    // The cancellation request above is the source of truth.
+                }
+                if (active) {
+                    setCancelReturnState((current) => current ? { ...current, loading: false } : current)
+                    queryClient.invalidateQueries({ queryKey: ["orders"] })
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setCancelReturnState((current) => current ? { ...current, loading: false, error: true } : current)
+                }
+            })
+
+        return () => {
+            active = false
+        }
+    }, [cancelOrderCode, cancelOrderId, cancelReturn, isAuthenticated, queryClient])
+
+    // Sau khi tạo đơn thành công với paymentMethod = 'payos'
+    const openPayosDialog = useCallback((order: any) => {
+        if (!order?.payment?.checkoutUrl) return
+        setOrdered(order)
+        setPayosState({ orderId: order._id, checkoutUrl: order.payment.checkoutUrl })
+    }, [])
+
+    const pollOrderStatus = useCallback(async (orderId: string) => {
+        setVerifyingPayment(true)
+        const start = Date.now()
+        const TIMEOUT_MS = 30_000
+
+        const check = async (): Promise<void> => {
+            const res = await fetchAPI(`/orders/${orderId}`)
+            if (res?.data?.paymentStatus === "paid") {
+                setVerifyingPayment(false)
+                router.push(`/dat-hang/thanh-cong?orderId=${orderId}`)
+                return
+            }
+            if (Date.now() - start > TIMEOUT_MS) {
+                setVerifyingPayment(false)
+                showMessage.warning(
+                    "Đang chờ xác nhận thanh toán, vui lòng kiểm tra lại trong trang đơn hàng.",
+                )
+                router.push(routes.trangCaNhan.url)
+                return
+            }
+            setTimeout(check, 2000)
+        }
+        check()
+    }, [router])
+
+    const handleSubmit = async (values: any) => {
+        if (items.length === 0) {
+            showMessage.warning("Giỏ hàng đang trống.")
+            return
+        }
+
+        setIsSubmitting(true)
+        try {
+            const result = await fetchAPI("/orders", {
+                method: "POST",
+                body: JSON.stringify({
+                    customerInfo: {
+                        name: values.fullName,
+                        phone: values.phone,
+                        email: values.email,
+                    },
+                    shippingAddress: {
+                        // GHTK expects the address names, matching the values
+                        // used by the shipping-fee preview request.
+                        province: selectedCityName,
+                        ward: selectedWardName,
+                        address: values.address,
+                    },
+                    paymentMethod: values.paymentMethod, // "cod" | "payos"
+                    note: values.note,
+                    selectedProductIds: items.map((item) => item.productId),
+                    clientRequestId,
+                }),
+            })
+
+            const order = result?.data
+
+            if (values.paymentMethod === "payos") {
+                // Mở dialog thanh toán ngay tại trang này, không redirect
+                if (!order?.payment?.checkoutUrl) {
+                    throw new Error("Không tìm thấy đường dẫn thanh toán PayOS.")
+                }
+                window.location.assign(order.payment.checkoutUrl)
+                return
+            }
+
+            await queryClient.invalidateQueries({ queryKey: ["orders"] })
+            showMessage.success("Đặt hàng thành công.")
+            router.push(`/dat-hang/thanh-cong?orderId=${order._id || order.id}`)
+        } catch (error: any) {
+            showMessage.error(error?.message || "Không thể tạo đơn hàng. Vui lòng thử lại.")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     const fullName = Form.useWatch("fullName", form)
     const phone = Form.useWatch("phone", form)
@@ -116,6 +267,7 @@ export default function OrderCheckoutPage() {
 
     useEffect(() => {
         if (!isHydrated) return
+        if (cancelReturn) return
         if (typeof window === "undefined") return
 
         const token = sessionStorage.getItem(CHECKOUT_FLOW_KEY)
@@ -129,15 +281,16 @@ export default function OrderCheckoutPage() {
             sessionStorage.removeItem(CHECKOUT_FLOW_KEY)
             router.replace(routes.gioHang.url)
         }
-    }, [isHydrated, router])
+    }, [cancelReturn, isHydrated, router])
 
     useEffect(() => {
         if (!isHydrated) return
+        if (cancelReturn) return
         if (items.length === 0) {
             showMessage.warning("Vui lòng chọn sản phẩm để thanh toán.")
             router.replace(routes.gioHang.url)
         }
-    }, [isHydrated, items, router])
+    }, [cancelReturn, isHydrated, items, router])
 
     useEffect(() => {
         if (!loadingAuth && !isAuthenticated) {
@@ -239,53 +392,46 @@ export default function OrderCheckoutPage() {
         subtotal,
     ])
 
-    const handleSubmit = async (values: any) => {
-        if (items.length === 0) {
-            showMessage.warning("Giỏ hàng đang trống.")
-            return
-        }
-
-        setIsSubmitting(true)
-        try {
-            const result = await fetchAPI("/orders", {
-                method: "POST",
-                body: JSON.stringify({
-                    customerInfo: {
-                        name: values.fullName,
-                        phone: values.phone,
-                        email: values.email,
-                    },
-                    shippingAddress: {
-                        province: selectedCity,
-                        ward: selectedWard,
-                        address: values.address,
-                    },
-                    paymentMethod: values.paymentMethod,
-                    note: values.note,
-                    selectedProductIds: items.map((item) => item.productId),
-                }),
-            })
-
-            const createdOrderId =
-                result?.data?._id || result?.data?.id || ""
-            await queryClient.invalidateQueries({ queryKey: ["orders"] })
-            showMessage.success("Đặt hàng thành công.")
-            if (createdOrderId) {
-                router.push(`/dat-hang/thanh-cong?orderId=${createdOrderId}`)
-            } else {
-                router.push(routes.trangCaNhan.url)
-            }
-        } catch (error: any) {
-            showMessage.error(
-                error?.message || "Không thể tạo đơn hàng. Vui lòng thử lại.",
-            )
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
     if (loadingAuth) {
         return <Loading className="!mt-20" />
+    }
+
+    if (cancelReturn) {
+        if (!cancelReturnState || cancelReturnState.loading) {
+            return <Loading className="!mt-20" />
+        }
+
+        return (
+            <div className="w-full max-w-[620px] mx-auto !mt-10 !mb-20 px-4">
+                <Card className="overflow-hidden border border-red-100 shadow-md" styles={{ body: { padding: 0 } }}>
+                    <div className="bg-[var(--primary)] px-6 py-8 text-center text-white">
+                        <CloseCircleFilled className="mb-3 text-5xl text-red-200" />
+                        <h1 className="m-0 text-2xl font-semibold">Giao dịch đã bị hủy</h1>
+                        <p className="mb-0 mt-2 text-white/85">Giao dịch chưa hoàn tất. Đơn hàng vẫn được giữ lại để bạn có thể thanh toán sau.</p>
+                    </div>
+                    <div className="space-y-4 bg-[linear-gradient(180deg,_#ffffff_0%,_#f6f8ff_100%)] p-6 text-center">
+                        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-left">
+                            <div className="flex justify-between gap-4">
+                                <Text type="secondary">Mã đơn hàng</Text>
+                                <Text strong>{cancelReturnState.orderCode || cancelReturnState.orderId}</Text>
+                            </div>
+                            <div className="mt-2 flex justify-between gap-4">
+                                <Text type="secondary">Trạng thái</Text>
+                                <Text className="text-amber-600">Đang xử lý · Chờ thanh toán</Text>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <Button className="!h-[40px]" type="primary" block onClick={() => router.push(routes.trangCaNhan.url)}>
+                                Xem đơn hàng của tôi
+                            </Button>
+                            <Button className="!h-[40px]" block onClick={() => router.push(routes.gioHang.url)}>
+                                Quay lại giỏ hàng
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        )
     }
 
     return (
@@ -476,7 +622,7 @@ export default function OrderCheckoutPage() {
                         >
                             <Radio.Group className="flex flex-wrap gap-4">
                                 <Radio value="cod">Thanh toán khi nhận hàng</Radio>
-                                <Radio value="bank">Chuyển khoản ngân hàng</Radio>
+                                <Radio value="payos">Chuyển khoản ngân hàng</Radio>
                             </Radio.Group>
                         </Form.Item>
 
@@ -493,7 +639,24 @@ export default function OrderCheckoutPage() {
                         </Button>
                     </Form>
                 </div>
-            </Card >
-        </div >
+            </Card>
+            <div id="payos-embedded-container" style={{ marginTop: 16 }} />
+            {verifyingPayment && (
+                <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/45 backdrop-blur-sm px-4">
+                    <div className="bg-white rounded-2xl shadow-2xl px-8 py-9 flex flex-col items-center gap-4 max-w-[340px] w-full">
+                        <div className="relative w-16 h-16">
+                            <div className="absolute inset-0 rounded-full border-4 border-[var(--primary)]/15" />
+                            <div className="absolute inset-0 rounded-full border-4 border-[var(--primary)] border-t-transparent animate-spin" />
+                        </div>
+                        <Text strong className="text-center text-base">
+                            Đang xác nhận thanh toán...
+                        </Text>
+                        <Text type="secondary" className="text-center text-sm !mt-0">
+                            Vui lòng đợi trong giây lát, không đóng hoặc tải lại trang.
+                        </Text>
+                    </div>
+                </div>
+            )}
+        </div>
     )
 }

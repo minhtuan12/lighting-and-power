@@ -286,6 +286,7 @@ export default function QuanLyPage() {
                                 pagination={{
                                     pageSize: 10,
                                     hideOnSinglePage: true,
+                                    className: 'custom-pagination'
                                 }}
                                 scroll={{ x: 300 }}
                             />
@@ -300,7 +301,7 @@ export default function QuanLyPage() {
                                 columns={orderColumns as any}
                                 dataSource={[]}
                                 locale={{ emptyText: t('noOrders') }}
-                                pagination={{ hideOnSinglePage: true }}
+                                pagination={{ hideOnSinglePage: true, className: 'custom-pagination' }}
                                 scroll={{ x: 300 }}
                             />
                         ),

@@ -15,6 +15,26 @@ export enum EPaymentStatus {
     refunded = "refunded",
 }
 
+// MỚI
+export enum EPaymentProvider {
+    cod = "cod",
+    payos = "payos",
+}
+
+export interface IOrderPayment {
+    provider: EPaymentProvider
+    orderCode?: number          // mã số nguyên gửi cho payOS (khác orderNumber dạng string)
+    paymentLinkId?: string
+    checkoutUrl?: string
+    qrCode?: string
+    expiredAt?: Date            // hết hạn link thanh toán -> job cron sẽ hủy đơn
+    paidAt?: Date
+    reference?: string          // mã giao dịch ngân hàng, dùng để dedup webhook
+    transactionDateTime?: string
+    cancelledAt?: Date
+    cancelReason?: string
+}
+
 export interface IOrderItem {
     productId: string
     productName: string
@@ -23,45 +43,43 @@ export interface IOrderItem {
     quantity: number
     price: number
     subtotal: number
-    hasFeedback?: boolean // đã feedback chưa
+    hasFeedback?: boolean
 }
 
 export interface IOrder {
     _id?: string
-    orderNumber: string // Mã đơn hàng tự động
+    orderNumber: string
     userId: string
     items: IOrderItem[]
 
-    // Thông tin khách hàng
     customerInfo: {
         name: string
         phone: string
         email?: string
     }
 
-    // Địa chỉ giao hàng
     shippingAddress: {
         province: string
         ward: string
         address: string
     }
 
-    // Giá tiền
     subtotal: number
     shippingFee: number
     discount: number
     total: number
 
-    // Trạng thái
     status: EOrderStatus
     paymentStatus: EPaymentStatus
-    paymentMethod: string // COD, Banking, ...
+    paymentMethod: EPaymentProvider // "cod" | "payos"
+    payment?: IOrderPayment
 
-    // Ghi chú
+    clientRequestId?: string    // idempotency key khi tạo đơn
+    paymentIssue?: boolean      // cờ cảnh báo khi số tiền webhook không khớp
+
     note?: string
     cancelReason?: string
 
-    // Tracking
     deliveredAt?: Date
     cancelledAt?: Date
 

@@ -125,6 +125,12 @@ export default function MessengerBubbleView() {
 									<Skeleton />
 								) : (
 									m.messages.map((message, index) => {
+										const senderId =
+											typeof message.senderId === 'object'
+												? message.senderId?._id
+												: message.senderId
+										const isMine =
+											String(senderId) === String(m.user?._id)
 										const showDate =
 											index === 0 ||
 											dayKey(
@@ -152,9 +158,9 @@ export default function MessengerBubbleView() {
 														<small className="text-[10px] text-gray-400">{timeLabel(message.createdAt)}</small>
 													</div>
 												) : message.attachmentMimeType?.startsWith('audio/') ? (
-													<div className={`flex w-fit max-w-[70%] flex-col ${message.senderId === m.user?._id ? 'ml-auto items-end' : 'items-start'}`}>
-														<div className={`flex flex-col ${message.senderId === m.user?._id ? 'items-end' : 'items-start'}`}>
-															<VoiceMessageBubble src={message.attachmentUrl} isMe={message.senderId === m.user?._id} />
+														<div className={`flex w-fit max-w-[70%] flex-col ${isMine ? 'ml-auto items-end' : 'items-start'}`}>
+															<div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+																<VoiceMessageBubble src={message.attachmentUrl} isMe={isMine} />
 															<small className="mt-1 text-[10px] text-gray-400">
 																{timeLabel(message.createdAt)}
 															</small>
@@ -162,9 +168,8 @@ export default function MessengerBubbleView() {
 													</div>
 												) : message.attachmentUrl ? (
 													<div
-														className={`flex w-fit max-w-[70%] flex-col ${message.senderId ===
-															m.user?._id
-															? 'ml-auto items-end'
+																className={`flex w-fit max-w-[70%] flex-col ${isMine
+																	? 'ml-auto items-end'
 															: 'items-start'
 															}`}
 													>
@@ -207,8 +212,7 @@ export default function MessengerBubbleView() {
 													</div>
 												) : (
 													<div
-														className={`min-w-0 w-fit max-w-[70%] break-all rounded-2xl px-3 py-2 text-sm ${message.senderId ===
-															m.user?._id
+																className={`min-w-0 w-fit max-w-[70%] break-all rounded-2xl px-3 py-2 text-sm ${isMine
 															? 'ml-auto bg-[#f4511e] text-white rounded-br-[3px]'
 															: 'rounded-bl-[3px] bg-[#f1f4f5] text-[#082c40]'
 															}`}
@@ -219,8 +223,7 @@ export default function MessengerBubbleView() {
 															}
 														</div>
 														<small
-															className={`flex ${message.senderId ===
-																m.user?._id
+																	className={`flex ${isMine
 																? 'justify-end'
 																: ''
 																} mt-1 block text-[10px] opacity-70`}

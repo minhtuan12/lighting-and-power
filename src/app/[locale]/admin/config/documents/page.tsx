@@ -800,6 +800,7 @@ export const Documents = () => {
                         pagination={{
                             pageSize: PAGE_LIMIT,
                             showTotal: (total) => `Tổng: ${total} mục`,
+                            className: 'custom-pagination'
                         }}
                         loading={{
                             indicator: <LoadingOutlined />,

@@ -105,7 +105,6 @@ export class UserService {
         currentUserId?: string,
         limit: number = 10
     ) {
-        console.log(currentUserId)
         const term = query.trim()
         if (!term) return []
 

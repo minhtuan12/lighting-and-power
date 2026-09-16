@@ -20,7 +20,7 @@ import {
 } from 'antd'
 import { Eye, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const { Text, Title } = Typography
 const { TextArea, Search } = Input
@@ -44,7 +44,7 @@ const isCancelable = (status?: EOrderStatus) =>
 const toStatusArray = (status?: StatusFilter) =>
     Array.isArray(status) ? status : status ? [status] : []
 
-export default function OrderList({ statusFilter }: { statusFilter?: StatusFilter }) {
+export default function OrderList({ statusFilter, initialOrderId }: { statusFilter?: StatusFilter; initialOrderId?: string }) {
     const t = useTranslations('orders')
     const tc = useTranslations('common')
 
@@ -66,6 +66,12 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
     const [cancelReason, setCancelReason] = useState('')
 
     const statusList = toStatusArray(statusFilter)
+
+    useEffect(() => {
+        if (!initialOrderId || !orders?.length) return
+        const order = orders.find((item) => String(item._id) === initialOrderId)
+        if (order) openDetail(order)
+    }, [initialOrderId, orders])
 
     const filteredOrders = useMemo(() => {
         let data = orders ?? []
@@ -298,7 +304,7 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
                     columns={columns as any}
                     dataSource={filteredOrders}
                     loading={isFetching}
-                    pagination={{ pageSize: 6, hideOnSinglePage: true }}
+                    pagination={{ pageSize: 6, hideOnSinglePage: true, className: 'custom-pagination' }}
                     className="order-table"
                     locale={{
                         emptyText: (
@@ -321,9 +327,9 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
             >
                 {selectedOrder && (
                     <div className="space-y-4">
-                        <Row gutter={24}>
+                        <Row gutter={30}>
                             {/* Cột trái: thông tin khách hàng */}
-                            <Col span={12}>
+                            <Col span={12} className='!pr-14'>
                                 <Title level={5} className="!mb-3 !text-[var(--primary)]">
                                     Thông tin khách hàng
                                 </Title>
@@ -434,14 +440,36 @@ export default function OrderList({ statusFilter }: { statusFilter?: StatusFilte
                                 </Space>
 
                                 <Flex
-                                    justify="end"
+                                    justify="space-between"
                                     align="center"
                                     gap={8}
                                     className="!mt-4 pt-3"
                                 >
-                                    <Text type="secondary" className='!text-gray-600'>Tổng cộng:</Text>
+                                    <Text type="secondary" className='!text-gray-600'>Tổng chi phí sản phẩm:</Text>
                                     <Text className="font-semibold text-[var(--primary)]">
-                                        {formatCurrency(selectedOrder.total)}
+                                        {formatCurrency(selectedOrder.subtotal, true)}
+                                    </Text>
+                                </Flex>
+                                <Flex
+                                    justify="space-between"
+                                    align="center"
+                                    gap={8}
+                                    className="!mt-2 pt-3"
+                                >
+                                    <Text type="secondary" className='!text-gray-600'>Phí vận chuyển:</Text>
+                                    <Text className="font-semibold text-[var(--primary)]">
+                                        {formatCurrency(selectedOrder.shippingFee, true)}
+                                    </Text>
+                                </Flex>
+                                <Flex
+                                    justify="space-between"
+                                    align="center"
+                                    gap={8}
+                                    className="!mt-2 pt-3"
+                                >
+                                    <Text type="secondary" className='!text-gray-900 font-semibold'>Tổng cộng:</Text>
+                                    <Text className="font-semibold text-[var(--primary)]">
+                                        {formatCurrency(selectedOrder.total, true)}
                                     </Text>
                                 </Flex>
                             </Col>

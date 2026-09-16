@@ -61,4 +61,28 @@ export const NotificationService = {
         emitToUser(recipientId, 'notification:new', populated)
         return notification
     },
+    async createOrderStatusUpdated(actorId: string, recipientId: string, orderId: string, orderNumber: string, status: string) {
+        const statusLabels: Record<string, string> = {
+            pending: 'Chờ xác nhận',
+            confirmed: 'Đã xác nhận',
+            processing: 'Đang xử lý',
+            shipping: 'Đang giao hàng',
+            delivered: 'Đã giao hàng',
+            cancelled: 'Đã hủy',
+            refunded: 'Đã hoàn tiền',
+        }
+        const notification = await Notification.create({
+            recipientId: oid(recipientId),
+            actorId: oid(actorId),
+            type: 'order_status_updated',
+            title: 'Cập nhật đơn hàng',
+            message: `Shop đã chuyển đơn hàng ${orderNumber} sang trạng thái ${statusLabels[status] || status}`,
+            link: `/trang-ca-nhan?tab=orders&orderId=${encodeURIComponent(orderId)}`,
+        })
+        const populated = await Notification.findById(notification._id)
+            .populate('actorId', 'fullName username avatar')
+            .lean()
+        emitToUser(recipientId, 'notification:new', populated)
+        return notification
+    },
 }

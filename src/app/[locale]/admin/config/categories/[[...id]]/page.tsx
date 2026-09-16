@@ -132,7 +132,7 @@ const Category = () => {
                                 width={80}
                                 height={50}
                             />
-                        ) : <X color="grey"/>}
+                        ) : <X color="grey" />}
                     </Space>
                 ),
             },
@@ -370,7 +370,7 @@ const Category = () => {
                 pagination={{
                     pageSize: PAGE_LIMIT,
                     showTotal: (total) => `Tổng: ${total} danh mục`,
-                    className: "!mt-6 !px-6",
+                    className: "!mt-6 !px-6 custom-pagination",
                 }}
                 className="custom-table rounded-lg"
                 scroll={{ y: "calc(100vh - 320px)" }}

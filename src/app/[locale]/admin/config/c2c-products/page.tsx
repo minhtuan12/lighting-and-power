@@ -183,6 +183,7 @@ export default function AdminC2CProductsPage() {
                 pagination={{
                     ...pagination,
                     showSizeChanger: false,
+                    className: 'custom-pagination'
                 }}
                 onChange={handleTableChange}
             />

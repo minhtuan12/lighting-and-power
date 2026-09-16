@@ -7,6 +7,7 @@ import { ChevronDown, MapPinHouse } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import Cart from '../Cart'
 import { Icon } from '../Icon'
 import HeaderAuthButtons from './HeaderAuthButtons'
 import NotificationBell from './NotificationBell'
@@ -196,14 +197,14 @@ export default async function Header({
                                 align="center"
                                 gap={12}
                             >
-                                {/* {!isC2C &&
+                                {!isC2C &&
                                     <Link
                                         href={routes.gioHang.url}
                                         className="flex items-center mr-2"
                                     >
                                         <Cart />
                                     </Link>
-                                } */}
+                                }
                                 <NotificationBell />
                                 <UserMenu user={data} isC2C={isC2C} />
                             </Flex>

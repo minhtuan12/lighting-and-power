@@ -208,18 +208,18 @@ const Product = () => {
                     <Space size={4} wrap>
                         {tags?.length > 0
                             ? tags.map((tag) => (
-                                  <Tag
-                                      key={tag}
-                                      color={
-                                          tagConfig[
-                                              tag as keyof typeof tagConfig
-                                          ]?.color
-                                      }
-                                  >
-                                      {tagConfig[tag as keyof typeof tagConfig]
-                                          ?.text || tag}
-                                  </Tag>
-                              ))
+                                <Tag
+                                    key={tag}
+                                    color={
+                                        tagConfig[
+                                            tag as keyof typeof tagConfig
+                                        ]?.color
+                                    }
+                                >
+                                    {tagConfig[tag as keyof typeof tagConfig]
+                                        ?.text || tag}
+                                </Tag>
+                            ))
                             : "-"}
                     </Space>
                 ),
@@ -448,7 +448,7 @@ const Product = () => {
                 pagination={{
                     pageSize: PAGE_LIMIT,
                     showTotal: (total) => `Tổng: ${total} sản phẩm`,
-                    className: "!mt-6 !px-6",
+                    className: "!mt-6 !px-6 custom-pagination",
                     onChange: (page) =>
                         setFilter((prev) => ({ ...prev, page })),
                 }}
