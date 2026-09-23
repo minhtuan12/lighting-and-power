@@ -368,6 +368,7 @@ export const Documents = () => {
                 description: category.description,
                 color: category.color || 'blue',
                 isPublished: category.isPublished ?? true,
+                parentId: typeof category.parentId === 'object' ? (category.parentId as any)._id : category.parentId || undefined,
             })
         } else {
             setEditingCategory(null)
@@ -375,6 +376,7 @@ export const Documents = () => {
             categoryForm.setFieldsValue({
                 color: 'blue',
                 isPublished: true,
+                parentId: undefined,
             })
         }
         setIsCategoryFormOpen(true)
@@ -479,7 +481,9 @@ export const Documents = () => {
             width: 150,
             align: 'center',
             render: (type: string, record: IDocument) => {
-                const typeConfig = categoryMap.get((record.type as IDocumentCategory).slug)
+                const typeConfig = typeof record.type === 'string'
+                    ? categories.find((category: IDocumentCategory) => String(category._id) === record.type || category.slug === record.type)
+                    : record.type
                 return (
                     <Tag
                         color={typeConfig?.color}
@@ -660,7 +664,7 @@ export const Documents = () => {
         Array<{ label: string; value: string; color?: string }>
     >(
         () =>
-            categories.map((cat: IDocumentCategory) => ({
+            categories.filter((cat: IDocumentCategory) => cat.level === 2 || !categories.some((child: IDocumentCategory) => child.parentId && String(typeof child.parentId === 'object' ? (child.parentId as any)._id : child.parentId) === String(cat._id))).map((cat: IDocumentCategory) => ({
                 label: cat.name,
                 value: String(cat._id),
                 color: cat.color,
@@ -700,7 +704,7 @@ export const Documents = () => {
         if (!filter.type && categories.length > 0) {
             setFilter((prev) => ({
                 ...prev,
-                type: String(categories[0]._id),
+                type: String(categories.find((category: IDocumentCategory) => category.level === 2)?._id || categories[0]._id),
             }))
         }
     }, [categories, filter.type, setFilter])
@@ -1007,11 +1011,11 @@ export const Documents = () => {
                 open={isCategoryModalOpen}
                 onCancel={() => setIsCategoryModalOpen(false)}
                 footer={null}
-                title="Danh mục thiết bị"
+                title="Danh mục danh mục"
                 width={700}
             >
                 <div className="flex justify-between items-center mb-4">
-                    <div className="font-semibold">Danh sách danh mục</div>
+                    <div className="font-semibold">Danh sách</div>
                     <Button
                         type="primary"
                         icon={<Plus size={16} />}
@@ -1069,6 +1073,13 @@ export const Documents = () => {
                         isPublished: true,
                     }}
                 >
+                    <Form.Item name="parentId" label="Danh mục cha (không bắt buộc)">
+                        <Select
+                            allowClear
+                            placeholder="Để trống nếu là danh mục cấp 1"
+                            options={categories.filter((category: IDocumentCategory) => !category.parentId && category._id !== editingCategory?._id).map((category: IDocumentCategory) => ({ label: category.name, value: category._id }))}
+                        />
+                    </Form.Item>
                     <Form.Item
                         name="name"
                         rules={[

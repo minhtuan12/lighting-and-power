@@ -11,13 +11,23 @@ export class DocumentCategoryService {
             throw new Error('Name is required')
         }
 
-        await DocumentCategory.updateMany({}, { $inc: { order: 1 } })
+        const parentId = data.parentId || null
+        let level: 1 | 2 = 1
+        if (parentId) {
+            const parent = await DocumentCategory.findById(parentId).lean()
+            if (!parent) throw new Error('Parent category not found')
+            if (parent.parentId) throw new Error('Only 2 category levels are supported')
+            level = 2
+        }
+        await DocumentCategory.updateMany({ parentId }, { $inc: { order: 1 } })
         const category = await DocumentCategory.create({
             name: data.name,
             description: data.description,
             color: data.color || 'blue',
             isPublished: data.isPublished ?? true,
             order: 0,
+            parentId,
+            level,
             slug: await SlugGenerator.generateUniqueSlug(
                 data.name,
                 DocumentCategory,
@@ -45,7 +55,7 @@ export class DocumentCategoryService {
         }
 
         return DocumentCategory.find(query)
-            .sort({ order: 1, createdAt: -1 })
+            .sort({ parentId: 1, order: 1, createdAt: -1 })
             .lean()
     }
 
@@ -62,6 +72,16 @@ export class DocumentCategoryService {
             throw new Error('Category not found')
         }
 
+        const parentId = data.parentId || null
+        let level: 1 | 2 = 1
+        if (parentId) {
+            if (String(parentId) === String(id)) throw new Error('Category cannot be its own parent')
+            const parent = await DocumentCategory.findById(parentId).lean()
+            if (!parent) throw new Error('Parent category not found')
+            if (parent.parentId) throw new Error('Only 2 category levels are supported')
+            level = 2
+        }
+
         const nextSlug = await SlugGenerator.generateUniqueSlug(
             data.name,
             DocumentCategory,
@@ -72,6 +92,8 @@ export class DocumentCategoryService {
             id,
             {
                 ...data,
+                parentId,
+                level,
                 slug: nextSlug,
                 updatedAt: new Date(),
             },
@@ -80,13 +102,6 @@ export class DocumentCategoryService {
 
         if (!category) {
             throw new Error('Category not found')
-        }
-
-        if (existing.slug !== nextSlug) {
-            await Document.updateMany(
-                { type: existing.slug },
-                { $set: { type: nextSlug } },
-            )
         }
 
         return category
@@ -103,6 +118,9 @@ export class DocumentCategoryService {
         const linkedDocuments = await Document.countDocuments({
             type: category.slug,
         })
+
+        const childCount = await DocumentCategory.countDocuments({ parentId: id })
+        if (childCount > 0) throw new Error('Cannot delete a category with child categories')
 
         if (linkedDocuments > 0) {
             throw new Error('Cannot delete category with existing sections')

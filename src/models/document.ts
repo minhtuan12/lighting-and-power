@@ -23,9 +23,9 @@ const DocumentSchema = new Schema(
             maxlength: [500, "Description cannot exceed 500 characters"],
         },
         type: {
-            type: String,
+            type: Schema.Types.ObjectId,
             ref: "DocumentCategory",
-            default: "other",
+            required: true,
         },
         contentType: {
             type: String,
@@ -87,14 +87,6 @@ DocumentSchema.index({ type: 1 })
 DocumentSchema.index({ isPublished: 1 })
 DocumentSchema.index({ createdAt: -1 })
 DocumentSchema.index({ type: 1, order: 1 })
-
-// Documents store the category slug in `type`, so populate the category by slug.
-DocumentSchema.virtual('typeInfo', {
-    ref: 'DocumentCategory',
-    localField: 'type',
-    foreignField: 'slug',
-    justOne: true,
-})
 
 const Document =
     mongoose.models.Document ||

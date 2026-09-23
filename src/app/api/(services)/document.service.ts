@@ -25,6 +25,11 @@ export class DocumentService {
                 throw new Error('File URL is required for file type')
             }
 
+            const category = await DocumentCategory.findById(data.type).lean()
+            if (!category) throw new Error('Category not found')
+            const hasChildren = await DocumentCategory.exists({ parentId: category._id })
+            if (hasChildren) throw new Error('Documents can only belong to a child category')
+
             const document = await Document.create({
                 ...data,
                 slug: await SlugGenerator.generateUniqueSlug(
@@ -70,18 +75,18 @@ export class DocumentService {
                 const unpublishedCategories = await DocumentCategory.find({
                     isPublished: false,
                 })
-                    .select('slug')
+                    .select('_id')
                     .lean()
 
-                const unpublishedSlugs = unpublishedCategories.map(
-                    (category) => category.slug,
+                const unpublishedIds = unpublishedCategories.map(
+                    (category) => category._id,
                 )
-                if (unpublishedSlugs.length) {
+                if (unpublishedIds.length) {
                     query.type = {
                         ...(typeof query.type === 'string'
                             ? { $eq: query.type }
                             : query.type),
-                        $nin: unpublishedSlugs,
+                            $nin: unpublishedIds,
                     }
                 }
             }
@@ -95,7 +100,7 @@ export class DocumentService {
 
             const total = await Document.countDocuments(query)
             const documents = await Document.find(query)
-                .populate('type')
+                .populate('type', 'name slug color')
                 .sort({ type: 1, order: 1, createdAt: -1 })
                 .skip(skip)
                 .limit(PAGE_LIMIT)
@@ -154,6 +159,14 @@ export class DocumentService {
         try {
             if (!data.title || !data.contentType) {
                 throw new Error('Title and content type are required')
+            }
+
+            if (data.type) {
+                const category = await DocumentCategory.findById(data.type).lean()
+                if (!category) throw new Error('Category not found')
+                if (await DocumentCategory.exists({ parentId: category._id })) {
+                    throw new Error('Documents can only belong to a child category')
+                }
             }
 
             const document = await Document.findByIdAndUpdate(

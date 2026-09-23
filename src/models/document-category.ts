@@ -14,6 +14,16 @@ const DocumentCategorySchema = new Schema(
             required: true,
             unique: true,
         },
+        parentId: {
+            type: Schema.Types.ObjectId,
+            ref: "DocumentCategory",
+            default: null,
+        },
+        level: {
+            type: Number,
+            enum: [1, 2],
+            default: 1,
+        },
         description: {
             type: String,
             trim: true,
@@ -43,6 +53,7 @@ DocumentCategorySchema.index({ name: "text" })
 DocumentCategorySchema.index({ slug: 1 })
 DocumentCategorySchema.index({ isPublished: 1 })
 DocumentCategorySchema.index({ order: 1, createdAt: -1 })
+DocumentCategorySchema.index({ parentId: 1, order: 1 })
 
 const DocumentCategory =
     mongoose.models.DocumentCategory ||

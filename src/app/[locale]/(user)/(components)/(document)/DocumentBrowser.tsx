@@ -24,8 +24,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
 
-async function fetchSections(type: string): Promise<IDocument[]> {
-    const res = await fetch(`/api/documents?type=${type}`, {
+async function fetchSections(categoryId: string): Promise<IDocument[]> {
+    const res = await fetch(`/api/documents?type=${categoryId}`, {
         cache: 'no-store',
     })
     if (!res.ok) return []
@@ -56,14 +56,44 @@ export default function DocumentBrowser({
         const selectedCategory = selectedDocument
             ? categories.find((category) => category.slug === selectedDocument.categorySlug)
             : null
-        return (categories.find(c => c.slug === category)) || (selectedCategory ?? categories?.[0] ?? null)
+        return categories.find(c => c.slug === category) || selectedCategory || categories.find(c => c.level === 2) || categories?.[0] || null
     })
     const [sections, setSections] = useState<IDocument[]>([])
     const [activeSection, setActiveSection] = useState<IDocument | null>(null)
+    const [documentsByCategory, setDocumentsByCategory] = useState<Record<string, IDocument[]>>({})
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
     const [isLoadingSections, setIsLoadingSections] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const t = useTranslations('common')
+    const categoryHasChildren = useMemo(
+        () => !!activeCategory && categories.some((item) => String(item.parentId) === String(activeCategory._id)),
+        [categories, activeCategory],
+    )
+
+    const categoryMenuItems = useMemo(() => {
+        if (!activeCategory) return []
+
+        // Trường hợp 1: không có category con -> hiển thị phẳng document của chính nó
+        if (!categoryHasChildren) {
+            return (documentsByCategory[String(activeCategory._id)] || []).map((document) => ({
+                key: `document:${document.slug}`,
+                label: document.title,
+            }))
+        }
+
+        // Trường hợp 2: có category con -> giữ nguyên logic build menu con hiện tại
+        const buildItems = (parentId: string | null): any[] => categories
+            .filter((item) => String(item.parentId || '') === String(parentId || ''))
+            .map((item) => {
+                const children = buildItems(item._id || null)
+                const hasChildren = categories.some((child) => String(child.parentId) === String(item._id))
+                const documents = !hasChildren
+                    ? (documentsByCategory[String(item._id)] || []).map((document) => ({ key: `document:${document.slug}`, label: document.title }))
+                    : []
+                return { key: `category:${item.slug}`, label: item.name, children: [...children, ...documents] }
+            })
+        return buildItems(activeCategory._id || null)
+    }, [categories, documentsByCategory, activeCategory, categoryHasChildren])
 
     useEffect(() => {
         if (!activeCategory?.slug) return
@@ -98,9 +128,13 @@ export default function DocumentBrowser({
 
         let cancelled = false
         setIsLoadingSections(true)
-        fetchSections(String(activeCategory._id))
-            .then((data) => {
+        const leafCategories = categories.filter((item) => item.level === 2 || !categories.some((child) => String(child.parentId) === String(item._id)))
+        Promise.all(leafCategories.map(async (item) => [String(item._id), await fetchSections(String(item._id))] as const))
+            .then((entries) => {
                 if (cancelled) return
+                const documentMap = Object.fromEntries(entries)
+                setDocumentsByCategory(documentMap)
+                const data = documentMap[String(activeCategory._id)] || []
                 setSections(data)
                 const selected = selectedDocument?.categorySlug === activeCategory.slug
                     ? data.find((section) => section.slug === selectedDocument.sectionSlug)
@@ -117,7 +151,7 @@ export default function DocumentBrowser({
         // Fetch only when the category changes. Clearing the selection atom after
         // opening the requested section must not fetch again and reset to section 1.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeCategory?.slug])
+    }, [activeCategory?.slug, categories])
 
     useEffect(() => {
         if (!selectedDocument) return
@@ -125,28 +159,29 @@ export default function DocumentBrowser({
         if (category && category.slug !== activeCategory?.slug) setActiveCategory(category)
     }, [selectedDocument, categories, activeCategory?.slug])
 
-    const sectionMenuItems = useMemo(
-        () =>
-            sections.map((section) => ({
-                key: section._id || section.slug,
-                label: section.title,
-            })),
-        [sections],
-    )
-
     const handleSelectSection = (key: string) => {
-        const found = sections.find((s) => (s._id || s.slug) === key)
+        const found = Object.values(documentsByCategory).flat().find((s) => `document:${s.slug}` === key || (s._id || s.slug) === key)
         setActiveSection(found || null)
         setMobileMenuOpen(false)
         window.scrollTo({ top: 0, behavior: 'instant' })
     }
 
+    const defaultOpenKeys = useMemo(() => {
+        if (!activeSection) return []
+        const parent = categories.find((c) =>
+            (documentsByCategory[String(c._id)] || []).some((d) => d.slug === activeSection.slug)
+        )
+        return parent ? [`category:${parent.slug}`] : []
+    }, [categories, documentsByCategory, activeSection])
+
     const sectionMenu = (
         <Menu
             mode="inline"
-            items={sectionMenuItems}
-            selectedKeys={[activeSection?._id || activeSection?.slug || '']}
+            items={categoryMenuItems}
+            selectedKeys={activeSection ? [`document:${activeSection.slug}`] : []}
             onClick={(e) => handleSelectSection(e.key)}
+            defaultOpenKeys={defaultOpenKeys}
+            className='[&_.ant-menu-submenu-arrow]:!text-black'
         />
     )
 
@@ -177,8 +212,8 @@ export default function DocumentBrowser({
                     className="justify-start lg:justify-center w-full overflow-x-auto scrollbar-thin sticky top-15 lg:!top-[149.5px] z-1000 px-4 bg-white !py-3 lg:px-0 max-md:bg-white max-md:!py-2 max-md:h-auto max-md:!px-3"
                     gap={10}
                 >
-                    {categories.map((cat) => {
-                        const isActive = activeCategory?.slug === cat.slug
+                    {categories.filter((cat) => !cat.parentId).map((cat) => {
+                        const isActive = activeCategory?.slug === cat.slug || String(activeCategory?.parentId || '') === String(cat._id || '')
                         return (
                             <div
                                 key={cat.slug}
@@ -210,7 +245,7 @@ export default function DocumentBrowser({
                 </Title>
                 {isLoadingSections ? (
                     <Loading />
-                ) : sections.length === 0 ? (
+                ) : categoryMenuItems.length === 0 ? (
                     sectionEmpty
                 ) : (
                     sectionMenu
@@ -243,7 +278,7 @@ export default function DocumentBrowser({
             >
                 {isLoadingSections ? (
                     <Loading />
-                ) : sections.length === 0 ? (
+                ) : categoryMenuItems.length === 0 ? (
                     sectionEmpty
                 ) : (
                     sectionMenu
