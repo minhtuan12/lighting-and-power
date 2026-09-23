@@ -3,7 +3,7 @@ import { SlugGenerator } from '@/lib/slug'
 import Document from '@/models/document'
 import DocumentCategory from '@/models/document-category'
 import { IDocument } from '@/types/document'
-import { isValidObjectId } from 'mongoose'
+import { isValidObjectId, Types } from 'mongoose'
 
 export class DocumentService {
     // ================= CREATE =================
@@ -58,7 +58,7 @@ export class DocumentService {
             const skip = (page - 1) * PAGE_LIMIT
 
             if (filters?.type) {
-                query.type = filters.type
+                query.type = typeof filters.type === 'string' ? new Types.ObjectId(filters.type) : filters.type
             }
 
             if (filters?.contentType) {
@@ -83,10 +83,8 @@ export class DocumentService {
                 )
                 if (unpublishedIds.length) {
                     query.type = {
-                        ...(typeof query.type === 'string'
-                            ? { $eq: query.type }
-                            : query.type),
-                            $nin: unpublishedIds,
+                        ...(query.type ? { $eq: query.type } : {}),
+                        $nin: unpublishedIds,
                     }
                 }
             }
@@ -95,6 +93,7 @@ export class DocumentService {
                 query.$or = [
                     { title: { $regex: filters.search, $options: 'i' } },
                     { description: { $regex: filters.search, $options: 'i' } },
+                    { content: { $regex: filters.search, $options: 'i' } },
                 ]
             }
 

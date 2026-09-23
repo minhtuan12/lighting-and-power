@@ -16,10 +16,10 @@ interface IDcoumentDetailResponse {
     data: IDocument | null
 }
 
-export async function getDocuments(): Promise<IDcoumentResponse> {
+export async function getDocuments(search?: string): Promise<IDcoumentResponse> {
     try {
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL!}/api/documents`,
+            `${process.env.NEXT_PUBLIC_API_URL!}/api/documents${search ? `?search=${encodeURIComponent(search)}` : ""}`,
             {
                 next: {
                     revalidate: 3600 * 3, // Cache for 3 hour

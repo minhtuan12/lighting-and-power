@@ -70,6 +70,11 @@ export const routes = {
         url: "/tai-lieu-dien-tu",
         key: "document",
     },
+    timKiem: {
+        title: "Tìm kiếm",
+        url: "/tim-kiem",
+        key: "search",
+    },
     congDong: {
         title: "Cộng đồng",
         url: "/cong-dong",

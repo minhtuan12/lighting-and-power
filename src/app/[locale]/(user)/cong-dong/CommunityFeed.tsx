@@ -188,7 +188,7 @@ function PostCard({
                             )}
                         </div>
                         {!isCurrentUser && !isFriend && post.author.role !== 'admin' && (
-                            <button type="button" onClick={addFriend} disabled={isPendingFriend} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:underline disabled:cursor-default disabled:opacity-60">
+                            <button type="button" onClick={addFriend} disabled={isPendingFriend} className="flex items-center gap-2 !mt-0 cursor-pointer text-sm font-medium text-[#f4511e] hover:opacity-80 disabled:cursor-default disabled:opacity-60">
                                 <Dot color='black' size={18} />{isPendingFriend ? 'Đang chờ phản hồi kết bạn' : 'Thêm bạn bè'}
                             </button>
                         )}

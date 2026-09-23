@@ -20,6 +20,7 @@ import {
 import { useAtom } from 'jotai'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 const { Title, Text } = Typography
@@ -48,7 +49,7 @@ export default function DocumentBrowser({
 }: {
     categories: IDocumentCategory[]
 }) {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = useSearchParams();
     const category = urlParams.get('loai');
     const section = urlParams.get('muc');
     const [selectedDocument, setSelectedDocument] = useAtom(selectedDocumentAtom)
@@ -271,10 +272,9 @@ export default function DocumentBrowser({
             <Drawer
                 title={activeCategory?.name || 'Danh mục'}
                 placement="bottom"
-                height="60%"
                 open={mobileMenuOpen}
                 onClose={() => setMobileMenuOpen(false)}
-                className="lg:hidden"
+                className="lg:hidden !height-[60%]"
             >
                 {isLoadingSections ? (
                     <Loading />

@@ -18,6 +18,7 @@ export interface IDocument {
 }
 
 export interface IDocumentType {
+    _id?: string
     name?: string
     slug?: string
     label: string

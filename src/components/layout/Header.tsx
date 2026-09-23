@@ -3,8 +3,9 @@ import { getCurrentUser } from '@/fetch-data/auth'
 import { ICategory } from '@/types/category'
 import { IConfig } from '@/types/config'
 import { Col, Flex, Menu, MenuProps, Row } from 'antd'
-import { ChevronDown, MapPinHouse } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import dynamic from 'next/dynamic'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import Cart from '../Cart'
@@ -12,6 +13,8 @@ import { Icon } from '../Icon'
 import HeaderAuthButtons from './HeaderAuthButtons'
 import NotificationBell from './NotificationBell'
 import UserMenu from './UserMenu'
+
+const SearchOverlay = dynamic(() => import("./SearchOverlay"));
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -133,11 +136,7 @@ export default async function Header({
                         style={{ display: 'flex', justifyContent: 'left' }}
                     >
                         {/* <C2CToggle /> */}
-                        <MapPinHouse size={25} color='#000f8f' />
-                        <span className="ml-2 text-[14px] text-[#000f8f] font-bold mt-1">
-                            {/* {config.address} */}
-                            2/4A Tổ 10, KP.Bình Thuận, P.Lái Thiêu, TP. HCM
-                        </span>
+                        <SearchOverlay />
                     </Col>
                     <Col
                         span={8}

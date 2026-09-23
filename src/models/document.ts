@@ -81,7 +81,7 @@ const DocumentSchema = new Schema(
 )
 
 // Indexes
-DocumentSchema.index({ title: "text", description: "text" })
+DocumentSchema.index({ title: "text", description: "text", content: "text" })
 DocumentSchema.index({ productIds: 1 })
 DocumentSchema.index({ type: 1 })
 DocumentSchema.index({ isPublished: 1 })
